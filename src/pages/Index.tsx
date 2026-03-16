@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Radio, Plus, Cast } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Radio, Plus, Cast, Sun, Moon } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -36,6 +36,7 @@ const Index = () => {
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showRadio, setShowRadio] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
@@ -572,6 +573,26 @@ const Index = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Theme toggle */}
+              <div className="bg-secondary rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {isDark ? <Moon size={18} className="text-foreground" /> : <Sun size={18} className="text-foreground" />}
+                  <span className="text-sm font-medium text-foreground">Tema</span>
+                </div>
+                <button
+                  onClick={() => {
+                    const goLight = isDark;
+                    document.documentElement.classList.toggle('light', goLight);
+                    localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                    setIsDark(!isDark);
+                  }}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent text-accent-foreground hover:bg-muted transition-colors"
+                >
+                  {isDark ? 'Modo Claro' : 'Modo Escuro'}
+                </button>
+              </div>
+
               <div className="bg-secondary rounded-lg p-3 space-y-1.5">
                 <h3 className="text-xs font-medium text-foreground">Sobre</h3>
                 <div className="space-y-1 text-[11px] text-muted-foreground">

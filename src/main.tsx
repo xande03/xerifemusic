@@ -3,6 +3,12 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// Restore saved theme before first render
+const savedTheme = localStorage.getItem('demus-theme');
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light');
+}
+
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
@@ -18,7 +24,6 @@ if ("serviceWorker" in navigator) {
       );
     });
   } else {
-    // Dev: remove old SW/caches to avoid stale chunk mismatches and React hook runtime crashes
     navigator.serviceWorker.getRegistrations().then((regs) => {
       regs.forEach((reg) => reg.unregister());
     });
@@ -27,4 +32,3 @@ if ("serviceWorker" in navigator) {
     });
   }
 }
-
