@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Search, TrendingUp, Loader2, X } from "lucide-react";
+import { useState, useRef } from "react";
+import { Search, TrendingUp, Loader2, X, Music2, Gamepad2, Trophy, GraduationCap, Newspaper } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import VideoCard from "./VideoCard";
@@ -8,14 +8,24 @@ interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
 }
 
+const CATEGORIES = [
+  { id: "all", label: "Tudo", icon: TrendingUp, query: "" },
+  { id: "music", label: "Música", icon: Music2, query: "música" },
+  { id: "gaming", label: "Gaming", icon: Gamepad2, query: "gameplay" },
+  { id: "sports", label: "Esportes", icon: Trophy, query: "esportes highlights" },
+  { id: "education", label: "Educação", icon: GraduationCap, query: "aula tutorial" },
+  { id: "news", label: "Notícias", icon: Newspaper, query: "notícias hoje" },
+];
+
 const TRENDING_QUERIES = [
   "receitas fáceis", "rock in rio", "treino em casa",
-  "resumo novela", "gameplay", "tutorial",
-  "notícias hoje", "música nova", "comédia",
+  "resumo novela", "gameplay fortnite", "tutorial programação",
+  "notícias hoje", "música nova 2026", "comédia stand up",
 ];
 
 const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -58,14 +68,28 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
     doSearch(term);
   };
 
+  const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
+    setActiveCategory(cat.id);
+    if (cat.query) {
+      const combined = query.length >= 2 ? `${query} ${cat.query}` : cat.query;
+      doSearch(combined);
+    } else if (query.length >= 2) {
+      doSearch(query);
+    } else {
+      setResults([]);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    doSearch(query);
+    const cat = CATEGORIES.find(c => c.id === activeCategory);
+    const combined = cat?.query && query.length >= 2 ? `${query} ${cat.query}` : query;
+    doSearch(combined || query);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Search bar */}
       <form onSubmit={handleSubmit} className="px-4 pt-1">
         <div className="relative">
@@ -82,7 +106,7 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
           {query && (
             <button
               type="button"
-              onClick={() => { setQuery(""); setResults([]); setSuggestions([]); }}
+              onClick={() => { setQuery(""); setResults([]); setSuggestions([]); setActiveCategory("all"); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             >
               <X size={16} />
@@ -96,6 +120,7 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
             {suggestions.map((s, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => handleSuggestionClick(s)}
                 className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
               >
@@ -107,10 +132,32 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
         )}
       </form>
 
+      {/* Category chips */}
+      <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
+        {CATEGORIES.map((cat) => {
+          const Icon = cat.icon;
+          const isActive = activeCategory === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryClick(cat)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                isActive
+                  ? "bg-foreground text-background"
+                  : "bg-secondary text-secondary-foreground hover:bg-accent"
+              }`}
+            >
+              <Icon size={14} />
+              {cat.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Trending chips (when no search) */}
       {results.length === 0 && !loading && (
         <div className="px-4">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 mt-2">
             <TrendingUp size={16} className="text-primary" />
             <h2 className="text-sm font-medium text-foreground">Em alta</h2>
           </div>
