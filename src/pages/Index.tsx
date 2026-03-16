@@ -261,7 +261,7 @@ const Index = () => {
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
-              {activeTab === "home" ? greeting : activeTab === "explore" ? "Explorar" : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
             </h2>
           </div>
           <div className="flex items-center gap-3">
