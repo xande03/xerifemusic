@@ -250,6 +250,26 @@ const Index = () => {
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted border-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
+
+            {/* Search Suggestions (YouTube Autocomplete) */}
+            {suggestions.length > 0 && (
+              <div className="glass rounded-xl overflow-hidden">
+                <p className="px-3 pt-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                  Sugestões do YouTube
+                </p>
+                {suggestions.map((term, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSuggestionClick(term)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-muted/50 transition-colors text-left"
+                  >
+                    <TrendingUp size={14} className="text-primary flex-shrink-0" />
+                    <span className="truncate">{term}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isSearching ? (
               <SearchSkeleton />
             ) : (
@@ -264,8 +284,13 @@ const Index = () => {
                     showVotes
                   />
                 ))}
-                {filteredSongs.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">Nenhuma música encontrada</p>
+                {filteredSongs.length === 0 && searchQuery && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Nenhuma música local encontrada</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Busca no catálogo YouTube requer Lovable Cloud
+                    </p>
+                  </div>
                 )}
               </div>
             )}
