@@ -30,6 +30,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
+  const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
