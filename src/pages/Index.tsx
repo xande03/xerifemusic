@@ -8,7 +8,8 @@ import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
   saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId,
-  saveVolume, getVolume,
+  saveVolume, getVolume, addToHistory, getHistory, clearHistory,
+  type HistoryEntry,
 } from "@/lib/localStorage";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
