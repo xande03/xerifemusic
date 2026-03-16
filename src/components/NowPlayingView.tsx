@@ -20,7 +20,7 @@ interface NowPlayingViewProps {
 
 const NowPlayingView = ({
   song, isPlaying, currentTime, duration,
-  onCollapse, onSeek, volume, onVolumeChange,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP,
 }: NowPlayingViewProps) => {
   const [showVideo, setShowVideo] = useState(true);
   const progress = duration > 0 ? currentTime / duration : 0;
