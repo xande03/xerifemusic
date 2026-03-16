@@ -297,7 +297,9 @@ const NowPlayingView = ({
                 max={100}
                 step={0.1}
                 onValueChange={([v]) => onSeek(v / 100)}
-                className="w-full [&_[data-slot=slider-track]]:h-[5px] [&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-range]]:bg-primary [&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:bg-primary [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+                className="w-full"
+                trackClassName="h-[5px] bg-muted"
+                thumbClassName="w-4 h-4"
               />
               <div className="flex justify-between text-[11px] text-primary font-mono">
                 <span>{formatDuration(currentTime)}</span>
