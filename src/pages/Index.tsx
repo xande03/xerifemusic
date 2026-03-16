@@ -372,6 +372,7 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                    setTimeout(() => requestFullscreen(), 500);
                   }}
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
                 />
