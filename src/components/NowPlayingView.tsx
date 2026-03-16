@@ -304,7 +304,25 @@ const NowPlayingView = ({
           />
         </div>
 
-        {/* Related / Comments tabs */}
+        {/* Autoplay toggle */}
+        <div className="w-full flex items-center justify-between px-2 flex-shrink-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <SkipForward size={14} />
+            <span>Autoplay</span>
+          </div>
+          <button
+            onClick={() => {
+              const next = !autoplay;
+              setAutoplay(next);
+              localStorage.setItem('demus-autoplay', String(next));
+            }}
+            className={`w-10 h-5 rounded-full transition-colors relative ${autoplay ? 'bg-primary' : 'bg-muted'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${autoplay ? 'left-[22px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+
         <div className="w-full mt-4 flex-shrink-0">
           <div className="flex items-center gap-1 mb-3">
             <button
