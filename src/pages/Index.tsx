@@ -36,6 +36,7 @@ const Index = () => {
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showRadio, setShowRadio] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
