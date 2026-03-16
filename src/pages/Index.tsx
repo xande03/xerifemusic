@@ -746,7 +746,7 @@ const Index = () => {
         )}
 
         <div className="lg:hidden">
-          <BottomNav active={activeTab} onChange={setActiveTab} />
+          <BottomNav active={activeTab} onChange={setActiveTab} homeMode={homeMode} />
         </div>
 
         {expanded && (
