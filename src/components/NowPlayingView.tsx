@@ -20,6 +20,7 @@ interface NowPlayingViewProps {
   onVolumeChange: (vol: number) => void;
   onTogglePiP?: () => void;
   onModeChange?: (mode: PlayerMode) => void;
+  onAirPlay?: (mode: 'audio' | 'video') => void;
 }
 
 const NowPlayingView = ({
