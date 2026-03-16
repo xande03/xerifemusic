@@ -93,10 +93,10 @@ const NowPlayingView = ({
 
   // Autoplay: when video ends, play first related video
   useEffect(() => {
-    if (isEnded && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
+    if (isEnded && autoplay && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
       onPlayRelated(videoInfo.relatedVideos[0]);
     }
-  }, [isEnded]);
+  }, [isEnded, autoplay]);
 
   const handleModeChange = (newMode: PlayerMode) => {
     setMode(newMode);
