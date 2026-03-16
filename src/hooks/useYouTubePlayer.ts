@@ -302,5 +302,5 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, []);
 
-  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay };
+  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay, requestFullscreen };
 }
