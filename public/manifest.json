@@ -1,17 +1,25 @@
 {
-  "name": "Demus Evolution",
-  "short_name": "Demus",
-  "description": "Jukebox Social - Vote e ouça músicas juntos",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#00e5ff",
-  "orientation": "portrait",
+  "short_name": "DemusEvolution",
+  "name": "Demus Evolution: Social Music",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0f",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#00e5ff",
+  "description": "Streaming de música democrático com catálogo ilimitado do YouTube Music.",
+  "orientation": "portrait",
+  "categories": ["music", "entertainment"]
 }
