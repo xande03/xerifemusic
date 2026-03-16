@@ -726,7 +726,24 @@ const Index = () => {
         </main>
 
         {!expanded && (
-          <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
+          <>
+            <div className="lg:hidden">
+              <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
+            </div>
+            <DesktopPlayer
+              song={currentSong}
+              isPlaying={playerState.isPlaying}
+              currentTime={ct}
+              duration={dur}
+              volume={volume}
+              onTogglePlay={handleTogglePlay}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onExpand={() => setExpanded(true)}
+              onSeek={handleSeek}
+              onVolumeChange={setVolumeState}
+            />
+          </>
         )}
 
         <div className="lg:hidden">
