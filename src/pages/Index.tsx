@@ -608,36 +608,6 @@ const Index = () => {
                 setArtistView({ name, image });
               }}
             />
-                              <p className="text-[11px] text-muted-foreground truncate text-left">{artist}</p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {(searchFilter === "all" || searchFilter === "songs") && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
-                      {searchResults.length > 0 ? (
-                        searchResults.map((song) => (
-                          <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground py-4">Nenhum resultado</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Tendências</h3>
-                  {songs.slice(0, 5).map((song) => (
-                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
-                  ))}
-                </div>
-              )}
-            </div>
           )}
 
 
