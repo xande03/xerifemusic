@@ -169,6 +169,8 @@ export function useYouTubePlayer(containerId: string) {
 
   const loadVideo = useCallback((videoId: string) => {
     if (playerRef.current?.loadVideoById) {
+      // Ensure user gesture audio session is active
+      ensureSilentAudio().play().catch(() => {});
       playerRef.current.loadVideoById(videoId);
       setState((s) => ({ ...s, videoId, currentTime: 0, isEnded: false }));
     }
