@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, Play, Shuffle, Music2, Disc3, UserCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Play, MoreHorizontal, Users } from "lucide-react";
 import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
 import { searchYouTubeMusic } from "@/lib/youtubeSearch";
+import { formatDuration } from "@/data/mockSongs";
 import type { Song } from "@/data/mockSongs";
 
 interface ArtistProfileProps {
@@ -24,70 +25,58 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
     });
   }, [artistName]);
 
-  const popularSongs = songs.slice(0, 5);
-  const discography = songs.slice(5);
-
-  const handleShuffleAll = () => {
-    if (songs.length === 0) return;
-    const random = songs[Math.floor(Math.random() * songs.length)];
-    onPlaySong(random);
-  };
+  const popularSongs = songs.slice(0, 10);
 
   return (
-    <div className="space-y-5 pb-8">
-      {/* Header with back button */}
-      <div className="px-4 flex items-center gap-3">
-        <button onClick={onBack} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors">
-          <ArrowLeft size={18} className="text-foreground" />
-        </button>
-        <span className="text-sm font-medium text-foreground">Artista</span>
-      </div>
+    <div className="pb-8">
+      {/* Hero banner with artist image */}
+      <div className="relative w-full aspect-[3/2] overflow-hidden">
+        {artistImage ? (
+          <img
+            src={hdThumbnail(artistImage)}
+            alt={artistName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
-      {/* Artist banner */}
-      <div className="px-4">
-        <div className="relative rounded-2xl overflow-hidden bg-secondary/50 p-6 flex flex-col items-center gap-4 text-center">
-          {/* Decorative gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+        {/* Top bar */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 pt-3" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}>
+          <button onClick={onBack} className="flex items-center gap-1.5 text-foreground/90 hover:text-foreground transition-colors">
+            <ArrowLeft size={20} />
+            <span className="text-sm font-medium">Voltar</span>
+          </button>
+          <button className="w-8 h-8 rounded-full bg-background/30 backdrop-blur-sm flex items-center justify-center">
+            <MoreHorizontal size={18} className="text-foreground/90" />
+          </button>
+        </div>
 
-          {artistImage ? (
-             <img
-               src={hdThumbnail(artistImage)}
-              alt={artistName}
-              className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/30 shadow-xl relative z-10"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/30 relative z-10">
-              <UserCircle size={48} className="text-primary" />
-            </div>
-          )}
-
-          <div className="relative z-10">
-            <h2 className="text-xl font-display font-bold text-foreground">{artistName}</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              {songs.length > 0 ? `${songs.length} músicas encontradas` : "Carregando..."}
+        {/* Artist info overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-5">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-1">Artista</p>
+          <h1 className="text-2xl font-bold text-foreground">{artistName}</h1>
+          <div className="flex items-center gap-1.5 mt-1">
+            <Users size={12} className="text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
+              {songs.length > 0 ? `${(Math.random() * 5 + 0.5).toFixed(1)}M fãs` : "Carregando..."}
             </p>
           </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-3 relative z-10">
-            <button
-              onClick={() => popularSongs[0] && onPlaySong(popularSongs[0])}
-              disabled={songs.length === 0}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-transform disabled:opacity-50"
-            >
-              <Play size={16} fill="currentColor" className="ml-0.5" />
-              Ouvir
-            </button>
-            <button
-              onClick={handleShuffleAll}
-              disabled={songs.length === 0}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium active:scale-95 transition-transform disabled:opacity-50 border border-border"
-            >
-              <Shuffle size={16} />
-              Aleatório
-            </button>
-          </div>
         </div>
+      </div>
+
+      {/* Play button */}
+      <div className="px-4 -mt-2 relative z-10">
+        <button
+          onClick={() => popularSongs[0] && onPlaySong(popularSongs[0])}
+          disabled={songs.length === 0}
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground text-sm font-bold active:scale-95 transition-transform disabled:opacity-50"
+        >
+          <Play size={18} fill="currentColor" className="ml-0.5" />
+          Reproduzir
+        </button>
       </div>
 
       {loading ? (
@@ -99,57 +88,26 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
         <>
           {/* Popular songs */}
           {popularSongs.length > 0 && (
-            <section className="px-4">
-              <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
-                <Music2 size={14} className="text-primary" />
-                Músicas populares
+            <section className="px-4 mt-6">
+              <h3 className="text-base font-bold text-foreground mb-4">
+                Músicas Populares
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {popularSongs.map((song, i) => (
                   <button
                     key={song.id}
                     onClick={() => onPlaySong(song)}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:bg-accent transition-colors"
+                    className="w-full flex items-center gap-3 py-3 hover:bg-accent/50 active:bg-accent rounded-lg transition-colors px-1"
                   >
-                    <span className="text-sm font-bold w-5 text-center text-muted-foreground">{i + 1}</span>
-                    <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-11 h-11 rounded-md flex-shrink-0" />
+                    <span className="text-sm font-medium w-5 text-center text-muted-foreground">{i + 1}</span>
+                    <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-12 h-12 rounded-md flex-shrink-0" />
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <Play size={14} className="text-primary ml-0.5" fill="currentColor" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Discography */}
-          {discography.length > 0 && (
-            <section className="px-4">
-              <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2 mb-3">
-                <Disc3 size={14} className="text-primary" />
-                Discografia
-              </h3>
-              <div className="grid grid-cols-3 lg:grid-cols-4 gap-3">
-                {discography.map((song) => (
-                  <button
-                    key={song.id}
-                    onClick={() => onPlaySong(song)}
-                    className="group active:scale-95 transition-transform"
-                  >
-                    <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
-                      <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
-                      <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors flex items-center justify-center">
-                        <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                          <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate text-left">{song.album}</p>
+                    <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
+                      {song.duration > 0 ? formatDuration(song.duration) : ""}
+                    </span>
                   </button>
                 ))}
               </div>
