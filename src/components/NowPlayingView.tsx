@@ -290,20 +290,18 @@ const NowPlayingView = ({
               </div>
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar — draggable */}
             <div className="space-y-1">
-              <div
-                className="h-1.5 w-full rounded-full bg-muted overflow-hidden cursor-pointer touch-none"
-                onClick={handleProgressClick}
-                onTouchMove={handleProgressTouch}
-              >
-                <div className="h-full rounded-full bg-primary transition-all duration-200 relative" style={{ width: `${progress * 100}%` }}>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-primary shadow-lg border-2 border-background" />
-                </div>
-              </div>
-              <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <Slider
+                value={[progress * 100]}
+                max={100}
+                step={0.1}
+                onValueChange={([v]) => onSeek(v / 100)}
+                className="w-full [&_[data-slot=slider-track]]:h-[5px] [&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-range]]:bg-primary [&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:bg-primary [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
+              />
+              <div className="flex justify-between text-[11px] text-primary font-mono">
                 <span>{formatDuration(currentTime)}</span>
-                <span>{formatDuration(duration)}</span>
+                <span className="text-muted-foreground">{formatDuration(duration)}</span>
               </div>
             </div>
 
