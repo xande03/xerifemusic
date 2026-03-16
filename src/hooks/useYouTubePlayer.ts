@@ -211,7 +211,7 @@ export function useYouTubePlayer(containerId: string) {
       }
 
       // Method 2: Standard PiP on the iframe element (limited support)
-      if (iframe.requestPictureInPicture) {
+      if ((iframe as any).requestPictureInPicture) {
         await (iframe as any).requestPictureInPicture();
         return;
       }
