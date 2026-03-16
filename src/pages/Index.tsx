@@ -18,6 +18,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import ExploreScreen from "@/components/ExploreScreen";
 import ChannelProfile from "@/components/ChannelProfile";
+import ArtistProfile from "@/components/ArtistProfile";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
