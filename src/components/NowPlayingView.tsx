@@ -361,17 +361,10 @@ const NowPlayingView = ({
             </div>
 
             {/* Video info (video context) */}
-            {context === "video" && videoInfo && (
+            {context === "video" && !videoInfoLoading && videoInfo && (
               <div className="bg-secondary/40 rounded-xl p-3 mt-2">
                 <p className="text-xs text-foreground font-medium line-clamp-2">{song.title}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {videoInfo.viewCount && `${videoInfo.viewCount} visualizações`}
-                  {videoInfo.viewCount && videoInfo.publishedDate && " · "}
-                  {videoInfo.publishedDate}
-                </p>
-                {videoInfo.description && (
-                  <p className="text-[10px] text-muted-foreground/70 mt-1.5 line-clamp-3 leading-relaxed">{videoInfo.description}</p>
-                )}
+                <p className="text-[10px] text-muted-foreground mt-1">{song.artist}</p>
               </div>
             )}
 
