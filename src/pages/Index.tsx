@@ -248,7 +248,6 @@ const Index = () => {
             <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
             <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
           </div>
-          </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
               <Search size={20} />
