@@ -18,6 +18,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import ExploreScreen from "@/components/ExploreScreen";
 import BottomNav from "@/components/BottomNav";
+import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
 
@@ -233,7 +234,12 @@ const Index = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        {/* Desktop Sidebar */}
+        <DesktopSidebar active={activeTab} onChange={setActiveTab} />
+
+        {/* Main column */}
+        <div className="flex-1 flex flex-col min-w-0">
         {/* YouTube Player */}
         <div
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
@@ -242,11 +248,16 @@ const Index = () => {
           <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
         </div>
 
-        {/* Header — YouTube Music style */}
-        <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
-          <div className="flex items-center gap-2">
+        {/* Header */}
+        <header className="flex items-center justify-between px-4 lg:px-6 py-2.5 flex-shrink-0">
+          <div className="flex items-center gap-2 lg:hidden">
             <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
             <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
+          </div>
+          <div className="hidden lg:flex items-center gap-3">
+            <h2 className="text-lg font-display font-semibold text-foreground">
+              {activeTab === "home" ? greeting : activeTab === "explore" ? "Explorar" : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+            </h2>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -262,12 +273,12 @@ const Index = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain">
+        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2">
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
               <div className="px-4 pt-1">
-                <h1 className="text-xl font-display font-bold text-foreground mb-3">{greeting}</h1>
+                <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   {[
                     { label: "Relax", icon: "🎧" },
@@ -315,7 +326,7 @@ const Index = () => {
                     Seleção rápida
                   </h2>
                 </div>
-                <div className="grid grid-cols-2 gap-2 px-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 px-4">
                   {quickPicks.map((song) => (
                     <button
                       key={song.id}
@@ -340,7 +351,7 @@ const Index = () => {
                   </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-3 gap-3 px-4">
+                <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 px-4">
                   {(recentHistory.length > 0
                     ? recentHistory.slice(0, 6).map(e => ({
                         id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
@@ -437,7 +448,7 @@ const Index = () => {
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
                     { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
                     { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
@@ -641,7 +652,7 @@ const Index = () => {
                   <p className="text-xs text-muted-foreground font-mono">ID: {deviceId.current.substring(0, 16)}...</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
                 {[
                   { label: "Músicas", value: songs.length },
                   { label: "Downloads", value: offlineSongs.length },
@@ -717,7 +728,9 @@ const Index = () => {
           <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
         )}
 
-        <BottomNav active={activeTab} onChange={setActiveTab} />
+        <div className="lg:hidden">
+          <BottomNav active={activeTab} onChange={setActiveTab} />
+        </div>
 
         {expanded && (
           <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} isEnded={playerState.isEnded} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
@@ -756,6 +769,7 @@ const Index = () => {
             onClose={() => setShowFloatingPiP(false)}
           />
         )}
+        </div>{/* end main column */}
       </div>
     </>
   );
