@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2 } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
 import { useState } from "react";
