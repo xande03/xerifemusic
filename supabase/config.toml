@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.fetch-lyrics]
 verify_jwt = false
+
+[functions.youtube-general-search]
+verify_jwt = false
+
+[functions.youtube-video-info]
+verify_jwt = false
