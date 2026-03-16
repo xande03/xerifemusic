@@ -48,6 +48,17 @@ const Index = () => {
     setPlayerVolume(volume);
   }, [volume, setPlayerVolume]);
 
+  // Auto-play next song when current ends (Democracy Mode)
+  useEffect(() => {
+    if (playerState.isEnded) {
+      const sorted = sortByVotes(songs);
+      const idx = sorted.findIndex((s) => s.id === currentSong.id);
+      const next = sorted[(idx + 1) % sorted.length];
+      setCurrentSong(next);
+      loadVideo(next.youtubeId);
+    }
+  }, [playerState.isEnded]);
+
   const handleSelect = useCallback(
     (song: Song) => {
       setCurrentSong(song);
