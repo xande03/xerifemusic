@@ -13,6 +13,7 @@ export type PlayerMode = "video" | "audio" | "lyrics";
 interface NowPlayingViewProps {
   song: Song;
   isPlaying: boolean;
+  isEnded?: boolean;
   currentTime: number;
   duration: number;
   onTogglePlay: () => void;
@@ -29,7 +30,7 @@ interface NowPlayingViewProps {
 }
 
 const NowPlayingView = ({
-  song, isPlaying, currentTime, duration,
+  song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated,
 }: NowPlayingViewProps) => {
@@ -88,6 +89,13 @@ const NowPlayingView = ({
       });
     }
   }, [activeLineIndex]);
+
+  // Autoplay: when video ends, play first related video
+  useEffect(() => {
+    if (isEnded && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
+      onPlayRelated(videoInfo.relatedVideos[0]);
+    }
+  }, [isEnded]);
 
   const handleModeChange = (newMode: PlayerMode) => {
     setMode(newMode);
