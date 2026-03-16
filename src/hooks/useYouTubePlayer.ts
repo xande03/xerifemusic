@@ -252,19 +252,17 @@ export function useYouTubePlayer(containerId: string) {
 
   const requestFullscreen = useCallback(async () => {
     try {
-      const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
-      if (!iframe) return;
+      // Target the dedicated fullscreen container that holds both the player and overlay
+      const container = document.getElementById('yt-fullscreen-container');
+      const target = container || playerRef.current?.getIframe?.()?.parentElement;
+      if (!target) return;
 
-      const target = iframe.parentElement || iframe;
-      
       if (target.requestFullscreen) {
         await target.requestFullscreen();
       } else if ((target as any).webkitRequestFullscreen) {
         (target as any).webkitRequestFullscreen();
       } else if ((target as any).webkitEnterFullscreen) {
         (target as any).webkitEnterFullscreen();
-      } else if ((iframe as any).requestFullscreen) {
-        await (iframe as any).requestFullscreen();
       }
     } catch (err) {
       console.warn("Fullscreen request failed:", err);
