@@ -97,7 +97,8 @@ const Index = () => {
   }, [songs]);
 
   useEffect(() => {
-    if (playerState.isEnded) {
+    if (playerState.isEnded && !expanded) {
+      // Only auto-next from queue when NowPlayingView is NOT expanded (it handles autoplay via related videos)
       const sorted = sortByVotes(songs);
       const idx = sorted.findIndex((s) => s.id === currentSong.id);
       const next = sorted[(idx + 1) % sorted.length];
