@@ -54,9 +54,17 @@ const NowPlayingView = ({
     }
   }, [mode, song.id]);
 
-  // Reset lyrics when song changes
+  // Reset lyrics and fetch video info when song changes
   useEffect(() => {
     setLyricsResult(null);
+    setVideoInfo(null);
+    if (song.youtubeId) {
+      setVideoInfoLoading(true);
+      fetchVideoInfo(song.youtubeId).then((info) => {
+        setVideoInfo(info);
+        setVideoInfoLoading(false);
+      });
+    }
   }, [song.id]);
 
   // Find active line index for synced lyrics
