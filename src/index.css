@@ -201,3 +201,37 @@
 .animate-splash-progress {
   animation: splash-progress 1.6s ease-in-out forwards;
 }
+
+/* Fullscreen container fills entire screen when in fullscreen mode */
+#yt-fullscreen-container:fullscreen,
+#yt-fullscreen-container:-webkit-full-screen {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  background: black !important;
+  border-radius: 0 !important;
+  z-index: 9999 !important;
+}
+#yt-fullscreen-container:fullscreen #yt-player,
+#yt-fullscreen-container:-webkit-full-screen #yt-player {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+}
+#yt-fullscreen-container:fullscreen #yt-player iframe,
+#yt-fullscreen-container:-webkit-full-screen #yt-player iframe {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
