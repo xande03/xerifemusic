@@ -117,6 +117,23 @@ const Index = () => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
   }, [seekTo, playerState.duration, currentSong.duration]);
 
+  const handleSeekAbsolute = useCallback((seconds: number) => {
+    seekTo(seconds);
+  }, [seekTo]);
+
+  // Media Session API — lock screen & background controls
+  useMediaSession({
+    song: currentSong,
+    isPlaying: playerState.isPlaying,
+    currentTime: playerState.currentTime || 0,
+    duration: playerState.duration || currentSong.duration,
+    onPlay: play,
+    onPause: pause,
+    onNext: handleNext,
+    onPrev: handlePrev,
+    onSeek: handleSeekAbsolute,
+  });
+
   const handleVote = useCallback((song: Song) => {
     if (votedSongs.has(song.id)) return;
     addVotedSong(song.id);
