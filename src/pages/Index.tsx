@@ -17,6 +17,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
+import RadioScreen from "@/components/RadioScreen";
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
