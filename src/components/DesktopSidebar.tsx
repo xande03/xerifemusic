@@ -1,4 +1,4 @@
-import { Home, Library, Download, ListMusic, Settings } from "lucide-react";
+import { Home, Search, Heart, Download, Settings } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile";
@@ -10,9 +10,9 @@ interface DesktopSidebarProps {
 
 const mainTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "Início" },
-  { id: "library", icon: Library, label: "Biblioteca" },
+  { id: "search", icon: Search, label: "Buscar" },
+  { id: "library", icon: Heart, label: "Favoritas" },
   { id: "offline", icon: Download, label: "Downloads" },
-  { id: "search", icon: ListMusic, label: "Playlists" },
 ];
 
 const DesktopSidebar = ({ active, onChange }: DesktopSidebarProps) => {

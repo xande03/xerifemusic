@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, MoreHorizontal } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -22,6 +22,7 @@ import ArtistProfile from "@/components/ArtistProfile";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
+import SearchScreen from "@/components/SearchScreen";
 import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 import FullscreenOverlay from "@/components/FullscreenOverlay";
@@ -229,7 +230,7 @@ const Index = () => {
 
   // Trending data: use real YouTube trending if available, fallback to mock
   const heroSong = trendingSongs[0] || queueSongs[0];
-  const quickPicks = trendingSongs.length > 0 ? trendingSongs.slice(1, 5) : songs.slice(0, 4);
+  const quickPicks = trendingSongs.length > 0 ? trendingSongs.slice(1, 7) : songs.slice(0, 6);
   const topCharts = trendingSongs.length > 0 ? trendingSongs.slice(0, 10) : queueSongs.slice(0, 5);
   const forYouSongs = trendingSongs.length > 0 ? trendingSongs.slice(5, 15) : songs.slice(0, 6);
   const ct = playerState.currentTime || 0;
@@ -280,19 +281,16 @@ const Index = () => {
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
-              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : activeTab === "search" ? "Buscar" : "Playlists"}
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
-              <Search size={20} />
-            </button>
             <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
             </span>
-            <div className="w-7 h-7 rounded-full bg-secondary overflow-hidden flex items-center justify-center ring-2 ring-border">
-              <User size={14} className="text-muted-foreground" />
-            </div>
+            <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center">
+              <MoreHorizontal size={16} className="text-muted-foreground" />
+            </button>
           </div>
         </header>
 
@@ -395,57 +393,14 @@ const Index = () => {
                 />
               ) : (
               <>
-              {/* Greeting + Mood chips — YT Music style */}
+              {/* Greeting */}
               <div className="px-4">
-                <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  {[
-                    { label: "Relax", icon: "🎧" },
-                    { label: "Workout", icon: "💪" },
-                    { label: "Focus", icon: "🎯" },
-                    { label: "Energize", icon: "⚡" },
-                    { label: "Party", icon: "🎉" },
-                    { label: "Commute", icon: "🚗" },
-                  ].map((mood) => (
-                    <button key={mood.label} className="chip chip-inactive flex-shrink-0 whitespace-nowrap rounded-full flex items-center gap-1">
-                      <span>{mood.icon}</span>
-                      {mood.label}
-                    </button>
-                  ))}
-                </div>
+                <h1 className="text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
               </div>
 
-              {/* Top Trending — hero banner like YT Music */}
+              {/* Quick picks — 2-col compact grid like reference */}
               <section className="px-4">
-                <div className="relative w-full rounded-2xl overflow-hidden aspect-[2/1] group">
-                  <img src={heroSong?.cover} alt={heroSong?.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Flame size={14} className="text-primary" />
-                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
-                    </div>
-                    <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
-                    <button onClick={() => heroSong?.artist && setArtistView({ name: heroSong.artist, image: heroSong.cover })} className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors">{heroSong?.artist}</button>
-                    <button
-                      onClick={() => heroSong && handleSelect(heroSong)}
-                      className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
-                    >
-                      <Play size={14} fill="currentColor" className="ml-0.5" /> Ouvir agora
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              {/* Quick picks — compact row like YT Music home */}
-              <section>
-                <div className="flex items-center justify-between px-4 mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Zap size={16} className="text-primary" />
-                    Seleção rápida
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 px-4">
+                <div className="grid grid-cols-2 gap-2">
                   {quickPicks.map((song) => (
                     <button
                       key={song.id}
@@ -454,8 +409,32 @@ const Index = () => {
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                      <img src={song.cover} alt={song.album} className="w-14 h-14 object-cover flex-shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate pr-3 leading-tight">{song.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Álbuns em Destaque — large cards like reference */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h2 className="text-lg font-bold text-foreground">Álbuns em Destaque</h2>
+                  <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 px-4">
+                  {forYouSongs.slice(0, 4).map((song) => (
+                    <button
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className="group active:scale-[0.97] transition-transform text-left"
+                    >
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 relative">
+                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
                     </button>
                   ))}
                 </div>
@@ -621,103 +600,14 @@ const Index = () => {
           )}
 
           {activeTab === "search" && (
-            <div className="px-4 space-y-3">
-              <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Músicas, artistas, álbuns, podcasts"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  autoFocus
-                  className="w-full pl-10 pr-4 py-3 rounded-full bg-secondary border-none text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-muted-foreground/30"
-                />
-              </div>
-
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                {(["all", "songs", "artists", "albums"] as SearchFilter[]).map((f) => (
-                  <button key={f} onClick={() => setSearchFilter(f)} className={`chip flex-shrink-0 ${searchFilter === f ? "chip-active" : "chip-inactive"}`}>
-                    {f === "all" ? "Tudo" : f === "songs" ? "Músicas" : f === "artists" ? "Artistas" : "Álbuns"}
-                  </button>
-                ))}
-              </div>
-
-              {suggestions.length > 0 && searchQuery.length > 0 && (
-                <div className="rounded-lg overflow-hidden bg-card">
-                  {suggestions.map((term, i) => (
-                    <button key={i} onClick={() => handleSuggestionClick(term)} className="w-full flex items-center gap-3 px-3 py-3 text-sm text-foreground hover:bg-accent active:bg-accent transition-colors text-left">
-                      <Search size={14} className="text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{term}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {isSearching ? (
-                <SearchSkeleton />
-              ) : searchQuery.length >= 2 ? (
-                <div className="space-y-4">
-                  {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {uniqueArtists.slice(0, 6).map((artist) => {
-                          const artistSong = searchResults.find((s) => s.artist === artist);
-                          return (
-                            <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1.5 flex-shrink-0 active:scale-95 transition-transform">
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border">
-                                {artistSong && <img src={artistSong.cover} alt={artist} className="w-full h-full object-cover" />}
-                              </div>
-                              <span className="text-xs text-foreground truncate max-w-[80px]">{artist}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {(searchFilter === "all" || searchFilter === "albums") && uniqueAlbums.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
-                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                        {uniqueAlbums.slice(0, 6).map((raw) => {
-                          const [album, artist, cover] = raw.split("|||");
-                          return (
-                            <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px] active:scale-95 transition-transform">
-                              <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5">
-                                <img src={cover} alt={album} className="w-full h-full object-cover" />
-                              </div>
-                              <p className="text-xs font-medium text-foreground truncate text-left">{album}</p>
-                              <p className="text-[11px] text-muted-foreground truncate text-left">{artist}</p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {(searchFilter === "all" || searchFilter === "songs") && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
-                      {searchResults.length > 0 ? (
-                        searchResults.map((song) => (
-                          <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground py-4">Nenhum resultado</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Tendências</h3>
-                  {songs.slice(0, 5).map((song) => (
-                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
-                  ))}
-                </div>
-              )}
-            </div>
+            <SearchScreen
+              currentSongId={currentSong.id}
+              onSelect={handleSelect}
+              onArtistClick={(name, image) => {
+                setActiveTab("home");
+                setArtistView({ name, image });
+              }}
+            />
           )}
 
 
@@ -837,7 +727,7 @@ const Index = () => {
         {!expanded && (
           <>
             <div className="lg:hidden">
-              <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
+              <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onExpand={() => setExpanded(true)} />
             </div>
             <DesktopPlayer
               song={currentSong}
