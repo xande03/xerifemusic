@@ -20,6 +20,7 @@ import ExploreScreen from "@/components/ExploreScreen";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
+import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 
 import album1 from "@/assets/album-1.jpg";
@@ -273,7 +274,7 @@ const Index = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2">
+        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
@@ -613,7 +614,7 @@ const Index = () => {
 
           {activeTab === "library" && (
             <div className="px-4 space-y-3">
-              <h1 className="text-xl font-display font-bold text-foreground">Biblioteca</h1>
+              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Biblioteca</h1>
               <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
                 <span className="chip chip-active flex-shrink-0">Músicas</span>
                 <span className="chip chip-inactive flex-shrink-0">Álbuns</span>
@@ -627,7 +628,7 @@ const Index = () => {
 
           {activeTab === "offline" && (
             <div className="px-4 space-y-3">
-              <h1 className="text-xl font-display font-bold text-foreground">Downloads</h1>
+              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Downloads</h1>
               <p className="text-xs text-muted-foreground">{offlineSongs.length} músicas salvas</p>
               {offlineSongs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
@@ -725,7 +726,24 @@ const Index = () => {
         </main>
 
         {!expanded && (
-          <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
+          <>
+            <div className="lg:hidden">
+              <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
+            </div>
+            <DesktopPlayer
+              song={currentSong}
+              isPlaying={playerState.isPlaying}
+              currentTime={ct}
+              duration={dur}
+              volume={volume}
+              onTogglePlay={handleTogglePlay}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onExpand={() => setExpanded(true)}
+              onSeek={handleSeek}
+              onVolumeChange={setVolumeState}
+            />
+          </>
         )}
 
         <div className="lg:hidden">
