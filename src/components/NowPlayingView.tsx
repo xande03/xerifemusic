@@ -13,6 +13,7 @@ export type PlayerMode = "video" | "audio" | "lyrics";
 interface NowPlayingViewProps {
   song: Song;
   isPlaying: boolean;
+  isEnded?: boolean;
   currentTime: number;
   duration: number;
   onTogglePlay: () => void;
