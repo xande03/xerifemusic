@@ -91,10 +91,12 @@ const Index = () => {
   );
 
   const handleVote = useCallback((song: Song) => {
+    if (votedSongs.has(song.id)) return; // Single vote per song
+    setVotedSongs((prev) => new Set([...prev, song.id]));
     setSongs((prev) =>
       prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s))
     );
-  }, []);
+  }, [votedSongs]);
 
   const handleDownload = useCallback(
     async (song: Song) => {
