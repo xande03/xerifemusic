@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
