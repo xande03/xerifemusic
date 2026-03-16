@@ -30,6 +30,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [volume, setVolumeState] = useState(getVolume);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
