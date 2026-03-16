@@ -34,7 +34,7 @@ const Index = () => {
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
-  const [showRadio, setShowRadio] = useState(false);
+  const [_unused, _setUnused] = useState(false); // placeholder for removed radio state
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
   const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('demus-color') || 'red');
