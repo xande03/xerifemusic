@@ -42,6 +42,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [homeMode, setHomeMode] = useState<HomeMode>("music");
   const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
+  const [artistView, setArtistView] = useState<{ name: string; image?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
