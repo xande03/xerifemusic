@@ -123,7 +123,7 @@ const NowPlayingView = ({
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-3 max-w-lg mx-auto w-full overflow-y-auto pb-6">
+      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-3 max-w-lg mx-auto w-full overflow-y-auto pb-8">
         
         {/* Mode tabs */}
         <div className="flex items-center gap-1 bg-secondary/60 rounded-full p-1 w-fit flex-shrink-0">
