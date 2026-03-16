@@ -39,9 +39,16 @@ const NowPlayingView = ({
             <ChevronDown size={26} />
           </button>
           <span className="text-xs text-muted-foreground uppercase tracking-wider">YouTube Music</span>
-          <button onClick={() => setShowVideo((v) => !v)} className="text-muted-foreground hover:text-foreground transition-colors">
-            {showVideo ? <Music2 size={20} /> : <Video size={20} />}
-          </button>
+          <div className="flex items-center gap-2">
+            {onTogglePiP && (
+              <button onClick={onTogglePiP} className="text-muted-foreground hover:text-foreground transition-colors" title="Picture-in-Picture">
+                <PictureInPicture2 size={20} />
+              </button>
+            )}
+            <button onClick={() => setShowVideo((v) => !v)} className="text-muted-foreground hover:text-foreground transition-colors">
+              {showVideo ? <Music2 size={20} /> : <Video size={20} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col items-center px-4 gap-4 max-w-lg mx-auto w-full overflow-y-auto pb-6">
