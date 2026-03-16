@@ -129,14 +129,6 @@ export function getPrefs(): UserPrefs {
     return { displayName: "Convidado", isHost: false, theme: "dark" };
   }
 }
-  displayName: string;
-  isHost: boolean;
-  theme: string;
-}
-
-export function savePrefs(prefs: UserPrefs): void {
-  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-}
 
 export function getPrefs(): UserPrefs {
   try {
