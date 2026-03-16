@@ -47,6 +47,7 @@ export function useYouTubePlayer(containerId: string) {
   const [state, setState] = useState<YouTubePlayerState>({
     isReady: false,
     isPlaying: false,
+    isEnded: false,
     currentTime: 0,
     duration: 0,
     videoId: null,
