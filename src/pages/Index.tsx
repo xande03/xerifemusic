@@ -285,17 +285,17 @@ const Index = () => {
               {/* Top Trending — hero banner like YT Music */}
               <section className="px-4">
                 <div className="relative w-full rounded-2xl overflow-hidden aspect-[2/1] group">
-                  <img src={queueSongs[0]?.cover} alt={queueSongs[0]?.title} className="w-full h-full object-cover" />
+                  <img src={heroSong?.cover} alt={heroSong?.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Flame size={14} className="text-primary" />
-                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta</span>
+                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
                     </div>
-                    <p className="text-base font-bold text-foreground">{queueSongs[0]?.title}</p>
-                    <p className="text-xs text-muted-foreground">{queueSongs[0]?.artist}</p>
+                    <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
+                    <p className="text-xs text-muted-foreground">{heroSong?.artist}</p>
                     <button
-                      onClick={() => queueSongs[0] && handleSelect(queueSongs[0])}
+                      onClick={() => heroSong && handleSelect(heroSong)}
                       className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
                     >
                       <Play size={14} fill="currentColor" className="ml-0.5" /> Ouvir agora
