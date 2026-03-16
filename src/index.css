@@ -223,11 +223,15 @@
   width: 100% !important;
   height: 100% !important;
   border-radius: 0 !important;
-  position: relative !important;
+  position: absolute !important;
+  inset: 0 !important;
   z-index: 0 !important;
 }
 #yt-fullscreen-container:fullscreen #yt-player iframe,
 #yt-fullscreen-container:-webkit-full-screen #yt-player iframe {
-  position: relative !important;
+  position: absolute !important;
+  inset: 0 !important;
   z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
