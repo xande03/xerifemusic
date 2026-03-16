@@ -217,6 +217,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo }: ExploreScreenProps) =
                     video={video}
                     onPlay={onPlayVideo}
                     onChannelClick={handleChannelClick}
+                    onFullscreen={onFullscreenVideo}
                   />
                 ))}
               </div>
