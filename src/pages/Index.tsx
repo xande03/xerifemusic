@@ -177,9 +177,12 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
-      {/* Hidden YouTube Player */}
-      <div className="absolute -top-[9999px] -left-[9999px]">
-        <div id="yt-player" />
+      {/* YouTube Player - visible when expanded, hidden otherwise */}
+      <div
+        className={`${expanded ? "fixed inset-0 z-[60] pointer-events-none" : "absolute -top-[9999px] -left-[9999px]"}`}
+        style={expanded ? { top: "46px", left: "24px", right: "24px", height: "calc(56.25vw - 27px)", maxHeight: "360px", maxWidth: "calc(100% - 48px)", pointerEvents: "auto", zIndex: 60 } : {}}
+      >
+        <div id="yt-player" className="w-full h-full rounded-2xl overflow-hidden" />
       </div>
 
       {/* Status bar */}
