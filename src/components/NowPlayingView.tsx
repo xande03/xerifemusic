@@ -241,7 +241,7 @@ const NowPlayingView = ({
         )}
 
         {/* Song info */}
-        <div className="w-full flex items-center justify-between mt-1 flex-shrink-0">
+        <div className="w-full flex items-center justify-between mt-0 flex-shrink-0">
           <div className="min-w-0 flex-1">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate">{song.title}</h2>
             <p className="text-sm text-muted-foreground">{song.artist}</p>
