@@ -4,7 +4,7 @@ import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 interface VideoCardProps {
   video: VideoResult;
   onPlay: (video: VideoResult) => void;
-  onChannelClick?: (channelName: string) => void;
+  onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
   onFullscreen?: (video: VideoResult) => void;
 }
 
