@@ -254,7 +254,7 @@ const Index = () => {
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
           style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
         >
-          <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
+          <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden relative z-0" />
           {/* Fullscreen overlay controls rendered here */}
           {playerState.isFullscreen && (
             <FullscreenOverlay
