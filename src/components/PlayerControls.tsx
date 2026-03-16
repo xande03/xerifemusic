@@ -4,28 +4,39 @@ import { Song, formatDuration } from "@/data/mockSongs";
 interface PlayerControlsProps {
   song: Song;
   isPlaying: boolean;
-  progress: number;
+  currentTime: number;
+  duration: number;
   onTogglePlay: () => void;
   onNext: () => void;
   onPrev: () => void;
+  onSeek: (fraction: number) => void;
 }
 
-const PlayerControls = ({ song, isPlaying, progress, onTogglePlay, onNext, onPrev }: PlayerControlsProps) => {
-  const elapsed = Math.floor(song.duration * progress);
+const PlayerControls = ({ song, isPlaying, currentTime, duration, onTogglePlay, onNext, onPrev, onSeek }: PlayerControlsProps) => {
+  const progress = duration > 0 ? currentTime / duration : 0;
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const fraction = (e.clientX - rect.left) / rect.width;
+    onSeek(Math.max(0, Math.min(1, fraction)));
+  };
 
   return (
     <div className="w-full space-y-4">
       {/* Progress bar */}
       <div className="space-y-1">
-        <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+        <div
+          className="h-1.5 w-full rounded-full bg-muted overflow-hidden cursor-pointer"
+          onClick={handleProgressClick}
+        >
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-200"
             style={{ width: `${progress * 100}%` }}
           />
         </div>
         <div className="flex justify-between text-xs text-muted-foreground font-mono">
-          <span>{formatDuration(elapsed)}</span>
-          <span>{formatDuration(song.duration)}</span>
+          <span>{formatDuration(currentTime)}</span>
+          <span>{formatDuration(duration)}</span>
         </div>
       </div>
 
@@ -55,7 +66,7 @@ const PlayerControls = ({ song, isPlaying, progress, onTogglePlay, onNext, onPre
       <div className="flex justify-center gap-4 text-xs text-muted-foreground">
         {song.isDownloaded && (
           <span className="flex items-center gap-1 text-primary">
-            <Download size={12} /> Offline
+            <Download size={12} /> Salvo offline
           </span>
         )}
         <span className="flex items-center gap-1">
