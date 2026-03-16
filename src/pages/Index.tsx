@@ -3,6 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User } fr
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
+import { useMediaSession } from "@/hooks/useMediaSession";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
@@ -115,6 +116,23 @@ const Index = () => {
   const handleSeek = useCallback((fraction: number) => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
   }, [seekTo, playerState.duration, currentSong.duration]);
+
+  const handleSeekAbsolute = useCallback((seconds: number) => {
+    seekTo(seconds);
+  }, [seekTo]);
+
+  // Media Session API — lock screen & background controls
+  useMediaSession({
+    song: currentSong,
+    isPlaying: playerState.isPlaying,
+    currentTime: playerState.currentTime || 0,
+    duration: playerState.duration || currentSong.duration,
+    onPlay: play,
+    onPause: pause,
+    onNext: handleNext,
+    onPrev: handlePrev,
+    onSeek: handleSeekAbsolute,
+  });
 
   const handleVote = useCallback((song: Song) => {
     if (votedSongs.has(song.id)) return;
