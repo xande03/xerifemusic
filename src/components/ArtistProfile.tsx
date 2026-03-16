@@ -111,7 +111,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:bg-accent transition-colors"
                   >
                     <span className="text-sm font-bold w-5 text-center text-muted-foreground">{i + 1}</span>
-                    <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                    <img src={hdThumbnail(song.cover)} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
