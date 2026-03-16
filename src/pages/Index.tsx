@@ -42,7 +42,8 @@ const albumCovers = [album1, album2, album3, album4];
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("home");
-  const [homeMode, setHomeMode] = useState<HomeMode>("music");
+  const [homeMode, setHomeModeState] = useState<HomeMode>(() => (localStorage.getItem('demus-home-mode') as HomeMode) || "music");
+  const setHomeMode = (mode: HomeMode) => { setHomeModeState(mode); localStorage.setItem('demus-home-mode', mode); };
   const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
   const [artistView, setArtistView] = useState<{ name: string; image?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
