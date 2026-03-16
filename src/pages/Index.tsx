@@ -3,6 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clo
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
+import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
@@ -56,6 +57,9 @@ const Index = () => {
   });
 
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay } = useYouTubePlayer("yt-player");
+  const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
+
+
 
   useEffect(() => {
     const savedId = getCurrentSongId();
@@ -208,6 +212,12 @@ const Index = () => {
 
   const offlineSongs = songs.filter((s) => s.isDownloaded);
   const queueSongs = sortByVotes(songs);
+
+  // Trending data: use real YouTube trending if available, fallback to mock
+  const heroSong = trendingSongs[0] || queueSongs[0];
+  const quickPicks = trendingSongs.length > 0 ? trendingSongs.slice(1, 5) : songs.slice(0, 4);
+  const topCharts = trendingSongs.length > 0 ? trendingSongs.slice(0, 10) : queueSongs.slice(0, 5);
+  const forYouSongs = trendingSongs.length > 0 ? trendingSongs.slice(5, 15) : songs.slice(0, 6);
   const ct = playerState.currentTime || 0;
   const dur = playerState.duration || currentSong.duration;
 
@@ -275,17 +285,17 @@ const Index = () => {
               {/* Top Trending — hero banner like YT Music */}
               <section className="px-4">
                 <div className="relative w-full rounded-2xl overflow-hidden aspect-[2/1] group">
-                  <img src={queueSongs[0]?.cover} alt={queueSongs[0]?.title} className="w-full h-full object-cover" />
+                  <img src={heroSong?.cover} alt={heroSong?.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Flame size={14} className="text-primary" />
-                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta</span>
+                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
                     </div>
-                    <p className="text-base font-bold text-foreground">{queueSongs[0]?.title}</p>
-                    <p className="text-xs text-muted-foreground">{queueSongs[0]?.artist}</p>
+                    <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
+                    <p className="text-xs text-muted-foreground">{heroSong?.artist}</p>
                     <button
-                      onClick={() => queueSongs[0] && handleSelect(queueSongs[0])}
+                      onClick={() => heroSong && handleSelect(heroSong)}
                       className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
                     >
                       <Play size={14} fill="currentColor" className="ml-0.5" /> Ouvir agora
@@ -303,7 +313,7 @@ const Index = () => {
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 gap-2 px-4">
-                  {songs.slice(0, 4).map((song) => (
+                  {quickPicks.map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
@@ -365,7 +375,7 @@ const Index = () => {
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
-                  {queueSongs.slice(0, 5).map((song, i) => (
+                  {topCharts.map((song, i) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
@@ -400,7 +410,7 @@ const Index = () => {
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
-                  {songs.slice(0, 6).map((song) => (
+                  {forYouSongs.map((song) => (
                     <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] group snap-start">
                       <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
