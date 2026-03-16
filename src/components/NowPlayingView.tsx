@@ -329,14 +329,15 @@ const NowPlayingView = ({
 
             {/* Volume + Autoplay row */}
             <div className="flex items-center gap-3">
-              <Volume2 size={16} className="text-muted-foreground flex-shrink-0" />
-              <input
-                type="range"
-                min={0}
+              <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+                {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+              <Slider
+                value={[volume]}
                 max={100}
-                value={volume}
-                onChange={(e) => onVolumeChange(Number(e.target.value))}
-                className="flex-1 h-1 appearance-none rounded-full bg-muted accent-primary"
+                step={1}
+                onValueChange={([v]) => onVolumeChange(v)}
+                className="flex-1 [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-range]]:bg-primary [&_[data-slot=slider-thumb]]:w-3.5 [&_[data-slot=slider-thumb]]:h-3.5 [&_[data-slot=slider-thumb]]:bg-primary [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:shadow-[0_0_6px_hsl(var(--primary)/0.4)]"
               />
               <div className="flex items-center gap-2 ml-2">
                 <span className="text-[10px] text-muted-foreground">Auto</span>
