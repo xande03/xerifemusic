@@ -20,7 +20,7 @@ interface NowPlayingViewProps {
 
 const NowPlayingView = ({
   song, isPlaying, currentTime, duration,
-  onTogglePlay, onNext, onPrev, onCollapse, onSeek,
+  onCollapse, onSeek,
   volume, onVolumeChange,
 }: NowPlayingViewProps) => {
   const [showVideo, setShowVideo] = useState(true);
@@ -34,16 +34,15 @@ const NowPlayingView = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up">
-      {/* Background art */}
+      {/* Background */}
       <div className="absolute inset-0 overflow-hidden">
         <img src={heroBg} alt="" className="w-full h-full object-cover opacity-10 blur-3xl scale-110" />
         <div className="absolute inset-0 gradient-mesh" />
       </div>
 
-      {/* Content */}
       <div className="relative flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3 z-10">
           <button onClick={onCollapse} className="text-muted-foreground hover:text-foreground transition-colors">
             <ChevronDown size={28} />
           </button>
@@ -58,24 +57,24 @@ const NowPlayingView = ({
           </button>
         </div>
 
-        {/* Main area */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4 max-w-lg mx-auto w-full">
-          {/* YouTube Player / Album Art */}
-          <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-glow-cyan bg-background">
-            {showVideo ? (
-              <div
-                id="yt-player"
-                className="w-full h-full"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center relative">
-                <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-background/30 flex items-center justify-center">
-                  <AudioVisualizer isPlaying={isPlaying} barCount={48} className="w-3/4 h-20" />
-                </div>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col items-center px-6 gap-4 max-w-lg mx-auto w-full overflow-y-auto pb-6">
+          {/* Video area - the actual yt-player is positioned here by parent */}
+          {showVideo ? (
+            <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-glow-cyan bg-card">
+              {/* YouTube player is overlaid here by Index.tsx */}
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                Player do YouTube
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-glow-cyan relative">
+              <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-background/40 flex items-center justify-center">
+                <AudioVisualizer isPlaying={isPlaying} barCount={48} className="w-3/4 h-20" />
+              </div>
+            </div>
+          )}
 
           {/* Song info */}
           <div className="w-full flex items-center justify-between">
@@ -93,7 +92,10 @@ const NowPlayingView = ({
             </div>
           </div>
 
-          {/* Progress bar */}
+          {/* Visualizer */}
+          <AudioVisualizer isPlaying={isPlaying} barCount={64} className="w-full" />
+
+          {/* Progress */}
           <div className="w-full space-y-1">
             <div
               className="h-1.5 w-full rounded-full bg-muted overflow-hidden cursor-pointer"
@@ -122,6 +124,10 @@ const NowPlayingView = ({
               className="flex-1 h-1 appearance-none rounded-full bg-muted accent-primary"
             />
           </div>
+
+          <p className="text-[10px] text-muted-foreground text-center">
+            Use os controles nativos do YouTube no player acima
+          </p>
         </div>
       </div>
     </div>
