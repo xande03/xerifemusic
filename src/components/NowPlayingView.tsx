@@ -2,6 +2,7 @@ import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, 
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
+import BlurImage from "@/components/BlurImage";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
