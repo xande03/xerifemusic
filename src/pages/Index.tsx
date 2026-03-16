@@ -3,7 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User } fr
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
-import { getSearchSuggestions } from "@/lib/youtubeSearch";
+import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
   saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId,
