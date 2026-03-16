@@ -351,7 +351,7 @@ const Index = () => {
                   </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-3 gap-3 px-4">
+                <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 px-4">
                   {(recentHistory.length > 0
                     ? recentHistory.slice(0, 6).map(e => ({
                         id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
