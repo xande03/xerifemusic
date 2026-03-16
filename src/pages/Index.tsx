@@ -407,7 +407,7 @@ const Index = () => {
                       <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
                     </div>
                     <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
-                    <p className="text-xs text-muted-foreground">{heroSong?.artist}</p>
+                    <button onClick={() => heroSong?.artist && setArtistView({ name: heroSong.artist, image: heroSong.cover })} className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors">{heroSong?.artist}</button>
                     <button
                       onClick={() => heroSong && handleSelect(heroSong)}
                       className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
