@@ -68,6 +68,13 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
     doSearch(term);
   };
 
+  const handleChannelClick = (channelName: string) => {
+    if (!channelName) return;
+    setQuery(channelName);
+    setActiveCategory("all");
+    doSearch(channelName);
+  };
+
   const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
     setActiveCategory(cat.id);
     if (cat.query) {
@@ -187,7 +194,12 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
       {!loading && results.length > 0 && (
         <div className="space-y-6 px-4 pb-4">
           {results.map((video) => (
-            <VideoCard key={video.videoId} video={video} onPlay={onPlayVideo} />
+            <VideoCard
+              key={video.videoId}
+              video={video}
+              onPlay={onPlayVideo}
+              onChannelClick={handleChannelClick}
+            />
           ))}
         </div>
       )}
