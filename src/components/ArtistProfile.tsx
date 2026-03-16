@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, Play, Shuffle, Music2, Disc3, UserCircle } from "lucide-react";
+import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
 import { searchYouTubeMusic } from "@/lib/youtubeSearch";
 import type { Song } from "@/data/mockSongs";
@@ -111,7 +112,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-accent active:bg-accent transition-colors"
                   >
                     <span className="text-sm font-bold w-5 text-center text-muted-foreground">{i + 1}</span>
-                    <img src={hdThumbnail(song.cover)} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                    <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-11 h-11 rounded-md flex-shrink-0" />
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
@@ -140,7 +141,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                     className="group active:scale-95 transition-transform"
                   >
                     <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
-                      <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
+                      <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
                       <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors flex items-center justify-center">
                         <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
                           <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />

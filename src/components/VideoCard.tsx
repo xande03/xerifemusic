@@ -1,6 +1,7 @@
 import { Play, Maximize } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 import { hdThumbnail } from "@/lib/utils";
+import BlurImage from "@/components/BlurImage";
 
 interface VideoCardProps {
   video: VideoResult;
@@ -17,12 +18,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
       className="w-full text-left active:scale-[0.98] transition-transform"
     >
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-card group">
-         <img
-            src={hdThumbnail(video.thumbnail)}
-            alt={video.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+         <BlurImage src={hdThumbnail(video.thumbnail)} alt={video.title} className="w-full h-full" />
         {video.duration && (
           <span className="absolute bottom-2 right-2 bg-background/80 text-foreground text-[10px] font-mono px-1.5 py-0.5 rounded">
             {video.duration}
