@@ -8,6 +8,8 @@ const savedTheme = localStorage.getItem('demus-theme');
 if (savedTheme === 'light') {
   document.documentElement.classList.add('light');
 }
+const savedColor = localStorage.getItem('demus-color') || 'red';
+document.documentElement.classList.add(`theme-${savedColor}`);
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

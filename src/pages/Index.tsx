@@ -579,7 +579,7 @@ const Index = () => {
               <div className="bg-secondary rounded-lg p-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {isDark ? <Moon size={18} className="text-foreground" /> : <Sun size={18} className="text-foreground" />}
-                  <span className="text-sm font-medium text-foreground">Tema</span>
+                  <span className="text-sm font-medium text-foreground">Modo</span>
                 </div>
                 <button
                   onClick={() => {
@@ -592,6 +592,33 @@ const Index = () => {
                 >
                   {isDark ? 'Modo Claro' : 'Modo Escuro'}
                 </button>
+              </div>
+
+              {/* Color theme selector */}
+              <div className="bg-secondary rounded-lg p-3 space-y-2">
+                <span className="text-sm font-medium text-foreground">Cor do Tema</span>
+                <div className="flex gap-2 flex-wrap">
+                  {([
+                    { id: 'red', color: 'bg-[hsl(0,100%,50%)]', label: 'Vermelho' },
+                    { id: 'blue', color: 'bg-[hsl(217,91%,60%)]', label: 'Azul' },
+                    { id: 'purple', color: 'bg-[hsl(271,76%,53%)]', label: 'Roxo' },
+                    { id: 'green', color: 'bg-[hsl(142,71%,45%)]', label: 'Verde' },
+                    { id: 'orange', color: 'bg-[hsl(25,95%,53%)]', label: 'Laranja' },
+                    { id: 'pink', color: 'bg-[hsl(330,81%,60%)]', label: 'Rosa' },
+                  ] as const).map((t) => (
+                    <button
+                      key={t.id}
+                      title={t.label}
+                      onClick={() => {
+                        document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink');
+                        document.documentElement.classList.add(`theme-${t.id}`);
+                        localStorage.setItem('demus-color', t.id);
+                        setColorTheme(t.id);
+                      }}
+                      className={`w-8 h-8 rounded-full ${t.color} transition-all ${colorTheme === t.id ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110' : 'opacity-70 hover:opacity-100'}`}
+                    />
+                  ))}
+                </div>
               </div>
 
               <div className="bg-secondary rounded-lg p-3 space-y-1.5">
