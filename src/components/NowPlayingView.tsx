@@ -339,7 +339,9 @@ const NowPlayingView = ({
                 max={100}
                 step={1}
                 onValueChange={([v]) => onVolumeChange(v)}
-                className="flex-1 [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-range]]:bg-primary [&_[data-slot=slider-thumb]]:w-3.5 [&_[data-slot=slider-thumb]]:h-3.5 [&_[data-slot=slider-thumb]]:bg-primary [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-thumb]]:shadow-[0_0_6px_hsl(var(--primary)/0.4)]"
+                className="flex-1"
+                trackClassName="h-1 bg-muted"
+                thumbClassName="w-3.5 h-3.5"
               />
               <div className="flex items-center gap-2 ml-2">
                 <span className="text-[10px] text-muted-foreground">Auto</span>
