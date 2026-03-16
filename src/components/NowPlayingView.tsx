@@ -241,16 +241,16 @@ const NowPlayingView = ({
           <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
             <Shuffle size={20} />
           </button>
-          <button onClick={onPrev} className="p-3 text-foreground hover:text-primary active:scale-90 transition-all">
+        <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
             <SkipBack size={28} fill="currentColor" />
           </button>
           <button
             onClick={onTogglePlay}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform shadow-lg"
+            className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform shadow-lg"
           >
             {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
           </button>
-          <button onClick={onNext} className="p-3 text-foreground hover:text-primary active:scale-90 transition-all">
+          <button onClick={onNext} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
             <SkipForward size={28} fill="currentColor" />
           </button>
           <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
