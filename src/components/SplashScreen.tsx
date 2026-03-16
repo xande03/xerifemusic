@@ -24,7 +24,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
 
       {/* Logo */}
       <div className="relative flex flex-col items-center gap-4 animate-splash-logo">
-        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-28 h-28 drop-shadow-2xl" />
+        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-36 h-36 drop-shadow-2xl" />
         <div className="flex flex-col items-center gap-1">
           <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Xerife Hub</h1>
           <p className="text-xs text-muted-foreground tracking-widest uppercase">Music Streaming</p>
