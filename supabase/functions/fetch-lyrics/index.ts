@@ -19,13 +19,46 @@ serve(async (req) => {
       });
     }
 
-    // Clean artist/title for better matching
     const cleanArtist = artist.replace(/\s*ft\.?\s*.*/i, '').replace(/\s*feat\.?\s*.*/i, '').trim();
     const cleanTitle = title.replace(/\s*\(.*\)/, '').replace(/\s*\[.*\]/, '').trim();
 
-    // Try lyrics.ovh (free, no key needed)
+    // Try LRCLIB first (provides synced lyrics with timestamps)
+    try {
+      const lrclibUrl = `https://lrclib.net/api/search?artist_name=${encodeURIComponent(cleanArtist)}&track_name=${encodeURIComponent(cleanTitle)}`;
+      const lrclibRes = await fetch(lrclibUrl, {
+        headers: { 'User-Agent': 'DemusMusic/1.0' },
+      });
+
+      if (lrclibRes.ok) {
+        const results = await lrclibRes.json();
+        if (Array.isArray(results) && results.length > 0) {
+          const best = results[0];
+          if (best.syncedLyrics) {
+            return new Response(JSON.stringify({
+              lyrics: best.syncedLyrics,
+              synced: true,
+              source: 'lrclib',
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+          if (best.plainLyrics) {
+            return new Response(JSON.stringify({
+              lyrics: best.plainLyrics.trim(),
+              synced: false,
+              source: 'lrclib',
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('LRCLIB fetch failed:', e);
+    }
+
+    // Fallback: lyrics.ovh (plain text only)
     const lyricsUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`;
-    
     const response = await fetch(lyricsUrl, {
       headers: { 'User-Agent': 'DemusMusic/1.0' },
     });
@@ -33,35 +66,18 @@ serve(async (req) => {
     if (response.ok) {
       const data = await response.json();
       if (data.lyrics) {
-        return new Response(JSON.stringify({ lyrics: data.lyrics.trim(), source: 'lyrics.ovh' }), {
+        return new Response(JSON.stringify({ lyrics: data.lyrics.trim(), synced: false, source: 'lyrics.ovh' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
     }
 
-    // Fallback: try with original names
-    if (cleanArtist !== artist || cleanTitle !== title) {
-      const fallbackUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`;
-      const fallbackResponse = await fetch(fallbackUrl, {
-        headers: { 'User-Agent': 'DemusMusic/1.0' },
-      });
-      
-      if (fallbackResponse.ok) {
-        const data = await fallbackResponse.json();
-        if (data.lyrics) {
-          return new Response(JSON.stringify({ lyrics: data.lyrics.trim(), source: 'lyrics.ovh' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-      }
-    }
-
-    return new Response(JSON.stringify({ lyrics: null, error: 'Lyrics not found' }), {
+    return new Response(JSON.stringify({ lyrics: null, synced: false, error: 'Lyrics not found' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Lyrics fetch error:', error);
-    return new Response(JSON.stringify({ lyrics: null, error: 'Failed to fetch lyrics' }), {
+    return new Response(JSON.stringify({ lyrics: null, synced: false, error: 'Failed to fetch lyrics' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

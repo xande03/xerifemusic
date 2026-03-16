@@ -1,8 +1,8 @@
 import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
-import { useState, useEffect } from "react";
-import { fetchLyrics } from "@/lib/lyrics";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
@@ -28,16 +28,18 @@ const NowPlayingView = ({
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
-  const [lyrics, setLyrics] = useState<string | null>(null);
+  const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
+  const lyricsContainerRef = useRef<HTMLDivElement>(null);
+  const activeLineRef = useRef<HTMLParagraphElement>(null);
   const progress = duration > 0 ? currentTime / duration : 0;
 
   // Fetch lyrics when song changes or lyrics mode is activated
   useEffect(() => {
-    if (mode === "lyrics" && !lyrics && !lyricsLoading) {
+    if (mode === "lyrics" && !lyricsResult && !lyricsLoading) {
       setLyricsLoading(true);
       fetchLyrics(song.artist, song.title).then((result) => {
-        setLyrics(result);
+        setLyricsResult(result);
         setLyricsLoading(false);
       });
     }
@@ -45,16 +47,38 @@ const NowPlayingView = ({
 
   // Reset lyrics when song changes
   useEffect(() => {
-    setLyrics(null);
+    setLyricsResult(null);
   }, [song.id]);
+
+  // Find active line index for synced lyrics
+  const activeLineIndex = useMemo(() => {
+    if (!lyricsResult?.synced) return -1;
+    const lines = lyricsResult.lines;
+    let idx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].time <= currentTime) idx = i;
+      else break;
+    }
+    return idx;
+  }, [lyricsResult, currentTime]);
+
+  // Auto-scroll to active line
+  useEffect(() => {
+    if (activeLineRef.current && lyricsContainerRef.current) {
+      activeLineRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [activeLineIndex]);
 
   const handleModeChange = (newMode: PlayerMode) => {
     setMode(newMode);
     onModeChange?.(newMode);
-    if (newMode === "lyrics" && !lyrics && !lyricsLoading) {
+    if (newMode === "lyrics" && !lyricsResult && !lyricsLoading) {
       setLyricsLoading(true);
       fetchLyrics(song.artist, song.title).then((result) => {
-        setLyrics(result);
+        setLyricsResult(result);
         setLyricsLoading(false);
       });
     }
@@ -70,8 +94,6 @@ const NowPlayingView = ({
     const touch = e.touches[0];
     onSeek(Math.max(0, Math.min(1, (touch.clientX - rect.left) / rect.width)));
   };
-
-  const lyricsLines = lyrics?.split('\n').filter(l => l.trim()) || [];
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up safe-area-inset">
@@ -116,7 +138,6 @@ const NowPlayingView = ({
         {/* Video mode */}
         {mode === "video" && (
           <div className="w-full aspect-video rounded-xl overflow-hidden bg-card shadow-lg flex-shrink-0">
-            {/* YouTube iframe is positioned here by Index.tsx */}
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
               Player do YouTube
             </div>
@@ -136,19 +157,35 @@ const NowPlayingView = ({
 
         {/* Lyrics mode */}
         {mode === "lyrics" && (
-          <div className="w-full flex-1 min-h-[240px] rounded-2xl bg-card/30 p-5 overflow-y-auto flex-shrink-0">
+          <div ref={lyricsContainerRef} className="w-full flex-1 min-h-[240px] rounded-2xl bg-card/30 p-5 overflow-y-auto flex-shrink-0">
             {lyricsLoading ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <Loader2 size={24} className="text-primary animate-spin" />
                 <p className="text-sm text-muted-foreground">Buscando letra...</p>
               </div>
-            ) : lyricsLines.length > 0 ? (
-              <div className="space-y-2">
-                {lyricsLines.map((line, i) => (
-                  <p key={i} className="text-sm sm:text-base text-foreground/90 leading-relaxed text-center">
-                    {line}
-                  </p>
-                ))}
+            ) : lyricsResult && lyricsResult.lines.length > 0 ? (
+              <div className="space-y-3">
+                {lyricsResult.lines.map((line, i) => {
+                  const isActive = lyricsResult.synced && i === activeLineIndex;
+                  const isPast = lyricsResult.synced && activeLineIndex >= 0 && i < activeLineIndex;
+                  return (
+                    <p
+                      key={i}
+                      ref={isActive ? activeLineRef : undefined}
+                      className={`text-center transition-all duration-300 ${
+                        lyricsResult.synced
+                          ? isActive
+                            ? "text-lg font-bold text-primary scale-105"
+                            : isPast
+                              ? "text-sm text-muted-foreground/50"
+                              : "text-sm text-foreground/60"
+                          : "text-sm sm:text-base text-foreground/90 leading-relaxed"
+                      }`}
+                    >
+                      {line.text}
+                    </p>
+                  );
+                })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-2">
