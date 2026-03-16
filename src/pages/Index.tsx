@@ -3,7 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User } fr
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
-import { getSearchSuggestions } from "@/lib/youtubeSearch";
+import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
   saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId,
@@ -30,6 +30,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [volume, setVolumeState] = useState(getVolume);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -129,46 +130,62 @@ const Index = () => {
     setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, isDownloaded: true } : s)));
   }, [savedSongIds]);
 
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
   const handleSearch = (q: string) => {
     setSearchQuery(q);
-    if (q.length > 0) {
-      setIsSearching(true);
-      setTimeout(() => setIsSearching(false), 500);
+    if (q.length >= 2) {
+      // Suggestions
       if (suggestTimeoutRef.current) clearTimeout(suggestTimeoutRef.current);
       suggestTimeoutRef.current = setTimeout(async () => {
         const results = await getSearchSuggestions(q);
         setSuggestions(results);
       }, 300);
-    } else { setSuggestions([]); }
+
+      // Real search
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(async () => {
+        setIsSearching(true);
+        const results = await searchYouTubeMusic(q, searchFilter);
+        setSearchResults(results);
+        setIsSearching(false);
+      }, 600);
+    } else {
+      setSuggestions([]);
+      setSearchResults([]);
+    }
   };
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
     setSuggestions([]);
     setIsSearching(true);
-    setTimeout(() => setIsSearching(false), 500);
+    searchYouTubeMusic(term, searchFilter).then((results) => {
+      setSearchResults(results);
+      setIsSearching(false);
+    });
   };
 
-  // Improved search: match by title, artist, album
-  const q = searchQuery.toLowerCase();
-  const filteredSongs = searchQuery
-    ? songs.filter((s) => {
-        const matchTitle = s.title.toLowerCase().includes(q);
-        const matchArtist = s.artist.toLowerCase().includes(q);
-        const matchAlbum = s.album.toLowerCase().includes(q);
-        if (searchFilter === "songs") return matchTitle;
-        if (searchFilter === "artists") return matchArtist;
-        if (searchFilter === "albums") return matchAlbum;
-        return matchTitle || matchArtist || matchAlbum;
-      })
-    : songs;
+  // When filter changes, re-search
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      setIsSearching(true);
+      searchYouTubeMusic(searchQuery, searchFilter).then((results) => {
+        setSearchResults(results);
+        setIsSearching(false);
+      });
+    }
+  }, [searchFilter]);
+
+  // Use search results for display
+  const filteredSongs = searchQuery.length >= 2 ? searchResults : songs;
 
   // Group results for search
-  const uniqueArtists = searchQuery
-    ? [...new Set(filteredSongs.map((s) => s.artist))]
+  const uniqueArtists = searchQuery.length >= 2
+    ? [...new Set(searchResults.map((s) => s.artist).filter(a => a && a !== "Desconhecido"))]
     : [];
-  const uniqueAlbums = searchQuery
-    ? [...new Set(filteredSongs.map((s) => `${s.album}|||${s.artist}|||${s.cover}`))]
+  const uniqueAlbums = searchQuery.length >= 2
+    ? [...new Set(searchResults.map((s) => `${s.album}|||${s.artist}|||${s.cover}`).filter(a => !a.startsWith("|||")))]
     : [];
 
   const offlineSongs = songs.filter((s) => s.isDownloaded);
@@ -344,15 +361,15 @@ const Index = () => {
 
             {isSearching ? (
               <SearchSkeleton />
-            ) : searchQuery ? (
+            ) : searchQuery.length >= 2 ? (
               <div className="space-y-4">
                 {/* Artists section */}
                 {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
                     <div className="flex gap-4 overflow-x-auto pb-2">
-                      {uniqueArtists.map((artist) => {
-                        const artistSong = filteredSongs.find((s) => s.artist === artist);
+                      {uniqueArtists.slice(0, 6).map((artist) => {
+                        const artistSong = searchResults.find((s) => s.artist === artist);
                         return (
                           <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1 flex-shrink-0">
                             <div className="w-16 h-16 rounded-full overflow-hidden bg-secondary">
@@ -371,10 +388,10 @@ const Index = () => {
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
                     <div className="flex gap-3 overflow-x-auto pb-2">
-                      {uniqueAlbums.map((raw) => {
+                      {uniqueAlbums.slice(0, 6).map((raw) => {
                         const [album, artist, cover] = raw.split("|||");
                         return (
-                          <button key={raw} onClick={() => { const s = filteredSongs.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px]">
+                          <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px]">
                             <div className="w-[120px] h-[120px] rounded-md overflow-hidden mb-1">
                               <img src={cover} alt={album} className="w-full h-full object-cover" />
                             </div>
@@ -391,16 +408,13 @@ const Index = () => {
                 {(searchFilter === "all" || searchFilter === "songs") && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
-                    {filteredSongs.length > 0 ? (
-                      filteredSongs.map((song) => (
+                    {searchResults.length > 0 ? (
+                      searchResults.map((song) => (
                         <SongCard
                           key={song.id}
                           song={song}
                           isActive={song.id === currentSong.id}
                           onSelect={handleSelect}
-                          onVote={handleVote}
-                          showVotes
-                          hasVoted={votedSongs.has(song.id)}
                         />
                       ))
                     ) : (

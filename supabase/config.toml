@@ -1,0 +1,4 @@
+project_id = "almvcphusfnqfhnybvdq"
+
+[functions.youtube-search]
+verify_jwt = false
