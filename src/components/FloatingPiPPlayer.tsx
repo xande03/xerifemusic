@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { X, Play, Pause, SkipForward, SkipBack, Maximize2 } from "lucide-react";
 import { Song } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 
 interface FloatingPiPPlayerProps {
   song: Song;
