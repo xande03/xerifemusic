@@ -245,10 +245,9 @@ const Index = () => {
         {/* Header — YouTube Music style */}
         <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-glow-red">
-              <Play size={13} className="text-primary-foreground ml-0.5" fill="currentColor" />
-            </div>
-            <span className="font-display font-bold text-foreground text-base tracking-tight">Music</span>
+            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
+            <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
+          </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
