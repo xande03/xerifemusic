@@ -81,7 +81,7 @@ const FloatingPiPPlayer = ({
       {/* Cover + info */}
       <div className="flex items-center gap-2.5 p-2.5">
         <img
-          src={song.cover}
+          src={hdThumbnail(song.cover)}
           alt={song.album}
           className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-md"
         />
