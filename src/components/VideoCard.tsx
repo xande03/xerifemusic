@@ -1,5 +1,6 @@
 import { Play, Maximize } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
+import { hdThumbnail } from "@/lib/utils";
 
 interface VideoCardProps {
   video: VideoResult;
