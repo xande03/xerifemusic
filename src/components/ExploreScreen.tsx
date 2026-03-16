@@ -27,12 +27,26 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
+  const [trendingResults, setTrendingResults] = useState<VideoResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [trendingLoading, setTrendingLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const hasFetchedTrending = useRef(false);
+
+  // Auto-load trending videos on mount
+  useEffect(() => {
+    if (hasFetchedTrending.current) return;
+    hasFetchedTrending.current = true;
+    setTrendingLoading(true);
+    searchYouTubeGeneral("tendências Brasil").then((res) => {
+      setTrendingResults(res);
+      setTrendingLoading(false);
+    });
+  }, []);
 
   const doSearch = async (q: string) => {
     if (q.length < 2) return;
