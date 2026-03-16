@@ -1,4 +1,4 @@
-import { Download, DownloadCloud, Play, ThumbsUp, Check } from "lucide-react";
+import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { motion } from "framer-motion";
 
@@ -15,51 +15,59 @@ interface SongCardProps {
 const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = false, hasVoted = false }: SongCardProps) => (
   <motion.div
     layout
-    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors group ${
-      isActive ? "glass shadow-glow-cyan" : "hover:bg-muted/50"
+    transition={{ type: "spring", stiffness: 400, damping: 35 }}
+    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors group ${
+      isActive ? "bg-accent" : "hover:bg-accent/50 active:bg-accent"
     }`}
   >
-    <button onClick={() => onSelect(song)} className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
+    <button onClick={() => onSelect(song)} className="relative w-11 h-11 rounded flex-shrink-0 overflow-hidden">
       <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-        <Play size={16} className="text-primary" />
-      </div>
+      {isActive && (
+        <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+          <div className="flex gap-[2px]">
+            {[1,2,3].map(i => (
+              <div key={i} className="w-[3px] h-3 bg-primary rounded-full animate-pulse" style={{ animationDelay: `${i*0.15}s` }} />
+            ))}
+          </div>
+        </div>
+      )}
     </button>
     <button onClick={() => onSelect(song)} className="flex-1 text-left min-w-0">
-      <p className={`text-sm font-medium truncate ${isActive ? "text-primary" : "text-foreground"}`}>
+      <p className={`text-sm font-normal truncate ${isActive ? "text-primary" : "text-foreground"}`}>
         {song.title}
       </p>
-      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+      <p className="text-xs text-muted-foreground truncate">
+        {song.artist} • {song.album}
+      </p>
     </button>
-    <div className="flex items-center gap-2 flex-shrink-0">
+    <div className="flex items-center gap-1 flex-shrink-0">
       {showVotes && onVote && (
         <button
           onClick={() => onVote(song)}
           disabled={hasVoted}
-          className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
+          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
             hasVoted
-              ? "bg-primary/20 text-primary cursor-default"
-              : "bg-muted hover:bg-primary/20 hover:text-primary"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {hasVoted ? <Check size={12} /> : <ThumbsUp size={12} />}
-          <span className="font-mono">{song.votes}</span>
+          {hasVoted ? <Check size={14} /> : <ThumbsUp size={14} />}
+          <span>{song.votes}</span>
         </button>
       )}
       {onDownload && (
         <button
           onClick={() => onDownload(song)}
-          className={`p-1 rounded transition-colors ${
-            song.isDownloaded
-              ? "text-primary"
-              : "text-muted-foreground hover:text-primary"
+          className={`p-1.5 rounded-full transition-colors ${
+            song.isDownloaded ? "text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          {song.isDownloaded ? <Download size={14} /> : <DownloadCloud size={14} />}
+          {song.isDownloaded ? <Download size={16} /> : <DownloadCloud size={16} />}
         </button>
       )}
-      <span className="text-xs text-muted-foreground font-mono">{formatDuration(song.duration)}</span>
+      <button className="p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+        <MoreVertical size={16} />
+      </button>
     </div>
   </motion.div>
 );
