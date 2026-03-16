@@ -15,6 +15,7 @@ import {
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
+import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
