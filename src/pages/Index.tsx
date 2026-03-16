@@ -122,7 +122,23 @@ const Index = () => {
     if (q.length > 0) {
       setIsSearching(true);
       setTimeout(() => setIsSearching(false), 600);
+      
+      // Debounced search suggestions
+      if (suggestTimeoutRef.current) clearTimeout(suggestTimeoutRef.current);
+      suggestTimeoutRef.current = setTimeout(async () => {
+        const results = await getSearchSuggestions(q);
+        setSuggestions(results);
+      }, 300);
+    } else {
+      setSuggestions([]);
     }
+  };
+
+  const handleSuggestionClick = (term: string) => {
+    setSearchQuery(term);
+    setSuggestions([]);
+    setIsSearching(true);
+    setTimeout(() => setIsSearching(false), 600);
   };
 
   const filteredSongs = searchQuery
