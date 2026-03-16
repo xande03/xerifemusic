@@ -36,7 +36,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
         {onFullscreen && (
           <button
             onClick={(e) => { e.stopPropagation(); onFullscreen(video); }}
-            className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background/90"
+            className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-background/70 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-background/90 z-10"
             title="Tela cheia"
           >
             <Maximize size={14} className="text-foreground" />
