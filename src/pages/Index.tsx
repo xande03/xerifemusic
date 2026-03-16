@@ -530,16 +530,20 @@ const Index = () => {
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
                   {forYouSongs.map((song) => (
-                    <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] group snap-start">
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
-                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                        <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
-                          <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                    <div key={song.id} className="flex-shrink-0 w-[140px] group snap-start">
+                      <button onClick={() => handleSelect(song)} className="w-full">
+                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
+                          <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
+                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
-                      <p className="text-[11px] text-muted-foreground truncate text-left">{song.artist}</p>
-                    </button>
+                        <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
+                      </button>
+                      <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
+                        <p className="text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </section>
