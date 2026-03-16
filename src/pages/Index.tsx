@@ -698,7 +698,27 @@ const Index = () => {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {expanded && (
-          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
+          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
+            const result = await togglePiP();
+            if (result === 'fallback') {
+              setExpanded(false);
+              setShowFloatingPiP(true);
+            }
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
+        )}
+
+        {showFloatingPiP && !expanded && (
+          <FloatingPiPPlayer
+            song={currentSong}
+            isPlaying={playerState.isPlaying}
+            currentTime={ct}
+            duration={dur}
+            onTogglePlay={handleTogglePlay}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            onExpand={() => { setShowFloatingPiP(false); setExpanded(true); }}
+            onClose={() => setShowFloatingPiP(false)}
+          />
         )}
       </div>
     </>
