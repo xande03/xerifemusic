@@ -1,0 +1,17 @@
+{
+  "name": "Demus Evolution",
+  "short_name": "Demus",
+  "description": "Jukebox Social - Vote e ouça músicas juntos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00e5ff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
