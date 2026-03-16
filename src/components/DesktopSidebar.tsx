@@ -1,21 +1,32 @@
-import { Home, Search, Heart, Download, Settings } from "lucide-react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Music } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile";
+type HomeMode = "music" | "video";
 
 interface DesktopSidebarProps {
   active: Tab;
   onChange: (tab: Tab) => void;
+  homeMode?: HomeMode;
 }
 
-const mainTabs: { id: Tab; icon: typeof Home; label: string }[] = [
+const musicTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "Início" },
   { id: "search", icon: Search, label: "Buscar" },
   { id: "library", icon: Heart, label: "Favoritas" },
   { id: "offline", icon: Download, label: "Downloads" },
 ];
 
-const DesktopSidebar = ({ active, onChange }: DesktopSidebarProps) => {
+const videoTabs: { id: Tab; icon: typeof Home; label: string }[] = [
+  { id: "home", icon: Home, label: "Início" },
+  { id: "search", icon: Compass, label: "Explorar" },
+  { id: "library", icon: MonitorPlay, label: "Inscrições" },
+  { id: "offline", icon: Download, label: "Downloads" },
+];
+
+const DesktopSidebar = ({ active, onChange, homeMode = "music" }: DesktopSidebarProps) => {
+  const mainTabs = homeMode === "video" ? videoTabs : musicTabs;
+
   return (
     <aside className="hidden lg:flex flex-col w-[240px] h-full bg-sidebar border-r border-sidebar-border flex-shrink-0">
       {/* Logo */}

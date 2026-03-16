@@ -33,14 +33,16 @@ interface NowPlayingViewProps {
   onFullscreen?: () => void;
   onExitFullscreen?: () => void;
   isFullscreen?: boolean;
+  context?: "music" | "video";
 }
 
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
+  context = "music",
 }: NowPlayingViewProps) => {
-  const [mode, setMode] = useState<PlayerMode>("audio");
+  const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
@@ -357,6 +359,14 @@ const NowPlayingView = ({
                 </button>
               </div>
             </div>
+
+            {/* Video info (video context) */}
+            {context === "video" && !videoInfoLoading && videoInfo && (
+              <div className="bg-secondary/40 rounded-xl p-3 mt-2">
+                <p className="text-xs text-foreground font-medium line-clamp-2">{song.title}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{song.artist}</p>
+              </div>
+            )}
 
             {/* Related / Comments tabs */}
             <div className="mt-2">
