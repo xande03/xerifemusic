@@ -40,7 +40,7 @@ const NowPlayingView = ({
   onTogglePlay, onNext, onPrev,
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
 }: NowPlayingViewProps) => {
-  const [mode, setMode] = useState<PlayerMode>("video");
+  const [mode, setMode] = useState<PlayerMode>("audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
