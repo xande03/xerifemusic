@@ -614,7 +614,7 @@ const Index = () => {
 
           {activeTab === "library" && (
             <div className="px-4 space-y-3">
-              <h1 className="text-xl font-display font-bold text-foreground">Biblioteca</h1>
+              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Biblioteca</h1>
               <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
                 <span className="chip chip-active flex-shrink-0">Músicas</span>
                 <span className="chip chip-inactive flex-shrink-0">Álbuns</span>
