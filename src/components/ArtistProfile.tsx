@@ -49,8 +49,8 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
           <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
 
           {artistImage ? (
-            <img
-              src={artistImage}
+             <img
+               src={hdThumbnail(artistImage)}
               alt={artistName}
               className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/30 shadow-xl relative z-10"
             />
