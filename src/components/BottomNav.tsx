@@ -1,4 +1,4 @@
-import { Home, Library, Download, ListMusic, Compass } from "lucide-react";
+import { Home, Library, Download, ListMusic } from "lucide-react";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile";
 
