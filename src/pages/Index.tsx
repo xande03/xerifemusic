@@ -375,7 +375,7 @@ const Index = () => {
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
-                  {queueSongs.slice(0, 5).map((song, i) => (
+                  {topCharts.map((song, i) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
