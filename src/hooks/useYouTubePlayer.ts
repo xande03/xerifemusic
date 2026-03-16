@@ -69,6 +69,7 @@ export function useYouTubePlayer(containerId: string) {
     currentTime: 0,
     duration: 0,
     videoId: null,
+    isFullscreen: false,
   });
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const userGestureRef = useRef(false);
