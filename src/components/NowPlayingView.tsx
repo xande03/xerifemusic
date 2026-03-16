@@ -4,7 +4,7 @@ import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
 import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
