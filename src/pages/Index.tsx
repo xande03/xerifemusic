@@ -594,6 +594,8 @@ const Index = () => {
                   isDownloaded: false,
                 };
                 handleSelect(song);
+                setPlayerMode("video");
+                setExpanded(true);
               }}
             />
           )}
