@@ -35,7 +35,7 @@ const FullscreenOverlay = ({
 
   return (
     <div
-      className="absolute inset-0 z-[100] flex flex-col justify-between"
+      className="absolute inset-0 z-[200] flex flex-col justify-between pointer-events-auto"
       onClick={resetTimer}
     >
       {/* Top bar */}
