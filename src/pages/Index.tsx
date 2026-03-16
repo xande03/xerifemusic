@@ -412,6 +412,7 @@ const Index = () => {
               <div>
                 <h1 className="text-xl font-bold text-foreground">DJ Host</h1>
                 <p className="text-sm text-muted-foreground">Modo: Jukebox Social</p>
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">ID: {deviceId.current}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
