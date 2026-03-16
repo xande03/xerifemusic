@@ -1,10 +1,11 @@
-import { Play } from "lucide-react";
+import { Play, Maximize } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 
 interface VideoCardProps {
   video: VideoResult;
   onPlay: (video: VideoResult) => void;
   onChannelClick?: (channelName: string) => void;
+  onFullscreen?: (video: VideoResult) => void;
 }
 
 const VideoCard = ({ video, onPlay, onChannelClick }: VideoCardProps) => (
