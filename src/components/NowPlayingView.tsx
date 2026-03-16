@@ -1,8 +1,12 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
+import RelatedVideos from "./RelatedVideos";
+import VideoComments from "./VideoComments";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
+import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
+import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
@@ -21,16 +25,20 @@ interface NowPlayingViewProps {
   onTogglePiP?: () => void;
   onModeChange?: (mode: PlayerMode) => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
+  onPlayRelated?: (video: VideoResult) => void;
 }
 
 const NowPlayingView = ({
   song, isPlaying, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
+  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
+  const [videoInfoLoading, setVideoInfoLoading] = useState(false);
+  const [bottomTab, setBottomTab] = useState<"related" | "comments">("related");
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLParagraphElement>(null);
   const progress = duration > 0 ? currentTime / duration : 0;
@@ -46,9 +54,17 @@ const NowPlayingView = ({
     }
   }, [mode, song.id]);
 
-  // Reset lyrics when song changes
+  // Reset lyrics and fetch video info when song changes
   useEffect(() => {
     setLyricsResult(null);
+    setVideoInfo(null);
+    if (song.youtubeId) {
+      setVideoInfoLoading(true);
+      fetchVideoInfo(song.youtubeId).then((info) => {
+        setVideoInfo(info);
+        setVideoInfoLoading(false);
+      });
+    }
   }, [song.id]);
 
   // Find active line index for synced lyrics
@@ -277,6 +293,50 @@ const NowPlayingView = ({
             onChange={(e) => onVolumeChange(Number(e.target.value))}
             className="flex-1 h-1 appearance-none rounded-full bg-muted accent-primary"
           />
+        </div>
+
+        {/* Related / Comments tabs */}
+        <div className="w-full mt-4 flex-shrink-0">
+          <div className="flex items-center gap-1 mb-3">
+            <button
+              onClick={() => setBottomTab("related")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bottomTab === "related" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ListVideo size={14} />
+              A seguir
+            </button>
+            <button
+              onClick={() => setBottomTab("comments")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bottomTab === "comments" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MessageSquare size={14} />
+              Comentários
+              {videoInfo && videoInfo.comments.length > 0 && (
+                <span className="text-[10px] opacity-60">({videoInfo.comments.length})</span>
+              )}
+            </button>
+          </div>
+
+          {bottomTab === "related" && (
+            <RelatedVideos
+              videos={videoInfo?.relatedVideos || []}
+              loading={videoInfoLoading}
+              onPlay={(video) => {
+                onPlayRelated?.(video);
+              }}
+            />
+          )}
+
+          {bottomTab === "comments" && (
+            <VideoComments
+              comments={videoInfo?.comments || []}
+              loading={videoInfoLoading}
+            />
+          )}
         </div>
       </div>
     </div>

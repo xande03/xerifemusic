@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, TrendingUp, Loader2, X, Music2, Gamepad2, Trophy, GraduationCap, Newspaper } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
@@ -27,12 +27,26 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
+  const [trendingResults, setTrendingResults] = useState<VideoResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [trendingLoading, setTrendingLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const hasFetchedTrending = useRef(false);
+
+  // Auto-load trending videos on mount
+  useEffect(() => {
+    if (hasFetchedTrending.current) return;
+    hasFetchedTrending.current = true;
+    setTrendingLoading(true);
+    searchYouTubeGeneral("tendências Brasil").then((res) => {
+      setTrendingResults(res);
+      setTrendingLoading(false);
+    });
+  }, []);
 
   const doSearch = async (q: string) => {
     if (q.length < 2) return;
@@ -161,28 +175,56 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
         })}
       </div>
 
-      {/* Trending chips (when no search) */}
+      {/* Trending chips + auto-loaded trending (when no search) */}
       {results.length === 0 && !loading && (
-        <div className="px-4">
-          <div className="flex items-center gap-2 mb-3 mt-2">
-            <TrendingUp size={16} className="text-primary" />
-            <h2 className="text-sm font-medium text-foreground">Em alta</h2>
+        <>
+          <div className="px-4">
+            <div className="flex items-center gap-2 mb-3 mt-2">
+              <TrendingUp size={16} className="text-primary" />
+              <h2 className="text-sm font-medium text-foreground">Pesquisas populares</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TRENDING_QUERIES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => handleSuggestionClick(t)}
+                  className="chip chip-inactive rounded-full text-xs"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {TRENDING_QUERIES.map((t) => (
-              <button
-                key={t}
-                onClick={() => handleSuggestionClick(t)}
-                className="chip chip-inactive rounded-full text-xs"
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
+
+          {/* Auto-loaded trending videos */}
+          {trendingLoading && (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <Loader2 size={24} className="text-primary animate-spin" />
+              <p className="text-xs text-muted-foreground">Carregando tendências...</p>
+            </div>
+          )}
+          {!trendingLoading && trendingResults.length > 0 && (
+            <div className="px-4">
+              <h2 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                <TrendingUp size={14} className="text-primary" />
+                Em alta agora
+              </h2>
+              <div className="space-y-6">
+                {trendingResults.map((video) => (
+                  <VideoCard
+                    key={video.videoId}
+                    video={video}
+                    onPlay={onPlayVideo}
+                    onChannelClick={handleChannelClick}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Loading */}
+      {/* Loading search */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 size={28} className="text-primary animate-spin" />
