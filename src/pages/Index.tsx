@@ -25,6 +25,7 @@ import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
+import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
