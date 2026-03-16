@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Radio, Plus, Cast } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -16,6 +16,7 @@ import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
+import SplashScreen from "@/components/SplashScreen";
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
@@ -27,6 +28,7 @@ type SearchFilter = "all" | "songs" | "artists" | "albums";
 const albumCovers = [album1, album2, album3, album4];
 
 const Index = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
@@ -98,13 +100,8 @@ const Index = () => {
     setCurrentSong(song);
     saveCurrentSong(song.id);
     addToHistory({
-      songId: song.id,
-      youtubeId: song.youtubeId,
-      title: song.title,
-      artist: song.artist,
-      album: song.album,
-      cover: song.cover,
-      duration: song.duration,
+      songId: song.id, youtubeId: song.youtubeId, title: song.title,
+      artist: song.artist, album: song.album, cover: song.cover, duration: song.duration,
     });
     setRecentHistory(getHistory());
     loadVideo(song.youtubeId);
@@ -137,15 +134,10 @@ const Index = () => {
   }, [seekTo]);
 
   useMediaSession({
-    song: currentSong,
-    isPlaying: playerState.isPlaying,
+    song: currentSong, isPlaying: playerState.isPlaying,
     currentTime: playerState.currentTime || 0,
     duration: playerState.duration || currentSong.duration,
-    onPlay: play,
-    onPause: pause,
-    onNext: handleNext,
-    onPrev: handlePrev,
-    onSeek: handleSeekAbsolute,
+    onPlay: play, onPause: pause, onNext: handleNext, onPrev: handlePrev, onSeek: handleSeekAbsolute,
   });
 
   const handleVote = useCallback((song: Song) => {
@@ -169,15 +161,12 @@ const Index = () => {
     if (q.length >= 2) {
       if (suggestTimeoutRef.current) clearTimeout(suggestTimeoutRef.current);
       suggestTimeoutRef.current = setTimeout(async () => {
-        const results = await getSearchSuggestions(q);
-        setSuggestions(results);
+        setSuggestions(await getSearchSuggestions(q));
       }, 300);
-
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       searchTimeoutRef.current = setTimeout(async () => {
         setIsSearching(true);
-        const results = await searchYouTubeMusic(q, searchFilter);
-        setSearchResults(results);
+        setSearchResults(await searchYouTubeMusic(q, searchFilter));
         setIsSearching(false);
       }, 600);
     } else {
@@ -206,8 +195,6 @@ const Index = () => {
     }
   }, [searchFilter]);
 
-  const filteredSongs = searchQuery.length >= 2 ? searchResults : songs;
-
   const uniqueArtists = searchQuery.length >= 2
     ? [...new Set(searchResults.map((s) => s.artist).filter(a => a && a !== "Desconhecido"))]
     : [];
@@ -217,8 +204,6 @@ const Index = () => {
 
   const offlineSongs = songs.filter((s) => s.isDownloaded);
   const queueSongs = sortByVotes(songs);
-
-  const quickPicks = songs.slice(0, 4);
   const ct = playerState.currentTime || 0;
   const dur = playerState.duration || currentSong.duration;
 
@@ -226,398 +211,379 @@ const Index = () => {
   const greeting = greetingHour < 12 ? "Bom dia" : greetingHour < 18 ? "Boa tarde" : "Boa noite";
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
-      {/* YouTube Player - visible only in expanded video mode */}
-      <div
-        className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
-        style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
-      >
-        <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
-      </div>
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-glow-red">
-            <Play size={13} className="text-primary-foreground ml-0.5" />
-          </div>
-          <span className="font-display font-bold text-foreground text-base tracking-tight">Demus Music</span>
+      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
+        {/* YouTube Player */}
+        <div
+          className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
+          style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
+        >
+          <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`flex items-center gap-1 text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
-            {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
-          </span>
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-            <User size={14} className="text-muted-foreground" />
-          </div>
-        </div>
-      </header>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
-        {activeTab === "home" && (
-          <div className="space-y-5">
-            {/* Greeting + chips */}
-            <div className="px-4 space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">{greeting}</h1>
-              <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-                {["Energize", "Relax", "Workout", "Focus", "Party"].map((mood) => (
-                  <button key={mood} className="chip chip-inactive flex-shrink-0 whitespace-nowrap">
+        {/* Header — YouTube Music style */}
+        <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-glow-red">
+              <Play size={13} className="text-primary-foreground ml-0.5" fill="currentColor" />
+            </div>
+            <span className="font-display font-bold text-foreground text-base tracking-tight">Music</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
+              <Search size={20} />
+            </button>
+            <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
+              {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
+            </span>
+            <div className="w-7 h-7 rounded-full bg-secondary overflow-hidden flex items-center justify-center ring-2 ring-border">
+              <User size={14} className="text-muted-foreground" />
+            </div>
+          </div>
+        </header>
+
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
+          {activeTab === "home" && (
+            <div className="space-y-6">
+              {/* Mood chips — YT Music style */}
+              <div className="flex gap-2 overflow-x-auto px-4 pt-1 pb-1 scrollbar-hide">
+                {["Relax", "Workout", "Focus", "Energize", "Party", "Commute"].map((mood) => (
+                  <button key={mood} className="chip chip-inactive flex-shrink-0 whitespace-nowrap rounded-full">
                     {mood}
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Quick picks - responsive grid */}
-            <section className="px-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                  <Sparkles size={16} className="text-primary" />
-                  Seleção rápida
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {quickPicks.map((song) => (
-                  <button
-                    key={song.id}
-                    onClick={() => handleSelect(song)}
-                    className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
-                      song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
-                    }`}
-                  >
-                    <img src={song.cover} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-foreground truncate pr-3">{song.title}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Mixed for you carousel */}
-            <section>
-              <div className="flex items-center justify-between px-4 mb-3">
-                <h2 className="text-base font-display font-medium text-foreground">Para você</h2>
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
-                {songs.slice(0, 6).map((song) => (
-                  <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] sm:w-[160px] group snap-start">
-                    <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
-                      <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity" />
-                      <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg scale-90 group-hover:scale-100">
-                        <Play size={16} className="text-primary-foreground ml-0.5" />
+              {/* CREATE A RADIO — hero section like YT Music */}
+              <section className="px-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Crie uma rádio</p>
+                <h2 className="text-lg font-display font-bold text-foreground mb-3">Seu sintonizador musical</h2>
+                <button
+                  onClick={() => handleSelect(songs[Math.floor(Math.random() * songs.length)])}
+                  className="relative w-full rounded-2xl overflow-hidden aspect-[16/9] group active:scale-[0.99] transition-transform"
+                >
+                  {/* Collage of album covers */}
+                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-2">
+                    {songs.slice(0, 6).map((s, i) => (
+                      <div key={s.id} className="overflow-hidden">
+                        <img src={s.cover} alt={s.album} className="w-full h-full object-cover" />
                       </div>
-                    </div>
-                    <p className="text-xs sm:text-sm font-medium text-foreground truncate text-left">{song.title}</p>
-                    <p className="text-[11px] text-muted-foreground truncate text-left">{song.artist}</p>
-                  </button>
-                ))}
-              </div>
-            </section>
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
+                  {/* Plus button overlay */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Plus size={28} className="text-background" />
+                  </div>
+                </button>
+              </section>
 
-            {/* Recently played */}
-            {recentHistory.length > 0 && (
+              {/* Listen again — grid layout like YT Music */}
               <section>
                 <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Clock size={16} className="text-muted-foreground" />
-                    Recentes
-                  </h2>
-                  <button onClick={() => { clearHistory(); setRecentHistory([]); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors active:scale-95">
-                    Limpar
-                  </button>
+                  <h2 className="text-lg font-display font-bold text-foreground">Ouvir novamente</h2>
+                  <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
-                <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
-                  {recentHistory.slice(0, 10).map((entry) => (
+                <div className="grid grid-cols-3 gap-3 px-4">
+                  {(recentHistory.length > 0
+                    ? recentHistory.slice(0, 6).map(e => ({
+                        id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
+                        album: e.album, cover: e.cover, duration: e.duration, votes: 0, isDownloaded: false,
+                      }))
+                    : songs.slice(0, 6)
+                  ).map((song) => (
                     <button
-                      key={entry.songId + entry.playedAt}
-                      onClick={() => handleSelect({
-                        id: entry.songId, youtubeId: entry.youtubeId, title: entry.title,
-                        artist: entry.artist, album: entry.album, cover: entry.cover,
-                        duration: entry.duration, votes: 0, isDownloaded: false,
-                      })}
-                      className="flex-shrink-0 w-[110px] sm:w-[130px] group snap-start"
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className="group relative active:scale-95 transition-transform"
                     >
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
-                        <img src={entry.cover} alt={entry.album} className="w-full h-full object-cover" />
-                        <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
-                          <Play size={12} className="text-primary-foreground ml-0.5" />
+                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
+                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 group-active:bg-background/30 transition-colors flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
+                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          </div>
                         </div>
                       </div>
-                      <p className="text-xs font-medium text-foreground truncate text-left">{entry.title}</p>
-                      <p className="text-[11px] text-muted-foreground truncate text-left">{entry.artist}</p>
+                      <p className="text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
+                      <p className="text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
                     </button>
                   ))}
                 </div>
               </section>
-            )}
 
-            {/* Featured mixes - new section */}
-            <section className="px-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-display font-medium text-foreground">Mixes populares</h2>
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
-                  { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
-                  { title: "Mix Latino", subtitle: "Luis Fonsi, Shakira, Bad Bunny", color: "from-yellow-900/40 to-transparent" },
-                  { title: "Mix Chill", subtitle: "Lo-fi, Ambient, Acoustic", color: "from-green-900/40 to-transparent" },
-                ].map((mix, i) => (
-                  <button
-                    key={mix.title}
-                    onClick={() => handleSelect(songs[i % songs.length])}
-                    className="relative rounded-xl overflow-hidden aspect-[4/3] group active:scale-[0.98] transition-transform"
-                  >
-                    <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover" />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${mix.color}`} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-sm font-semibold text-foreground text-left">{mix.title}</p>
-                      <p className="text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
-                    </div>
-                    <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
-                      <Play size={14} className="text-primary-foreground ml-0.5" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Voting queue */}
-            <section className="px-4">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-base font-display font-medium text-foreground">Fila de votação</h2>
-                <span className="text-xs text-primary font-medium">{songs.reduce((a, s) => a + s.votes, 0)} votos</span>
-              </div>
-              <div>
-                {queueSongs.map((song) => (
-                  <SongCard
-                    key={song.id}
-                    song={song}
-                    isActive={song.id === currentSong.id}
-                    onSelect={handleSelect}
-                    onVote={handleVote}
-                    onDownload={handleDownload}
-                    showVotes
-                    hasVoted={votedSongs.has(song.id)}
-                  />
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activeTab === "search" && (
-          <div className="px-4 space-y-3">
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Músicas, artistas, álbuns, podcasts"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-full bg-secondary border-none text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-muted-foreground/30"
-              />
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {(["all", "songs", "artists", "albums"] as SearchFilter[]).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setSearchFilter(f)}
-                  className={`chip flex-shrink-0 ${searchFilter === f ? "chip-active" : "chip-inactive"}`}
-                >
-                  {f === "all" ? "Tudo" : f === "songs" ? "Músicas" : f === "artists" ? "Artistas" : "Álbuns"}
-                </button>
-              ))}
-            </div>
-
-            {suggestions.length > 0 && !searchQuery.length && (
-              <div>
-                {suggestions.map((term, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestionClick(term)}
-                    className="w-full flex items-center gap-3 px-2 py-2.5 text-sm text-foreground hover:bg-accent/50 active:bg-accent rounded transition-colors text-left"
-                  >
-                    <TrendingUp size={16} className="text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{term}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {suggestions.length > 0 && searchQuery.length > 0 && (
-              <div className="rounded-lg overflow-hidden bg-card">
-                {suggestions.map((term, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestionClick(term)}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm text-foreground hover:bg-accent active:bg-accent transition-colors text-left"
-                  >
-                    <Search size={14} className="text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{term}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {isSearching ? (
-              <SearchSkeleton />
-            ) : searchQuery.length >= 2 ? (
-              <div className="space-y-4">
-                {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
-                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                      {uniqueArtists.slice(0, 6).map((artist) => {
-                        const artistSong = searchResults.find((s) => s.artist === artist);
-                        return (
-                          <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1.5 flex-shrink-0 active:scale-95 transition-transform">
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border">
-                              {artistSong && <img src={artistSong.cover} alt={artist} className="w-full h-full object-cover" />}
-                            </div>
-                            <span className="text-xs text-foreground truncate max-w-[80px]">{artist}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {(searchFilter === "all" || searchFilter === "albums") && uniqueAlbums.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                      {uniqueAlbums.slice(0, 6).map((raw) => {
-                        const [album, artist, cover] = raw.split("|||");
-                        return (
-                          <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px] sm:w-[140px] active:scale-95 transition-transform">
-                            <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5">
-                              <img src={cover} alt={album} className="w-full h-full object-cover" />
-                            </div>
-                            <p className="text-xs font-medium text-foreground truncate text-left">{album}</p>
-                            <p className="text-[11px] text-muted-foreground truncate text-left">{artist}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {(searchFilter === "all" || searchFilter === "songs") && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
-                    {searchResults.length > 0 ? (
-                      searchResults.map((song) => (
-                        <SongCard
-                          key={song.id}
-                          song={song}
-                          isActive={song.id === currentSong.id}
-                          onSelect={handleSelect}
-                        />
-                      ))
-                    ) : (
-                      <p className="text-sm text-muted-foreground py-4">Nenhum resultado</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Tendências</h3>
-                {songs.slice(0, 5).map((song) => (
-                  <SongCard
-                    key={song.id}
-                    song={song}
-                    isActive={song.id === currentSong.id}
-                    onSelect={handleSelect}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "library" && (
-          <div className="px-4 space-y-3">
-            <h1 className="text-xl font-display font-bold text-foreground">Biblioteca</h1>
-            <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
-              <span className="chip chip-active flex-shrink-0">Músicas</span>
-              <span className="chip chip-inactive flex-shrink-0">Álbuns</span>
-              <span className="chip chip-inactive flex-shrink-0">Artistas</span>
-            </div>
-            {songs.map((song) => (
-              <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} />
-            ))}
-          </div>
-        )}
-
-        {activeTab === "offline" && (
-          <div className="px-4 space-y-3">
-            <h1 className="text-xl font-display font-bold text-foreground">Downloads</h1>
-            <p className="text-xs text-muted-foreground">{offlineSongs.length} músicas salvas</p>
-            {offlineSongs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                <Music size={48} className="mb-4 opacity-20" />
-                <p className="text-sm">Nenhum download ainda</p>
-                <p className="text-xs mt-1">Toque em ☁️ para salvar offline</p>
-              </div>
-            ) : (
-              offlineSongs.map((song) => (
-                <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === "profile" && (
-          <div className="px-4 space-y-5">
-            <div className="flex items-center gap-4 pt-2">
-              <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-lg font-bold shadow-glow-red">D</div>
-              <div>
-                <h1 className="text-lg font-display font-bold text-foreground">DJ Host</h1>
-                <p className="text-xs text-muted-foreground font-mono">ID: {deviceId.current.substring(0, 16)}...</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "Músicas", value: songs.length },
-                { label: "Downloads", value: offlineSongs.length },
-                { label: "Votos", value: songs.reduce((a, s) => a + s.votes, 0) },
-              ].map((stat) => (
-                <div key={stat.label} className="bg-secondary rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                  <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+              {/* Quick picks row */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Sparkles size={16} className="text-primary" />
+                    Seleção rápida
+                  </h2>
                 </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4">
+                  {songs.slice(0, 4).map((song) => (
+                    <button
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
+                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
+                      }`}
+                    >
+                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* For you carousel */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h2 className="text-base font-display font-medium text-foreground">Para você</h2>
+                  <ChevronRight size={18} className="text-muted-foreground" />
+                </div>
+                <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
+                  {songs.slice(0, 6).map((song) => (
+                    <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] group snap-start">
+                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
+                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
+                          <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                        </div>
+                      </div>
+                      <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
+                      <p className="text-[11px] text-muted-foreground truncate text-left">{song.artist}</p>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Featured mixes */}
+              <section className="px-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-display font-medium text-foreground">Mixes populares</h2>
+                  <ChevronRight size={18} className="text-muted-foreground" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
+                    { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
+                    { title: "Mix Latino", subtitle: "Luis Fonsi, Shakira, Bad Bunny", color: "from-yellow-900/40 to-transparent" },
+                    { title: "Mix Chill", subtitle: "Lo-fi, Ambient, Acoustic", color: "from-green-900/40 to-transparent" },
+                  ].map((mix, i) => (
+                    <button
+                      key={mix.title}
+                      onClick={() => handleSelect(songs[i % songs.length])}
+                      className="relative rounded-xl overflow-hidden aspect-[4/3] group active:scale-[0.98] transition-transform"
+                    >
+                      <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover" />
+                      <div className={`absolute inset-0 bg-gradient-to-t ${mix.color}`} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-sm font-semibold text-foreground text-left">{mix.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Voting queue */}
+              <section className="px-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-base font-display font-medium text-foreground">Fila de votação</h2>
+                  <span className="text-xs text-primary font-medium">{songs.reduce((a, s) => a + s.votes, 0)} votos</span>
+                </div>
+                <div>
+                  {queueSongs.map((song) => (
+                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "search" && (
+            <div className="px-4 space-y-3">
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Músicas, artistas, álbuns, podcasts"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  autoFocus
+                  className="w-full pl-10 pr-4 py-3 rounded-full bg-secondary border-none text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-muted-foreground/30"
+                />
+              </div>
+
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                {(["all", "songs", "artists", "albums"] as SearchFilter[]).map((f) => (
+                  <button key={f} onClick={() => setSearchFilter(f)} className={`chip flex-shrink-0 ${searchFilter === f ? "chip-active" : "chip-inactive"}`}>
+                    {f === "all" ? "Tudo" : f === "songs" ? "Músicas" : f === "artists" ? "Artistas" : "Álbuns"}
+                  </button>
+                ))}
+              </div>
+
+              {suggestions.length > 0 && searchQuery.length > 0 && (
+                <div className="rounded-lg overflow-hidden bg-card">
+                  {suggestions.map((term, i) => (
+                    <button key={i} onClick={() => handleSuggestionClick(term)} className="w-full flex items-center gap-3 px-3 py-3 text-sm text-foreground hover:bg-accent active:bg-accent transition-colors text-left">
+                      <Search size={14} className="text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{term}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {isSearching ? (
+                <SearchSkeleton />
+              ) : searchQuery.length >= 2 ? (
+                <div className="space-y-4">
+                  {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
+                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {uniqueArtists.slice(0, 6).map((artist) => {
+                          const artistSong = searchResults.find((s) => s.artist === artist);
+                          return (
+                            <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1.5 flex-shrink-0 active:scale-95 transition-transform">
+                              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border">
+                                {artistSong && <img src={artistSong.cover} alt={artist} className="w-full h-full object-cover" />}
+                              </div>
+                              <span className="text-xs text-foreground truncate max-w-[80px]">{artist}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(searchFilter === "all" || searchFilter === "albums") && uniqueAlbums.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                        {uniqueAlbums.slice(0, 6).map((raw) => {
+                          const [album, artist, cover] = raw.split("|||");
+                          return (
+                            <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px] active:scale-95 transition-transform">
+                              <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5">
+                                <img src={cover} alt={album} className="w-full h-full object-cover" />
+                              </div>
+                              <p className="text-xs font-medium text-foreground truncate text-left">{album}</p>
+                              <p className="text-[11px] text-muted-foreground truncate text-left">{artist}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(searchFilter === "all" || searchFilter === "songs") && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
+                      {searchResults.length > 0 ? (
+                        searchResults.map((song) => (
+                          <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground py-4">Nenhum resultado</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Tendências</h3>
+                  {songs.slice(0, 5).map((song) => (
+                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "library" && (
+            <div className="px-4 space-y-3">
+              <h1 className="text-xl font-display font-bold text-foreground">Biblioteca</h1>
+              <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
+                <span className="chip chip-active flex-shrink-0">Músicas</span>
+                <span className="chip chip-inactive flex-shrink-0">Álbuns</span>
+                <span className="chip chip-inactive flex-shrink-0">Artistas</span>
+              </div>
+              {songs.map((song) => (
+                <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} />
               ))}
             </div>
-            <div className="bg-secondary rounded-lg p-3 space-y-1.5">
-              <h3 className="text-xs font-medium text-foreground">Sobre</h3>
-              <div className="space-y-1 text-[11px] text-muted-foreground">
-                <p>Player: YouTube IFrame API</p>
-                <p>Storage: IndexedDB + localStorage</p>
-                <p>Fila: Democracy Mode</p>
-                <p>PWA: Standalone</p>
+          )}
+
+          {activeTab === "offline" && (
+            <div className="px-4 space-y-3">
+              <h1 className="text-xl font-display font-bold text-foreground">Downloads</h1>
+              <p className="text-xs text-muted-foreground">{offlineSongs.length} músicas salvas</p>
+              {offlineSongs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                  <Music size={48} className="mb-4 opacity-20" />
+                  <p className="text-sm">Nenhum download ainda</p>
+                  <p className="text-xs mt-1">Toque em ☁️ para salvar offline</p>
+                </div>
+              ) : (
+                offlineSongs.map((song) => (
+                  <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === "profile" && (
+            <div className="px-4 space-y-5">
+              <div className="flex items-center gap-4 pt-2">
+                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-lg font-bold shadow-glow-red">D</div>
+                <div>
+                  <h1 className="text-lg font-display font-bold text-foreground">DJ Host</h1>
+                  <p className="text-xs text-muted-foreground font-mono">ID: {deviceId.current.substring(0, 16)}...</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Músicas", value: songs.length },
+                  { label: "Downloads", value: offlineSongs.length },
+                  { label: "Votos", value: songs.reduce((a, s) => a + s.votes, 0) },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-secondary rounded-lg p-3 text-center">
+                    <p className="text-lg font-bold text-foreground">{stat.value}</p>
+                    <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-secondary rounded-lg p-3 space-y-1.5">
+                <h3 className="text-xs font-medium text-foreground">Sobre</h3>
+                <div className="space-y-1 text-[11px] text-muted-foreground">
+                  <p>Player: YouTube IFrame API</p>
+                  <p>Storage: IndexedDB + localStorage</p>
+                  <p>Fila: Democracy Mode</p>
+                  <p>PWA: Standalone</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+        </main>
+
+        {!expanded && (
+          <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
         )}
-      </main>
 
-      {!expanded && (
-        <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onExpand={() => setExpanded(true)} />
-      )}
+        <BottomNav active={activeTab} onChange={setActiveTab} />
 
-      <BottomNav active={activeTab} onChange={setActiveTab} />
-
-      {expanded && (
-        <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} />
-      )}
-    </div>
+        {expanded && (
+          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} />
+        )}
+      </div>
+    </>
   );
 };
 
