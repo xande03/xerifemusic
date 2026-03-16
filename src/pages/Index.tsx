@@ -600,14 +600,44 @@ const Index = () => {
           )}
 
           {activeTab === "search" && (
-            <SearchScreen
-              currentSongId={currentSong.id}
-              onSelect={handleSelect}
-              onArtistClick={(name, image) => {
-                setActiveTab("home");
-                setArtistView({ name, image });
-              }}
-            />
+            homeMode === "video" ? (
+              <ExploreScreen
+                onPlayVideo={(video) => {
+                  const song: Song = {
+                    id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                    title: video.title, artist: video.channel, album: video.title,
+                    cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                  };
+                  handleSelect(song);
+                  setPlayerMode("video");
+                  setExpanded(true);
+                }}
+                onFullscreenVideo={(video) => {
+                  const song: Song = {
+                    id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                    title: video.title, artist: video.channel, album: video.title,
+                    cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                  };
+                  handleSelect(song);
+                  setPlayerMode("video");
+                  setExpanded(true);
+                  setTimeout(() => requestFullscreen(), 500);
+                }}
+                onChannelClick={(name, thumb) => {
+                  setActiveTab("home");
+                  setChannelView({ name, thumbnail: thumb });
+                }}
+              />
+            ) : (
+              <SearchScreen
+                currentSongId={currentSong.id}
+                onSelect={handleSelect}
+                onArtistClick={(name, image) => {
+                  setActiveTab("home");
+                  setArtistView({ name, image });
+                }}
+              />
+            )
           )}
 
 
