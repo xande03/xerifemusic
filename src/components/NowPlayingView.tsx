@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2 } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
 import { useState } from "react";
@@ -15,11 +15,12 @@ interface NowPlayingViewProps {
   onSeek: (fraction: number) => void;
   volume: number;
   onVolumeChange: (vol: number) => void;
+  onTogglePiP?: () => void;
 }
 
 const NowPlayingView = ({
   song, isPlaying, currentTime, duration,
-  onCollapse, onSeek, volume, onVolumeChange,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP,
 }: NowPlayingViewProps) => {
   const [showVideo, setShowVideo] = useState(true);
   const progress = duration > 0 ? currentTime / duration : 0;
@@ -38,9 +39,16 @@ const NowPlayingView = ({
             <ChevronDown size={26} />
           </button>
           <span className="text-xs text-muted-foreground uppercase tracking-wider">YouTube Music</span>
-          <button onClick={() => setShowVideo((v) => !v)} className="text-muted-foreground hover:text-foreground transition-colors">
-            {showVideo ? <Music2 size={20} /> : <Video size={20} />}
-          </button>
+          <div className="flex items-center gap-2">
+            {onTogglePiP && (
+              <button onClick={onTogglePiP} className="text-muted-foreground hover:text-foreground transition-colors" title="Picture-in-Picture">
+                <PictureInPicture2 size={20} />
+              </button>
+            )}
+            <button onClick={() => setShowVideo((v) => !v)} className="text-muted-foreground hover:text-foreground transition-colors">
+              {showVideo ? <Music2 size={20} /> : <Video size={20} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 flex flex-col items-center px-4 gap-4 max-w-lg mx-auto w-full overflow-y-auto pb-6">

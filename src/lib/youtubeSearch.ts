@@ -1,4 +1,5 @@
 import type { Song } from "@/data/mockSongs";
+import { supabase } from "@/integrations/supabase/client";
 
 // --- Search cache (localStorage) ---
 const SEARCH_CACHE_KEY = "demus_search_cache";
@@ -28,7 +29,7 @@ function cacheKeyFor(query: string, filter: string): string {
   return `${filter}:${query.toLowerCase().trim()}`;
 }
 
-// --- Invidious instances (public, CORS-friendly) ---
+// --- Invidious instances (fallback, CORS-friendly) ---
 const INVIDIOUS_INSTANCES = [
   "https://inv.nadeko.net",
   "https://invidious.nerdvpn.de",
@@ -69,7 +70,6 @@ function cleanTitle(title: string): string {
 
 function getBestThumbnail(thumbnails?: { url: string; quality: string }[]): string {
   if (!thumbnails || thumbnails.length === 0) return "/placeholder.svg";
-  // Prefer medium quality
   const medium = thumbnails.find(t => t.quality === "medium");
   if (medium) return medium.url;
   return thumbnails[0].url;
@@ -89,10 +89,62 @@ function videoToSong(v: InvidiousVideo): Song {
   };
 }
 
-async function fetchWithFallback(query: string, filter: string): Promise<Song[]> {
+// --- Edge function search (primary, reliable in production) ---
+async function searchViaEdgeFunction(query: string, filter: string): Promise<Song[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke("youtube-search", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      body: undefined,
+    });
+
+    // Edge functions invoked via GET need query params - use fetch directly
+    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!projectUrl || !anonKey) throw new Error("Missing config");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(
+      `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`,
+      {
+        signal: controller.signal,
+        headers: {
+          "Authorization": `Bearer ${anonKey}`,
+          "apikey": anonKey,
+        },
+      }
+    );
+    clearTimeout(timeout);
+
+    if (!response.ok) throw new Error(`Edge fn HTTP ${response.status}`);
+
+    const result = await response.json();
+    const items = result.results || [];
+
+    return items.map((item: any) => ({
+      id: item.id || `yt-${item.youtubeId}`,
+      youtubeId: item.youtubeId,
+      title: item.title,
+      artist: item.artist || "Desconhecido",
+      album: item.album || item.title,
+      cover: item.cover || "/placeholder.svg",
+      duration: item.duration || 0,
+      votes: 0,
+      isDownloaded: false,
+    }));
+  } catch (err) {
+    console.warn("Edge function search failed:", err);
+    return [];
+  }
+}
+
+// --- Invidious fallback ---
+async function fetchWithInvidious(query: string, filter: string): Promise<Song[]> {
   const typeParam = filter === "songs" ? "music" : filter === "artists" ? "channel" : filter === "albums" ? "playlist" : "all";
   
-  // Try up to 3 instances
   for (let attempt = 0; attempt < 3; attempt++) {
     const base = getInvidiousUrl();
     const url = `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=${typeParam === "all" ? "video" : typeParam}&sort_by=relevance&region=BR`;
@@ -109,7 +161,7 @@ async function fetchWithFallback(query: string, filter: string): Promise<Song[]>
       const data: InvidiousVideo[] = await response.json();
       
       return data
-        .filter((item: any) => item.videoId) // only videos
+        .filter((item: any) => item.videoId)
         .slice(0, 20)
         .map(videoToSong);
     } catch (err) {
@@ -137,7 +189,13 @@ export async function searchYouTubeMusic(
   }
 
   try {
-    const songs = await fetchWithFallback(query, filter);
+    // Try edge function first (works reliably in production)
+    let songs = await searchViaEdgeFunction(query, filter);
+
+    // Fallback to Invidious if edge function returned nothing
+    if (songs.length === 0) {
+      songs = await fetchWithInvidious(query, filter);
+    }
 
     // Save to cache
     if (songs.length > 0) {
