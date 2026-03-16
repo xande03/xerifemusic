@@ -8,7 +8,7 @@ interface VideoCardProps {
   onFullscreen?: (video: VideoResult) => void;
 }
 
-const VideoCard = ({ video, onPlay, onChannelClick }: VideoCardProps) => (
+const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardProps) => (
   <div className="w-full">
     {/* Thumbnail — plays video */}
     <button
