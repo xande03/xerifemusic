@@ -48,7 +48,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
     <div className="flex gap-3 mt-2.5 px-0.5">
       {/* Channel avatar — clickable */}
       <button
-        onClick={() => onChannelClick?.(video.channel)}
+        onClick={() => onChannelClick?.(video.channel, video.channelThumbnail)}
         className="flex-shrink-0 mt-0.5 active:scale-95 transition-transform"
       >
         {video.channelThumbnail ? (
