@@ -77,6 +77,40 @@ export function getVolume(): number {
   return v ? Number(v) : 80;
 }
 
+// Recently played history
+const HISTORY_KEY = "demus_history";
+const MAX_HISTORY = 50;
+
+export interface HistoryEntry {
+  songId: string;
+  youtubeId: string;
+  title: string;
+  artist: string;
+  album: string;
+  cover: string;
+  duration: number;
+  playedAt: number;
+}
+
+export function getHistory(): HistoryEntry[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function addToHistory(entry: Omit<HistoryEntry, "playedAt">): void {
+  const history = getHistory().filter((h) => h.songId !== entry.songId);
+  history.unshift({ ...entry, playedAt: Date.now() });
+  if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+export function clearHistory(): void {
+  localStorage.removeItem(HISTORY_KEY);
+}
+
 // User preferences
 export interface UserPrefs {
   displayName: string;
