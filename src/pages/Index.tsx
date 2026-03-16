@@ -306,6 +306,38 @@ const Index = () => {
               </div>
             </section>
 
+            {/* Recently played */}
+            {recentHistory.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h2 className="text-base font-display font-medium text-foreground">Reproduzidos recentemente</h2>
+                  <button onClick={() => { clearHistory(); setRecentHistory([]); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Limpar</button>
+                </div>
+                <div className="flex gap-3 overflow-x-auto px-4 pb-1">
+                  {recentHistory.slice(0, 10).map((entry) => (
+                    <button
+                      key={entry.songId + entry.playedAt}
+                      onClick={() => handleSelect({
+                        id: entry.songId, youtubeId: entry.youtubeId, title: entry.title,
+                        artist: entry.artist, album: entry.album, cover: entry.cover,
+                        duration: entry.duration, votes: 0, isDownloaded: false,
+                      })}
+                      className="flex-shrink-0 w-[120px] group"
+                    >
+                      <div className="w-[120px] h-[120px] rounded-md overflow-hidden mb-2 relative">
+                        <img src={entry.cover} alt={entry.album} className="w-full h-full object-cover" />
+                        <div className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                          <Play size={12} className="text-primary-foreground ml-0.5" />
+                        </div>
+                      </div>
+                      <p className="text-xs font-medium text-foreground truncate">{entry.title}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{entry.artist}</p>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Voting queue */}
             <section className="px-4">
               <div className="flex items-center justify-between mb-2">
