@@ -247,12 +247,28 @@ const Index = () => {
 
         {/* Main column */}
         <div className="flex-1 flex flex-col min-w-0">
-        {/* YouTube Player */}
+        {/* YouTube Player + Fullscreen Container */}
         <div
+          id="yt-fullscreen-container"
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
           style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
         >
           <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
+          {/* Fullscreen overlay controls rendered here */}
+          {playerState.isFullscreen && (
+            <FullscreenOverlay
+              song={currentSong}
+              isPlaying={playerState.isPlaying}
+              currentTime={ct}
+              duration={dur}
+              progress={dur > 0 ? ct / dur : 0}
+              onTogglePlay={handleTogglePlay}
+              onNext={handleNext}
+              onPrev={handlePrev}
+              onSeek={handleSeek}
+              onExit={exitFullscreen}
+            />
+          )}
         </div>
 
         {/* Header */}
