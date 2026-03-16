@@ -432,9 +432,10 @@ const Index = () => {
             <div className="glass rounded-xl p-4 space-y-2">
               <h3 className="text-sm font-semibold text-foreground">Engenharia</h3>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>▸ Player: YouTube IFrame API</p>
-                <p>▸ Storage: IndexedDB (metadados offline)</p>
-                <p>▸ Fila: Democracy Mode (votos)</p>
+                <p>▸ Player: YouTube IFrame API (visível)</p>
+                <p>▸ Storage: IndexedDB + localStorage</p>
+                <p>▸ Fila: Democracy Mode (votos persistidos)</p>
+                <p>▸ Identificação: Device ID (client-side)</p>
                 <p>▸ PWA: Manifest + Standalone</p>
               </div>
             </div>
