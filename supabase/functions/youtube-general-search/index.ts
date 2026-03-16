@@ -110,9 +110,11 @@ async function searchViaInvidious(query: string): Promise<VideoResult[]> {
           videoId: v.videoId,
           title: v.title || "",
           channel: v.author || "",
-          channelThumbnail: v.authorThumbnails?.[0]?.url || "",
-          thumbnail: v.videoThumbnails?.find((t: any) => t.quality === "medium")?.url ||
-            v.videoThumbnails?.[0]?.url || "",
+          channelThumbnail: v.authorThumbnails?.[v.authorThumbnails.length - 1]?.url || v.authorThumbnails?.[0]?.url || "",
+          thumbnail: v.videoThumbnails?.find((t: any) => t.quality === "maxres")?.url ||
+            v.videoThumbnails?.find((t: any) => t.quality === "high")?.url ||
+            v.videoThumbnails?.find((t: any) => t.quality === "medium")?.url ||
+            v.videoThumbnails?.[v.videoThumbnails.length - 1]?.url || "",
           duration: formatSeconds(v.lengthSeconds || 0),
           views: formatViews(v.viewCount || 0),
           publishedTime: v.publishedText || "",
