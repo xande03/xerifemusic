@@ -20,6 +20,7 @@ import ExploreScreen from "@/components/ExploreScreen";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
+import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 
 import album1 from "@/assets/album-1.jpg";
