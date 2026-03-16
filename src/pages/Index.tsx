@@ -236,7 +236,7 @@ const Index = () => {
                 Toque no 👍 para votar. A mais votada toca em seguida!
               </p>
               <div className="space-y-1">
-                {queueSongs.map((song) => (
+                {queueSongs.map((song, index) => (
                   <SongCard
                     key={song.id}
                     song={song}
@@ -245,6 +245,7 @@ const Index = () => {
                     onVote={handleVote}
                     onDownload={handleDownload}
                     showVotes
+                    hasVoted={votedSongs.has(song.id)}
                   />
                 ))}
               </div>
