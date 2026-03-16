@@ -24,7 +24,7 @@ const TRENDING_QUERIES = [
   "notícias hoje", "música nova 2026", "comédia stand up",
 ];
 
-const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
