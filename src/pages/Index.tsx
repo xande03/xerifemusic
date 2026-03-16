@@ -37,6 +37,7 @@ const Index = () => {
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [votedSongs, setVotedSongs] = useState<Set<string>>(() => new Set(getVotedSongs()));
+  const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>(() => getHistory());
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
