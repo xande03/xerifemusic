@@ -577,17 +577,19 @@ const Index = () => {
               {/* Theme toggle */}
               <div className="bg-secondary rounded-lg p-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {document.documentElement.classList.contains('light') ? <Sun size={18} className="text-foreground" /> : <Moon size={18} className="text-foreground" />}
+                  {isDark ? <Moon size={18} className="text-foreground" /> : <Sun size={18} className="text-foreground" />}
                   <span className="text-sm font-medium text-foreground">Tema</span>
                 </div>
                 <button
                   onClick={() => {
-                    const isLight = document.documentElement.classList.toggle('light');
-                    localStorage.setItem('demus-theme', isLight ? 'light' : 'dark');
+                    const goLight = isDark;
+                    document.documentElement.classList.toggle('light', goLight);
+                    localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                    setIsDark(!isDark);
                   }}
                   className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent text-accent-foreground hover:bg-muted transition-colors"
                 >
-                  {document.documentElement.classList.contains('light') ? 'Modo Escuro' : 'Modo Claro'}
+                  {isDark ? 'Modo Claro' : 'Modo Escuro'}
                 </button>
               </div>
 
