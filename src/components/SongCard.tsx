@@ -1,4 +1,5 @@
 import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical } from "lucide-react";
+import BlurImage from "@/components/BlurImage";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { motion } from "framer-motion";
 import { hdThumbnail } from "@/lib/utils";
