@@ -1,4 +1,4 @@
-import { v4fallback } from "./utils";
+// Demus Evolution - Client-Side Storage (localStorage)
 
 const DEVICE_ID_KEY = "demus_device_id";
 const VOTES_KEY = "demus_voted_songs";
