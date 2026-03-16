@@ -294,10 +294,37 @@ const Index = () => {
                 </div>
               </section>
 
+              {/* Quick picks — compact row like YT Music home */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-2">
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Zap size={16} className="text-primary" />
+                    Seleção rápida
+                  </h2>
+                </div>
+                <div className="grid grid-cols-2 gap-2 px-4">
+                  {songs.slice(0, 4).map((song) => (
+                    <button
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
+                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
+                      }`}
+                    >
+                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
               {/* Listen again — grid layout like YT Music */}
               <section>
                 <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-lg font-display font-bold text-foreground">Ouvir novamente</h2>
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-muted-foreground" />
+                    <h2 className="text-base font-display font-medium text-foreground">Ouvir novamente</h2>
+                  </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-3 gap-3 px-4">
@@ -328,25 +355,36 @@ const Index = () => {
                 </div>
               </section>
 
-              {/* Quick picks row */}
-              <section>
-                <div className="flex items-center justify-between px-4 mb-3">
+              {/* Top Charts — numbered list like YT Music Charts */}
+              <section className="px-4">
+                <div className="flex items-center justify-between mb-3">
                   <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Sparkles size={16} className="text-primary" />
-                    Seleção rápida
+                    <TrendingUp size={16} className="text-primary" />
+                    Top Charts
                   </h2>
+                  <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4">
-                  {songs.slice(0, 4).map((song) => (
+                <div className="space-y-1">
+                  {queueSongs.slice(0, 5).map((song, i) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
-                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
-                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all active:scale-[0.98] ${
+                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                      <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
+                        {i + 1}
+                      </span>
+                      <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <TrendingUp size={12} />
+                        <span>{song.votes}</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -355,7 +393,10 @@ const Index = () => {
               {/* For you carousel */}
               <section>
                 <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground">Para você</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Sparkles size={16} className="text-primary" />
+                    Para você
+                  </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
@@ -377,7 +418,10 @@ const Index = () => {
               {/* Featured mixes */}
               <section className="px-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground">Mixes populares</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Disc3 size={16} className="text-primary" />
+                    Mixes populares
+                  </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -407,7 +451,10 @@ const Index = () => {
               {/* Voting queue */}
               <section className="px-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground">Fila de votação</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Headphones size={16} className="text-primary" />
+                    Fila de votação
+                  </h2>
                   <span className="text-xs text-primary font-medium">{songs.reduce((a, s) => a + s.votes, 0)} votos</span>
                 </div>
                 <div>

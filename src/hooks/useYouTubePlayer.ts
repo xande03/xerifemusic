@@ -104,7 +104,7 @@ export function useYouTubePlayer(containerId: string) {
         height: "100%",
         width: "100%",
         playerVars: {
-          autoplay: 0, // iOS blocks autoplay without gesture — start manually
+          autoplay: 1,
           controls: 1,
           modestbranding: 1,
           rel: 0,
@@ -114,6 +114,8 @@ export function useYouTubePlayer(containerId: string) {
           fs: 0,
           disablekb: 1,
           origin: window.location.origin,
+          // Workaround: enable JS API and allow autoplay with sound
+          enablejsapi: 1,
         },
         events: {
           onReady: () => {
