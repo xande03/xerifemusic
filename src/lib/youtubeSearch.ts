@@ -70,9 +70,13 @@ function cleanTitle(title: string): string {
 
 function getBestThumbnail(thumbnails?: { url: string; quality: string }[]): string {
   if (!thumbnails || thumbnails.length === 0) return "/placeholder.svg";
-  const medium = thumbnails.find(t => t.quality === "medium");
-  if (medium) return medium.url;
-  return thumbnails[0].url;
+  // Prefer highest quality: maxres > high > medium > default
+  const priorities = ["maxres", "maxresdefault", "high", "sddefault", "medium"];
+  for (const q of priorities) {
+    const match = thumbnails.find(t => t.quality === q);
+    if (match) return match.url;
+  }
+  return thumbnails[thumbnails.length - 1]?.url || thumbnails[0].url;
 }
 
 function videoToSong(v: InvidiousVideo): Song {
