@@ -281,19 +281,16 @@ const Index = () => {
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
-              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : activeTab === "search" ? "Buscar" : "Playlists"}
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
-              <Search size={20} />
-            </button>
             <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
             </span>
-            <div className="w-7 h-7 rounded-full bg-secondary overflow-hidden flex items-center justify-center ring-2 ring-border">
-              <User size={14} className="text-muted-foreground" />
-            </div>
+            <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center">
+              <MoreHorizontal size={16} className="text-muted-foreground" />
+            </button>
           </div>
         </header>
 
