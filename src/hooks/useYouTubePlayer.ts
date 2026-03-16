@@ -179,5 +179,56 @@ export function useYouTubePlayer(containerId: string) {
   const seekTo = useCallback((seconds: number) => playerRef.current?.seekTo?.(seconds, true), []);
   const setVolume = useCallback((vol: number) => playerRef.current?.setVolume?.(vol), []);
 
-  return { state, loadVideo, play, pause, seekTo, setVolume };
+  const togglePiP = useCallback(async () => {
+    try {
+      const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
+      if (!iframe) return;
+
+      // Try to get the video element inside the iframe (same-origin only)
+      // YouTube iframe is cross-origin, so we use the iframe itself with documentPictureInPicture
+      // or fall back to the standard video PiP via requestPictureInPicture on iframe
+
+      // Method 1: Document PiP API (Chrome 116+)
+      if ('documentPictureInPicture' in window) {
+        const docPiP = (window as any).documentPictureInPicture;
+        if (docPiP.window) {
+          // Already in PiP, close it
+          docPiP.window.close();
+          return;
+        }
+        const pipWindow = await docPiP.requestWindow({ width: 320, height: 180 });
+        const pipIframe = pipWindow.document.createElement('iframe');
+        const videoId = state.videoId;
+        if (videoId) {
+          pipIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1`;
+          pipIframe.style.cssText = 'width:100%;height:100%;border:none;';
+          pipIframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+          pipWindow.document.body.style.margin = '0';
+          pipWindow.document.body.style.overflow = 'hidden';
+          pipWindow.document.body.appendChild(pipIframe);
+        }
+        return;
+      }
+
+      // Method 2: Standard PiP on the iframe element (limited support)
+      if (iframe.requestPictureInPicture) {
+        await (iframe as any).requestPictureInPicture();
+        return;
+      }
+
+      // Method 3: Open a mini player popup as last resort
+      const videoId = state.videoId;
+      if (videoId) {
+        window.open(
+          `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`,
+          'demus-pip',
+          'width=400,height=225,top=50,left=50'
+        );
+      }
+    } catch (err) {
+      console.warn('PiP not available:', err);
+    }
+  }, [state.videoId]);
+
+  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP };
 }
