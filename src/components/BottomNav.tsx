@@ -1,6 +1,6 @@
 import { Home, Library, Download, ListMusic, Compass } from "lucide-react";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
+type Tab = "home" | "search" | "library" | "offline" | "profile";
 
 interface BottomNavProps {
   active: Tab;
