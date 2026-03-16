@@ -361,15 +361,15 @@ const Index = () => {
 
             {isSearching ? (
               <SearchSkeleton />
-            ) : searchQuery ? (
+            ) : searchQuery.length >= 2 ? (
               <div className="space-y-4">
                 {/* Artists section */}
                 {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
                     <div className="flex gap-4 overflow-x-auto pb-2">
-                      {uniqueArtists.map((artist) => {
-                        const artistSong = filteredSongs.find((s) => s.artist === artist);
+                      {uniqueArtists.slice(0, 6).map((artist) => {
+                        const artistSong = searchResults.find((s) => s.artist === artist);
                         return (
                           <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1 flex-shrink-0">
                             <div className="w-16 h-16 rounded-full overflow-hidden bg-secondary">
@@ -388,10 +388,10 @@ const Index = () => {
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
                     <div className="flex gap-3 overflow-x-auto pb-2">
-                      {uniqueAlbums.map((raw) => {
+                      {uniqueAlbums.slice(0, 6).map((raw) => {
                         const [album, artist, cover] = raw.split("|||");
                         return (
-                          <button key={raw} onClick={() => { const s = filteredSongs.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px]">
+                          <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px]">
                             <div className="w-[120px] h-[120px] rounded-md overflow-hidden mb-1">
                               <img src={cover} alt={album} className="w-full h-full object-cover" />
                             </div>
@@ -408,16 +408,13 @@ const Index = () => {
                 {(searchFilter === "all" || searchFilter === "songs") && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-2">Músicas</h3>
-                    {filteredSongs.length > 0 ? (
-                      filteredSongs.map((song) => (
+                    {searchResults.length > 0 ? (
+                      searchResults.map((song) => (
                         <SongCard
                           key={song.id}
                           song={song}
                           isActive={song.id === currentSong.id}
                           onSelect={handleSelect}
-                          onVote={handleVote}
-                          showVotes
-                          hasVoted={votedSongs.has(song.id)}
                         />
                       ))
                     ) : (
