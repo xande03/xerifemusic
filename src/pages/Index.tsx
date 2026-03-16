@@ -273,7 +273,7 @@ const Index = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain">
+        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2">
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
