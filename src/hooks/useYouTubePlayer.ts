@@ -77,9 +77,11 @@ export function useYouTubePlayer(containerId: string) {
           },
           onStateChange: (event: any) => {
             const playing = event.data === window.YT.PlayerState.PLAYING;
+            const ended = event.data === window.YT.PlayerState.ENDED;
             setState((s) => ({
               ...s,
               isPlaying: playing,
+              isEnded: ended,
               duration: playerRef.current?.getDuration?.() || 0,
             }));
           },
