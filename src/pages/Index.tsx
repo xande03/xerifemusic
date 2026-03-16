@@ -274,7 +274,7 @@ const Index = () => {
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Crie uma rádio</p>
                 <h2 className="text-lg font-display font-bold text-foreground mb-3">Seu sintonizador musical</h2>
                 <button
-                  onClick={() => handleSelect(songs[Math.floor(Math.random() * songs.length)])}
+                  onClick={() => setShowRadio(true)}
                   className="relative w-full rounded-2xl overflow-hidden aspect-[16/9] group active:scale-[0.99] transition-transform"
                 >
                   {/* Collage of album covers */}
