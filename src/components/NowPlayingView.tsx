@@ -1,4 +1,5 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2 } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
@@ -289,20 +290,20 @@ const NowPlayingView = ({
               </div>
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar — draggable */}
             <div className="space-y-1">
-              <div
-                className="h-1.5 w-full rounded-full bg-muted overflow-hidden cursor-pointer touch-none"
-                onClick={handleProgressClick}
-                onTouchMove={handleProgressTouch}
-              >
-                <div className="h-full rounded-full bg-primary transition-all duration-200 relative" style={{ width: `${progress * 100}%` }}>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-primary shadow-lg border-2 border-background" />
-                </div>
-              </div>
-              <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <Slider
+                value={[progress * 100]}
+                max={100}
+                step={0.1}
+                onValueChange={([v]) => onSeek(v / 100)}
+                className="w-full"
+                trackClassName="h-[5px] bg-muted"
+                thumbClassName="w-4 h-4"
+              />
+              <div className="flex justify-between text-[11px] text-primary font-mono">
                 <span>{formatDuration(currentTime)}</span>
-                <span>{formatDuration(duration)}</span>
+                <span className="text-muted-foreground">{formatDuration(duration)}</span>
               </div>
             </div>
 
@@ -330,14 +331,17 @@ const NowPlayingView = ({
 
             {/* Volume + Autoplay row */}
             <div className="flex items-center gap-3">
-              <Volume2 size={16} className="text-muted-foreground flex-shrink-0" />
-              <input
-                type="range"
-                min={0}
+              <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+                {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+              <Slider
+                value={[volume]}
                 max={100}
-                value={volume}
-                onChange={(e) => onVolumeChange(Number(e.target.value))}
-                className="flex-1 h-1 appearance-none rounded-full bg-muted accent-primary"
+                step={1}
+                onValueChange={([v]) => onVolumeChange(v)}
+                className="flex-1"
+                trackClassName="h-1 bg-muted"
+                thumbClassName="w-3.5 h-3.5"
               />
               <div className="flex items-center gap-2 ml-2">
                 <span className="text-[10px] text-muted-foreground">Auto</span>
