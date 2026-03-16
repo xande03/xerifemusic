@@ -26,7 +26,7 @@ import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile";
+type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
 
 const albumCovers = [album1, album2, album3, album4];
