@@ -7,6 +7,7 @@ import VideoCard from "./VideoCard";
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
   onFullscreenVideo?: (video: VideoResult) => void;
+  onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
 }
 
 const CATEGORIES = [
