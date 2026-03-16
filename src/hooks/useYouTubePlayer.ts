@@ -53,6 +53,8 @@ function ensureSilentAudio() {
   silentAudio.volume = 0.001; // Nearly silent
   silentAudio.setAttribute("playsinline", "true");
   silentAudio.setAttribute("webkit-playsinline", "true");
+  // Enable AirPlay on the audio element (Safari)
+  silentAudio.setAttribute("x-webkit-airplay", "allow");
   
   return silentAudio;
 }
