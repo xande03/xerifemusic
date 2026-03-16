@@ -721,7 +721,7 @@ const Index = () => {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {expanded && (
-          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
+          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} isEnded={playerState.isEnded} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
             const result = await togglePiP();
             if (result === 'fallback') {
               setExpanded(false);
