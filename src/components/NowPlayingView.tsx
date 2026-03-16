@@ -97,7 +97,7 @@ const NowPlayingView = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up safe-area-inset">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
         <button onClick={onCollapse} className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors active:scale-95">
