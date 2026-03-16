@@ -284,7 +284,7 @@ const Index = () => {
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Mode switcher: Xerife Music / Xerife Video */}
-              {!channelView && (
+              {!channelView && !artistView && (
                 <div className="px-4 pt-1">
                   <div className="flex gap-2 p-1 bg-secondary rounded-xl w-fit">
                     <button
