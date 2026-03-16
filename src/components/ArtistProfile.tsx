@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, Play, Shuffle, Music2, Disc3, UserCircle } from "lucide-react";
+import { hdThumbnail } from "@/lib/utils";
 import { searchYouTubeMusic } from "@/lib/youtubeSearch";
 import type { Song } from "@/data/mockSongs";
 
