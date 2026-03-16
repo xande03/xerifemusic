@@ -25,6 +25,8 @@ const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [volume, setVolume] = useState(80);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // YouTube Player
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume } = useYouTubePlayer("yt-player");
