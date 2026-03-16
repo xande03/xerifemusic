@@ -652,7 +652,7 @@ const Index = () => {
                   <p className="text-xs text-muted-foreground font-mono">ID: {deviceId.current.substring(0, 16)}...</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
                 {[
                   { label: "Músicas", value: songs.length },
                   { label: "Downloads", value: offlineSongs.length },
