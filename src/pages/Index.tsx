@@ -26,6 +26,7 @@ const Index = () => {
   const [volume, setVolume] = useState(80);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [votedSongs, setVotedSongs] = useState<Set<string>>(new Set());
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // YouTube Player
@@ -46,6 +47,17 @@ const Index = () => {
   useEffect(() => {
     setPlayerVolume(volume);
   }, [volume, setPlayerVolume]);
+
+  // Auto-play next song when current ends (Democracy Mode)
+  useEffect(() => {
+    if (playerState.isEnded) {
+      const sorted = sortByVotes(songs);
+      const idx = sorted.findIndex((s) => s.id === currentSong.id);
+      const next = sorted[(idx + 1) % sorted.length];
+      setCurrentSong(next);
+      loadVideo(next.youtubeId);
+    }
+  }, [playerState.isEnded]);
 
   const handleSelect = useCallback(
     (song: Song) => {
@@ -90,10 +102,12 @@ const Index = () => {
   );
 
   const handleVote = useCallback((song: Song) => {
+    if (votedSongs.has(song.id)) return; // Single vote per song
+    setVotedSongs((prev) => new Set([...prev, song.id]));
     setSongs((prev) =>
       prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s))
     );
-  }, []);
+  }, [votedSongs]);
 
   const handleDownload = useCallback(
     async (song: Song) => {
@@ -222,7 +236,7 @@ const Index = () => {
                 Toque no 👍 para votar. A mais votada toca em seguida!
               </p>
               <div className="space-y-1">
-                {queueSongs.map((song) => (
+                {queueSongs.map((song, index) => (
                   <SongCard
                     key={song.id}
                     song={song}
@@ -231,6 +245,7 @@ const Index = () => {
                     onVote={handleVote}
                     onDownload={handleDownload}
                     showVotes
+                    hasVoted={votedSongs.has(song.id)}
                   />
                 ))}
               </div>

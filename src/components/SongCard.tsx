@@ -1,5 +1,6 @@
-import { Download, DownloadCloud, Play, ThumbsUp } from "lucide-react";
+import { Download, DownloadCloud, Play, ThumbsUp, Check } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
+import { motion } from "framer-motion";
 
 interface SongCardProps {
   song: Song;
@@ -8,11 +9,14 @@ interface SongCardProps {
   onVote?: (song: Song) => void;
   onDownload?: (song: Song) => void;
   showVotes?: boolean;
+  hasVoted?: boolean;
 }
 
-const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = false }: SongCardProps) => (
-  <div
-    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all group ${
+const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = false, hasVoted = false }: SongCardProps) => (
+  <motion.div
+    layout
+    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors group ${
       isActive ? "glass shadow-glow-cyan" : "hover:bg-muted/50"
     }`}
   >
@@ -32,9 +36,14 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = fa
       {showVotes && onVote && (
         <button
           onClick={() => onVote(song)}
-          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-muted hover:bg-primary/20 hover:text-primary transition-colors"
+          disabled={hasVoted}
+          className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
+            hasVoted
+              ? "bg-primary/20 text-primary cursor-default"
+              : "bg-muted hover:bg-primary/20 hover:text-primary"
+          }`}
         >
-          <ThumbsUp size={12} />
+          {hasVoted ? <Check size={12} /> : <ThumbsUp size={12} />}
           <span className="font-mono">{song.votes}</span>
         </button>
       )}
@@ -52,7 +61,7 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = fa
       )}
       <span className="text-xs text-muted-foreground font-mono">{formatDuration(song.duration)}</span>
     </div>
-  </div>
+  </motion.div>
 );
 
 export default SongCard;

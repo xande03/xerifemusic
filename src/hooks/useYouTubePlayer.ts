@@ -10,6 +10,7 @@ declare global {
 export interface YouTubePlayerState {
   isReady: boolean;
   isPlaying: boolean;
+  isEnded: boolean;
   currentTime: number;
   duration: number;
   videoId: string | null;
@@ -46,6 +47,7 @@ export function useYouTubePlayer(containerId: string) {
   const [state, setState] = useState<YouTubePlayerState>({
     isReady: false,
     isPlaying: false,
+    isEnded: false,
     currentTime: 0,
     duration: 0,
     videoId: null,
@@ -75,9 +77,11 @@ export function useYouTubePlayer(containerId: string) {
           },
           onStateChange: (event: any) => {
             const playing = event.data === window.YT.PlayerState.PLAYING;
+            const ended = event.data === window.YT.PlayerState.ENDED;
             setState((s) => ({
               ...s,
               isPlaying: playing,
+              isEnded: ended,
               duration: playerRef.current?.getDuration?.() || 0,
             }));
           },
