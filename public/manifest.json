@@ -1,25 +1,16 @@
 {
-  "short_name": "DemusEvolution",
-  "name": "Demus Evolution: Social Music",
+  "short_name": "Demus Music",
+  "name": "Demus Music - Social Jukebox",
   "icons": [
-    {
-      "src": "/icons/icon-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
-    }
+    { "src": "/icons/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
   ],
   "start_url": "/",
-  "background_color": "#0a0a0f",
+  "background_color": "#121212",
   "display": "standalone",
   "scope": "/",
-  "theme_color": "#00e5ff",
-  "description": "Streaming de música democrático com catálogo ilimitado do YouTube Music.",
+  "theme_color": "#ff0000",
+  "description": "Streaming de música democrático com YouTube Music",
   "orientation": "portrait",
   "categories": ["music", "entertainment"]
 }
