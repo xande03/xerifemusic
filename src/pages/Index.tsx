@@ -245,7 +245,7 @@ const Index = () => {
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}
-        <DesktopSidebar active={activeTab} onChange={setActiveTab} />
+        <DesktopSidebar active={activeTab} onChange={setActiveTab} homeMode={homeMode} />
 
         {/* Main column */}
         <div className="flex-1 flex flex-col min-w-0">
