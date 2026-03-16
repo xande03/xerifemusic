@@ -28,3 +28,8 @@ if ("serviceWorker" in navigator) {
   }
 }
 
+// Restore saved theme
+const savedTheme = localStorage.getItem('demus-theme');
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light');
+}
