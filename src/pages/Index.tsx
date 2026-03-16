@@ -68,7 +68,7 @@ const Index = () => {
     return mockSongs.map((s) => ({ ...s, votes: savedVotes[s.id] ?? s.votes }));
   });
 
-  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay } = useYouTubePlayer("yt-player");
+  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay, requestFullscreen } = useYouTubePlayer("yt-player");
   const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
 
 
