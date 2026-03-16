@@ -72,7 +72,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
         </button>
         {/* Channel name — clickable */}
         <button
-          onClick={() => onChannelClick?.(video.channel)}
+          onClick={() => onChannelClick?.(video.channel, video.channelThumbnail)}
           className="text-left mt-1 active:underline"
         >
           <span className="text-xs text-muted-foreground hover:text-foreground transition-colors">
