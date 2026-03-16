@@ -1,5 +1,6 @@
 import { Play, Pause, SkipForward } from "lucide-react";
 import { Song } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 
 interface MiniPlayerProps {
   song: Song;
