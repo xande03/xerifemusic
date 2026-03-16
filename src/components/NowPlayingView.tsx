@@ -90,7 +90,14 @@ const NowPlayingView = ({
     }
   }, [activeLineIndex]);
 
-  const handleModeChange = (newMode: PlayerMode) => {
+  // Autoplay: when video ends, play first related video
+  useEffect(() => {
+    if (isEnded && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
+      onPlayRelated(videoInfo.relatedVideos[0]);
+    }
+  }, [isEnded]);
+
+
     setMode(newMode);
     onModeChange?.(newMode);
     if (newMode === "lyrics" && !lyricsResult && !lyricsLoading) {
