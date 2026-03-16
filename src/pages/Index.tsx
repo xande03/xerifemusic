@@ -4,6 +4,11 @@ import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
+import {
+  getDeviceId, getVotedSongs, addVotedSong, hasVotedForSong,
+  saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId,
+  saveVolume, getVolume,
+} from "@/lib/localStorage";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView from "@/components/NowPlayingView";
@@ -17,44 +22,81 @@ type Tab = "home" | "search" | "library" | "offline" | "profile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
-  const [songs, setSongs] = useState<Song[]>(mockSongs);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [volume, setVolume] = useState(80);
+  const [volume, setVolumeState] = useState(getVolume);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [votedSongs, setVotedSongs] = useState<Set<string>>(new Set());
+  const [votedSongs, setVotedSongs] = useState<Set<string>>(() => new Set(getVotedSongs()));
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const deviceId = useRef(getDeviceId());
+
+  // Initialize songs with saved vote counts from localStorage
+  const [songs, setSongs] = useState<Song[]>(() => {
+    const savedVotes = getQueueState();
+    return mockSongs.map((s) => ({
+      ...s,
+      votes: savedVotes[s.id] ?? s.votes,
+    }));
+  });
 
   // YouTube Player
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume } = useYouTubePlayer("yt-player");
 
-  // Load saved songs from IndexedDB on mount
+  // Restore current song from localStorage
+  useEffect(() => {
+    const savedId = getCurrentSongId();
+    if (savedId) {
+      const found = mockSongs.find((s) => s.id === savedId);
+      if (found) setCurrentSong(found);
+    }
+  }, []);
+
+  // Load saved songs from IndexedDB
   useEffect(() => {
     getAllSavedSongs().then((saved) => {
       const ids = new Set(saved.map((s) => s.id));
       setSavedSongIds(ids);
-      setSongs((prev) =>
-        prev.map((s) => ({ ...s, isDownloaded: ids.has(s.id) }))
-      );
+      setSongs((prev) => prev.map((s) => ({ ...s, isDownloaded: ids.has(s.id) })));
     });
   }, []);
 
-  // Sync volume
+  // Online/Offline detection
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
+  // Sync volume to player and localStorage
   useEffect(() => {
     setPlayerVolume(volume);
+    saveVolume(volume);
   }, [volume, setPlayerVolume]);
 
-  // Auto-play next song when current ends (Democracy Mode)
+  // Save queue state to localStorage when votes change
+  useEffect(() => {
+    const votes: Record<string, number> = {};
+    songs.forEach((s) => { votes[s.id] = s.votes; });
+    saveQueueState(votes);
+  }, [songs]);
+
+  // Auto-play next song when current ends
   useEffect(() => {
     if (playerState.isEnded) {
       const sorted = sortByVotes(songs);
       const idx = sorted.findIndex((s) => s.id === currentSong.id);
       const next = sorted[(idx + 1) % sorted.length];
       setCurrentSong(next);
+      saveCurrentSong(next.id);
       loadVideo(next.youtubeId);
     }
   }, [playerState.isEnded]);
@@ -62,6 +104,7 @@ const Index = () => {
   const handleSelect = useCallback(
     (song: Song) => {
       setCurrentSong(song);
+      saveCurrentSong(song.id);
       loadVideo(song.youtubeId);
     },
     [loadVideo]
@@ -102,7 +145,8 @@ const Index = () => {
   );
 
   const handleVote = useCallback((song: Song) => {
-    if (votedSongs.has(song.id)) return; // Single vote per song
+    if (votedSongs.has(song.id)) return;
+    addVotedSong(song.id); // Persist to localStorage
     setVotedSongs((prev) => new Set([...prev, song.id]));
     setSongs((prev) =>
       prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s))
@@ -368,6 +412,7 @@ const Index = () => {
               <div>
                 <h1 className="text-xl font-bold text-foreground">DJ Host</h1>
                 <p className="text-sm text-muted-foreground">Modo: Jukebox Social</p>
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">ID: {deviceId.current}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -387,9 +432,10 @@ const Index = () => {
             <div className="glass rounded-xl p-4 space-y-2">
               <h3 className="text-sm font-semibold text-foreground">Engenharia</h3>
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>▸ Player: YouTube IFrame API</p>
-                <p>▸ Storage: IndexedDB (metadados offline)</p>
-                <p>▸ Fila: Democracy Mode (votos)</p>
+                <p>▸ Player: YouTube IFrame API (visível)</p>
+                <p>▸ Storage: IndexedDB + localStorage</p>
+                <p>▸ Fila: Democracy Mode (votos persistidos)</p>
+                <p>▸ Identificação: Device ID (client-side)</p>
                 <p>▸ PWA: Manifest + Standalone</p>
               </div>
             </div>
@@ -426,7 +472,7 @@ const Index = () => {
           onCollapse={() => setExpanded(false)}
           onSeek={handleSeek}
           volume={volume}
-          onVolumeChange={setVolume}
+          onVolumeChange={setVolumeState}
         />
       )}
     </div>
