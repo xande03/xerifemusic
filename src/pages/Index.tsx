@@ -278,7 +278,7 @@ const Index = () => {
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
               <div className="px-4 pt-1">
-                <h1 className="text-xl font-display font-bold text-foreground mb-3">{greeting}</h1>
+                <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   {[
                     { label: "Relax", icon: "🎧" },
