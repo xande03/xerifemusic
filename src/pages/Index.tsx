@@ -25,6 +25,7 @@ import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
+import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
@@ -244,10 +245,8 @@ const Index = () => {
         {/* Header — YouTube Music style */}
         <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-glow-red">
-              <Play size={13} className="text-primary-foreground ml-0.5" fill="currentColor" />
-            </div>
-            <span className="font-display font-bold text-foreground text-base tracking-tight">Music</span>
+            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
+            <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">

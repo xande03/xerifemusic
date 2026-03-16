@@ -1,6 +1,6 @@
 {
-  "short_name": "Demus Music",
-  "name": "Demus Music - Social Jukebox",
+  "short_name": "Xerife Hub",
+  "name": "Xerife Hub - Music Streaming",
   "icons": [
     { "src": "/icons/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
     { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
@@ -9,8 +9,8 @@
   "background_color": "#121212",
   "display": "standalone",
   "scope": "/",
-  "theme_color": "#ff0000",
-  "description": "Streaming de música democrático com YouTube Music",
+  "theme_color": "#d4a017",
+  "description": "Xerife Hub - Streaming de música com catálogo ilimitado",
   "orientation": "portrait",
   "categories": ["music", "entertainment"]
 }

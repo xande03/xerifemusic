@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play } from "lucide-react";
-import demusLogo from "@/assets/demus-logo.png";
+import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   const [phase, setPhase] = useState<"logo" | "fade">("logo");
@@ -24,13 +23,11 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
       </div>
 
       {/* Logo */}
-      <div className="relative flex flex-col items-center gap-6 animate-splash-logo">
-        <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shadow-glow-red">
-          <Play size={36} className="text-primary-foreground ml-1" fill="currentColor" />
-        </div>
+      <div className="relative flex flex-col items-center gap-4 animate-splash-logo">
+        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-28 h-28 drop-shadow-2xl" />
         <div className="flex flex-col items-center gap-1">
-          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Demus Music</h1>
-          <p className="text-xs text-muted-foreground tracking-widest uppercase">Social Jukebox</p>
+          <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">Xerife Hub</h1>
+          <p className="text-xs text-muted-foreground tracking-widest uppercase">Music Streaming</p>
         </div>
       </div>
 
