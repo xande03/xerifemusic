@@ -230,7 +230,7 @@ const Index = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
+      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* YouTube Player */}
         <div
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}

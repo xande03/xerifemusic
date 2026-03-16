@@ -253,7 +253,7 @@ const NowPlayingView = ({
           <button onClick={onNext} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
             <SkipForward size={28} fill="currentColor" />
           </button>
-          <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+          <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
             <Repeat size={20} />
           </button>
         </div>

@@ -15,7 +15,7 @@ const MiniPlayer = ({ song, isPlaying, currentTime, duration, onTogglePlay, onNe
   const progress = duration > 0 ? currentTime / duration : 0;
 
   return (
-    <div className="mx-2 mb-1 rounded-lg overflow-hidden bg-card animate-slide-up">
+    <div className="mx-3 mb-1.5 rounded-xl overflow-hidden bg-card animate-slide-up shadow-lg">
       {/* Progress */}
       <div className="h-[2px] bg-muted">
         <div className="h-full bg-primary transition-all duration-200" style={{ width: `${progress * 100}%` }} />
