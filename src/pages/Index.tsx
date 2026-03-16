@@ -248,7 +248,17 @@ const Index = () => {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
-          {activeTab === "home" && (
+          {activeTab === "home" && showRadio && (
+            <RadioScreen
+              onBack={() => setShowRadio(false)}
+              onPlaySong={handleSelect}
+              onPlayAll={(playlist) => {
+                if (playlist.length > 0) handleSelect(playlist[0]);
+              }}
+            />
+          )}
+
+          {activeTab === "home" && !showRadio && (
             <div className="space-y-6">
               {/* Mood chips — YT Music style */}
               <div className="flex gap-2 overflow-x-auto px-4 pt-1 pb-1 scrollbar-hide">
