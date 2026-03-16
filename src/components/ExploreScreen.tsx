@@ -6,6 +6,7 @@ import VideoCard from "./VideoCard";
 
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
+  onFullscreenVideo?: (video: VideoResult) => void;
 }
 
 const CATEGORIES = [
@@ -23,7 +24,7 @@ const TRENDING_QUERIES = [
   "notícias hoje", "música nova 2026", "comédia stand up",
 ];
 
-const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
@@ -216,6 +217,7 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
                     video={video}
                     onPlay={onPlayVideo}
                     onChannelClick={handleChannelClick}
+                    onFullscreen={onFullscreenVideo}
                   />
                 ))}
               </div>
@@ -241,6 +243,7 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
               video={video}
               onPlay={onPlayVideo}
               onChannelClick={handleChannelClick}
+              onFullscreen={onFullscreenVideo}
             />
           ))}
         </div>

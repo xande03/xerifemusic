@@ -1,13 +1,14 @@
-import { Play } from "lucide-react";
+import { Play, Maximize } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 
 interface VideoCardProps {
   video: VideoResult;
   onPlay: (video: VideoResult) => void;
   onChannelClick?: (channelName: string) => void;
+  onFullscreen?: (video: VideoResult) => void;
 }
 
-const VideoCard = ({ video, onPlay, onChannelClick }: VideoCardProps) => (
+const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardProps) => (
   <div className="w-full">
     {/* Thumbnail — plays video */}
     <button
@@ -31,6 +32,15 @@ const VideoCard = ({ video, onPlay, onChannelClick }: VideoCardProps) => (
             <Play size={20} className="text-primary-foreground ml-0.5" fill="currentColor" />
           </div>
         </div>
+        {onFullscreen && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onFullscreen(video); }}
+            className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-background/90"
+            title="Tela cheia"
+          >
+            <Maximize size={14} className="text-foreground" />
+          </button>
+        )}
       </div>
     </button>
 

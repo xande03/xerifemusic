@@ -124,7 +124,7 @@ const NowPlayingView = ({
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-2 flex-shrink-0">
         <button onClick={onCollapse} className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors active:scale-95">
           <ChevronDown size={28} />
         </button>
@@ -148,10 +148,10 @@ const NowPlayingView = ({
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-3 max-w-lg mx-auto w-full overflow-y-auto pb-8">
+      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-2 max-w-lg mx-auto w-full overflow-y-auto pb-8">
         
         {/* Mode tabs */}
-        <div className="flex items-center gap-1 bg-secondary/60 rounded-full p-1 w-fit flex-shrink-0">
+        <div className="flex items-center gap-1 bg-secondary/60 rounded-full p-1 w-fit flex-shrink-0 mb-1">
           {([
             { id: "video" as PlayerMode, icon: Video, label: "Vídeo" },
             { id: "audio" as PlayerMode, icon: Music2, label: "Áudio" },
@@ -241,7 +241,7 @@ const NowPlayingView = ({
         )}
 
         {/* Song info */}
-        <div className="w-full flex items-center justify-between mt-1 flex-shrink-0">
+        <div className="w-full flex items-center justify-between mt-0 flex-shrink-0">
           <div className="min-w-0 flex-1">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate">{song.title}</h2>
             <p className="text-sm text-muted-foreground">{song.artist}</p>

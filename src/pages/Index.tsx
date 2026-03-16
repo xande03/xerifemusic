@@ -252,7 +252,7 @@ const Index = () => {
         {/* Header */}
         <header className="flex items-center justify-between px-4 lg:px-6 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2 lg:hidden">
-            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
+            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-10 h-10 rounded-lg" />
             <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
           </div>
           <div className="hidden lg:flex items-center gap-3">
@@ -594,6 +594,22 @@ const Index = () => {
           {activeTab === "explore" && (
             <ExploreScreen
               onPlayVideo={(video) => {
+                const song: Song = {
+                  id: `yt-${video.videoId}`,
+                  youtubeId: video.videoId,
+                  title: video.title,
+                  artist: video.channel,
+                  album: video.title,
+                  cover: video.thumbnail,
+                  duration: video.lengthSeconds,
+                  votes: 0,
+                  isDownloaded: false,
+                };
+                handleSelect(song);
+                setPlayerMode("video");
+                setExpanded(true);
+              }}
+              onFullscreenVideo={(video) => {
                 const song: Song = {
                   id: `yt-${video.videoId}`,
                   youtubeId: video.videoId,

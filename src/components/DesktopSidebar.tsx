@@ -21,7 +21,7 @@ const DesktopSidebar = ({ active, onChange }: DesktopSidebarProps) => {
     <aside className="hidden lg:flex flex-col w-[240px] h-full bg-sidebar border-r border-sidebar-border flex-shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
-        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-9 h-9 rounded-lg" />
+        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-11 h-11 rounded-lg" />
         <span className="font-display font-bold text-sidebar-foreground text-lg tracking-tight">Xerife Hub</span>
       </div>
 
