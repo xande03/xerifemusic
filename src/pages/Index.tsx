@@ -13,7 +13,7 @@ import {
 } from "@/lib/localStorage";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
-import NowPlayingView from "@/components/NowPlayingView";
+import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import album1 from "@/assets/album-1.jpg";
@@ -30,6 +30,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
+  const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
@@ -226,10 +227,10 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
-      {/* YouTube Player overlay */}
+      {/* YouTube Player - visible only in expanded video mode */}
       <div
-        className={expanded ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
-        style={expanded ? { top: "46px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "320px", maxWidth: "calc(100% - 32px)" } : {}}
+        className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
+        style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
       >
         <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
       </div>
@@ -614,7 +615,7 @@ const Index = () => {
       <BottomNav active={activeTab} onChange={setActiveTab} />
 
       {expanded && (
-        <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} />
+        <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} />
       )}
     </div>
   );
