@@ -18,6 +18,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import ExploreScreen from "@/components/ExploreScreen";
 import ChannelProfile from "@/components/ChannelProfile";
+import ArtistProfile from "@/components/ArtistProfile";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
@@ -41,6 +42,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [homeMode, setHomeMode] = useState<HomeMode>("music");
   const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
+  const [artistView, setArtistView] = useState<{ name: string; image?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
@@ -282,7 +284,7 @@ const Index = () => {
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Mode switcher: Xerife Music / Xerife Video */}
-              {!channelView && (
+              {!channelView && !artistView && (
                 <div className="px-4 pt-1">
                   <div className="flex gap-2 p-1 bg-secondary rounded-xl w-fit">
                     <button
@@ -311,7 +313,7 @@ const Index = () => {
                 </div>
               )}
 
-              {/* Channel Profile View */}
+              {/* Channel Profile View (Video mode) */}
               {channelView ? (
                 <ChannelProfile
                   channelName={channelView.name}
@@ -336,6 +338,16 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                  }}
+                />
+              ) : artistView ? (
+                <ArtistProfile
+                  artistName={artistView.name}
+                  artistImage={artistView.image}
+                  onBack={() => setArtistView(null)}
+                  onPlaySong={(song) => {
+                    handleSelect(song);
+                    setPlayerMode("audio");
                   }}
                 />
               ) : homeMode === "video" ? (
@@ -395,7 +407,7 @@ const Index = () => {
                       <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
                     </div>
                     <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
-                    <p className="text-xs text-muted-foreground">{heroSong?.artist}</p>
+                    <button onClick={() => heroSong?.artist && setArtistView({ name: heroSong.artist, image: heroSong.cover })} className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors">{heroSong?.artist}</button>
                     <button
                       onClick={() => heroSong && handleSelect(heroSong)}
                       className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
@@ -478,26 +490,31 @@ const Index = () => {
                 </div>
                 <div className="space-y-1">
                   {topCharts.map((song, i) => (
-                    <button
+                    <div
                       key={song.id}
-                      onClick={() => handleSelect(song)}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all active:scale-[0.98] ${
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
                       <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
                         {i + 1}
                       </span>
-                      <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                      <button onClick={() => handleSelect(song)} className="flex-shrink-0">
+                        <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover" />
+                      </button>
                       <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                        <button onClick={() => handleSelect(song)} className="w-full text-left">
+                          <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                        </button>
+                        <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
+                          <p className="text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                        </button>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <TrendingUp size={12} />
                         <span>{song.votes}</span>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </section>
@@ -513,16 +530,20 @@ const Index = () => {
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
                   {forYouSongs.map((song) => (
-                    <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] group snap-start">
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
-                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                        <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
-                          <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                    <div key={song.id} className="flex-shrink-0 w-[140px] group snap-start">
+                      <button onClick={() => handleSelect(song)} className="w-full">
+                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
+                          <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
+                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
-                      <p className="text-[11px] text-muted-foreground truncate text-left">{song.artist}</p>
-                    </button>
+                        <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
+                      </button>
+                      <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
+                        <p className="text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </section>
