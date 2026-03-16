@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
 import RelatedVideos from "./RelatedVideos";
@@ -35,6 +35,7 @@ const NowPlayingView = ({
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
+  const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
@@ -92,10 +93,10 @@ const NowPlayingView = ({
 
   // Autoplay: when video ends, play first related video
   useEffect(() => {
-    if (isEnded && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
+    if (isEnded && autoplay && videoInfo && videoInfo.relatedVideos.length > 0 && onPlayRelated) {
       onPlayRelated(videoInfo.relatedVideos[0]);
     }
-  }, [isEnded]);
+  }, [isEnded, autoplay]);
 
   const handleModeChange = (newMode: PlayerMode) => {
     setMode(newMode);
@@ -303,7 +304,25 @@ const NowPlayingView = ({
           />
         </div>
 
-        {/* Related / Comments tabs */}
+        {/* Autoplay toggle */}
+        <div className="w-full flex items-center justify-between px-2 flex-shrink-0">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <SkipForward size={14} />
+            <span>Autoplay</span>
+          </div>
+          <button
+            onClick={() => {
+              const next = !autoplay;
+              setAutoplay(next);
+              localStorage.setItem('demus-autoplay', String(next));
+            }}
+            className={`w-10 h-5 rounded-full transition-colors relative ${autoplay ? 'bg-primary' : 'bg-muted'}`}
+          >
+            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${autoplay ? 'left-[22px]' : 'left-0.5'}`} />
+          </button>
+        </div>
+
+
         <div className="w-full mt-4 flex-shrink-0">
           <div className="flex items-center gap-1 mb-3">
             <button
