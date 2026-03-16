@@ -16,6 +16,7 @@ import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
+import ExploreScreen from "@/components/ExploreScreen";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
@@ -25,7 +26,7 @@ import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile";
+type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
 
 const albumCovers = [album1, album2, album3, album4];
@@ -576,6 +577,25 @@ const Index = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {activeTab === "explore" && (
+            <ExploreScreen
+              onPlayVideo={(video) => {
+                const song: Song = {
+                  id: `yt-${video.videoId}`,
+                  youtubeId: video.videoId,
+                  title: video.title,
+                  artist: video.channel,
+                  album: video.title,
+                  cover: video.thumbnail,
+                  duration: video.lengthSeconds,
+                  votes: 0,
+                  isDownloaded: false,
+                };
+                handleSelect(song);
+              }}
+            />
           )}
 
           {activeTab === "library" && (

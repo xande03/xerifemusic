@@ -19,43 +19,77 @@ serve(async (req) => {
       });
     }
 
-    const cleanArtist = artist.replace(/\s*ft\.?\s*.*/i, '').replace(/\s*feat\.?\s*.*/i, '').trim();
-    const cleanTitle = title.replace(/\s*\(.*\)/, '').replace(/\s*\[.*\]/, '').trim();
+    const cleanArtist = artist.replace(/\s*ft\.?\s*.*/i, '').replace(/\s*feat\.?\s*.*/i, '').replace(/\s*-\s*Topic$/i, '').replace(/VEVO$/i, '').trim();
+    const cleanTitle = title.replace(/\s*\(.*\)/, '').replace(/\s*\[.*\]/, '').replace(/\s*\|.*/, '').trim();
 
-    // Try LRCLIB first (provides synced lyrics with timestamps)
-    try {
-      const lrclibUrl = `https://lrclib.net/api/search?artist_name=${encodeURIComponent(cleanArtist)}&track_name=${encodeURIComponent(cleanTitle)}`;
-      const lrclibRes = await fetch(lrclibUrl, {
-        headers: { 'User-Agent': 'DemusMusic/1.0' },
-      });
+    // Try LRCLIB with multiple strategies
+    const searches = [
+      { artist: cleanArtist, title: cleanTitle },
+      { artist: artist, title: title },
+      { artist: cleanArtist, title: title },
+    ];
 
-      if (lrclibRes.ok) {
-        const results = await lrclibRes.json();
-        if (Array.isArray(results) && results.length > 0) {
-          const best = results[0];
-          if (best.syncedLyrics) {
-            return new Response(JSON.stringify({
-              lyrics: best.syncedLyrics,
-              synced: true,
-              source: 'lrclib',
-            }), {
+    for (const s of searches) {
+      try {
+        // Try exact match first
+        const getUrl = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(s.artist)}&track_name=${encodeURIComponent(s.title)}`;
+        const getRes = await fetch(getUrl, { headers: { 'User-Agent': 'DemusMusic/1.0' } });
+        if (getRes.ok) {
+          const data = await getRes.json();
+          if (data.syncedLyrics) {
+            return new Response(JSON.stringify({ lyrics: data.syncedLyrics, synced: true, source: 'lrclib' }), {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
           }
-          if (best.plainLyrics) {
-            return new Response(JSON.stringify({
-              lyrics: best.plainLyrics.trim(),
-              synced: false,
-              source: 'lrclib',
-            }), {
+          if (data.plainLyrics) {
+            return new Response(JSON.stringify({ lyrics: data.plainLyrics.trim(), synced: false, source: 'lrclib' }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        }
+      } catch {}
+
+      try {
+        // Search endpoint
+        const searchUrl = `https://lrclib.net/api/search?artist_name=${encodeURIComponent(s.artist)}&track_name=${encodeURIComponent(s.title)}`;
+        const searchRes = await fetch(searchUrl, { headers: { 'User-Agent': 'DemusMusic/1.0' } });
+        if (searchRes.ok) {
+          const results = await searchRes.json();
+          if (Array.isArray(results) && results.length > 0) {
+            // Prefer synced lyrics
+            const synced = results.find((r: any) => r.syncedLyrics);
+            if (synced) {
+              return new Response(JSON.stringify({ lyrics: synced.syncedLyrics, synced: true, source: 'lrclib' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              });
+            }
+            const plain = results.find((r: any) => r.plainLyrics);
+            if (plain) {
+              return new Response(JSON.stringify({ lyrics: plain.plainLyrics.trim(), synced: false, source: 'lrclib' }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              });
+            }
+          }
+        }
+      } catch {}
+    }
+
+    // Also try LRCLIB with just the title (for cases where artist doesn't match)
+    try {
+      const titleOnlyUrl = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}`;
+      const titleRes = await fetch(titleOnlyUrl, { headers: { 'User-Agent': 'DemusMusic/1.0' } });
+      if (titleRes.ok) {
+        const results = await titleRes.json();
+        if (Array.isArray(results) && results.length > 0) {
+          const synced = results.find((r: any) => r.syncedLyrics);
+          if (synced) {
+            return new Response(JSON.stringify({ lyrics: synced.syncedLyrics, synced: true, source: 'lrclib' }), {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
           }
         }
       }
-    } catch (e) {
-      console.warn('LRCLIB fetch failed:', e);
-    }
+    } catch {}
 
     // Fallback: lyrics.ovh (plain text only)
     const lyricsUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`;
