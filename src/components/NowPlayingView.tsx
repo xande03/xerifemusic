@@ -1,8 +1,12 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
+import RelatedVideos from "./RelatedVideos";
+import VideoComments from "./VideoComments";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
+import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
+import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
