@@ -4,7 +4,7 @@ import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
 import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
@@ -29,12 +29,14 @@ interface NowPlayingViewProps {
   onAirPlay?: (mode: 'audio' | 'video') => void;
   onPlayRelated?: (video: VideoResult) => void;
   onFullscreen?: () => void;
+  onExitFullscreen?: () => void;
+  isFullscreen?: boolean;
 }
 
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -43,11 +45,29 @@ const NowPlayingView = ({
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [videoInfoLoading, setVideoInfoLoading] = useState(false);
   const [bottomTab, setBottomTab] = useState<"related" | "comments">("related");
+  const [showFsControls, setShowFsControls] = useState(true);
+  const fsControlsTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLParagraphElement>(null);
   const progress = duration > 0 ? currentTime / duration : 0;
 
-  // Fetch lyrics when song changes or lyrics mode is activated
+  // Auto-hide fullscreen controls after 3s
+  const resetFsControlsTimer = useCallback(() => {
+    setShowFsControls(true);
+    if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+    fsControlsTimerRef.current = setTimeout(() => setShowFsControls(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      resetFsControlsTimer();
+    } else {
+      setShowFsControls(true);
+      if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+    }
+    return () => { if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current); };
+  }, [isFullscreen, resetFsControlsTimer]);
+
   useEffect(() => {
     if (mode === "lyrics" && !lyricsResult && !lyricsLoading) {
       setLyricsLoading(true);
@@ -377,6 +397,77 @@ const NowPlayingView = ({
           )}
         </div>
       </div>
+
+      {/* Fullscreen overlay controls */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col justify-between pointer-events-none"
+          onClick={(e) => { e.stopPropagation(); resetFsControlsTimer(); }}
+          style={{ pointerEvents: 'auto' }}
+        >
+          {/* Tap area to toggle controls */}
+          <div className="absolute inset-0" onClick={resetFsControlsTimer} />
+
+          {/* Top bar */}
+          <div
+            className={`relative z-10 flex items-center justify-between px-4 pt-4 pb-8 bg-gradient-to-b from-black/70 to-transparent transition-opacity duration-300 ${
+              showFsControls ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <button
+              onClick={onExitFullscreen}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+            >
+              <ChevronDown size={22} className="text-white" />
+            </button>
+            <div className="flex-1 text-center px-4 min-w-0">
+              <p className="text-white text-sm font-medium truncate">{song.title}</p>
+              <p className="text-white/60 text-xs truncate">{song.artist}</p>
+            </div>
+            <div className="w-10" /> {/* Spacer */}
+          </div>
+
+          {/* Bottom controls */}
+          <div
+            className={`relative z-10 px-4 pb-6 pt-10 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
+              showFsControls ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            {/* Progress */}
+            <div
+              className="h-1.5 w-full rounded-full bg-white/30 overflow-hidden cursor-pointer mb-2"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                onSeek(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
+              }}
+            >
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress * 100}%` }}>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-md" />
+              </div>
+            </div>
+            <div className="flex justify-between text-[10px] text-white/60 font-mono mb-3">
+              <span>{formatDuration(currentTime)}</span>
+              <span>{formatDuration(duration)}</span>
+            </div>
+
+            {/* Transport */}
+            <div className="flex items-center justify-center gap-6">
+              <button onClick={onPrev} className="p-2 text-white hover:text-white/80 active:scale-90 transition-all">
+                <SkipBack size={24} fill="currentColor" />
+              </button>
+              <button
+                onClick={onTogglePlay}
+                className="w-14 h-14 rounded-full bg-white flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-lg"
+              >
+                {isPlaying ? <Pause size={26} className="text-black" fill="currentColor" /> : <Play size={26} className="text-black ml-1" fill="currentColor" />}
+              </button>
+              <button onClick={onNext} className="p-2 text-white hover:text-white/80 active:scale-90 transition-all">
+                <SkipForward size={24} fill="currentColor" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

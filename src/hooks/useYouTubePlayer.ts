@@ -14,6 +14,7 @@ export interface YouTubePlayerState {
   currentTime: number;
   duration: number;
   videoId: string | null;
+  isFullscreen: boolean;
 }
 
 let apiLoaded = false;
@@ -68,6 +69,7 @@ export function useYouTubePlayer(containerId: string) {
     currentTime: 0,
     duration: 0,
     videoId: null,
+    isFullscreen: false,
   });
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const userGestureRef = useRef(false);
@@ -253,7 +255,6 @@ export function useYouTubePlayer(containerId: string) {
       const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
       if (!iframe) return;
 
-      // Try the container first (for better controls), then iframe itself
       const target = iframe.parentElement || iframe;
       
       if (target.requestFullscreen) {
@@ -268,6 +269,32 @@ export function useYouTubePlayer(containerId: string) {
     } catch (err) {
       console.warn("Fullscreen request failed:", err);
     }
+  }, []);
+
+  const exitFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    } catch (err) {
+      console.warn("Exit fullscreen failed:", err);
+    }
+  }, []);
+
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFsChange = () => {
+      const isFs = !!document.fullscreenElement || !!(document as any).webkitFullscreenElement;
+      setState((s) => ({ ...s, isFullscreen: isFs }));
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    document.addEventListener("webkitfullscreenchange", handleFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFsChange);
+      document.removeEventListener("webkitfullscreenchange", handleFsChange);
+    };
   }, []);
 
   const requestAirPlay = useCallback(async (mode: 'audio' | 'video') => {
@@ -302,5 +329,5 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, []);
 
-  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay, requestFullscreen };
+  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay, requestFullscreen, exitFullscreen };
 }
