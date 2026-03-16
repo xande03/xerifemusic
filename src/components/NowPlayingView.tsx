@@ -28,6 +28,7 @@ interface NowPlayingViewProps {
   onModeChange?: (mode: PlayerMode) => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
   onPlayRelated?: (video: VideoResult) => void;
+  onFullscreen?: () => void;
 }
 
 const NowPlayingView = ({
