@@ -726,7 +726,21 @@ const Index = () => {
               setExpanded(false);
               setShowFloatingPiP(true);
             }
-          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onPlayRelated={(video) => {
+            const song: Song = {
+              id: `yt-${video.videoId}`,
+              youtubeId: video.videoId,
+              title: video.title,
+              artist: video.channel,
+              album: video.title,
+              cover: video.thumbnail,
+              duration: video.lengthSeconds,
+              votes: 0,
+              isDownloaded: false,
+            };
+            handleSelect(song);
+            setPlayerMode("video");
+          }} />
         )}
 
         {showFloatingPiP && !expanded && (
