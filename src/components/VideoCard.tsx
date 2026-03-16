@@ -4,7 +4,7 @@ import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 interface VideoCardProps {
   video: VideoResult;
   onPlay: (video: VideoResult) => void;
-  onChannelClick?: (channelName: string) => void;
+  onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
   onFullscreen?: (video: VideoResult) => void;
 }
 
@@ -48,7 +48,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
     <div className="flex gap-3 mt-2.5 px-0.5">
       {/* Channel avatar — clickable */}
       <button
-        onClick={() => onChannelClick?.(video.channel)}
+        onClick={() => onChannelClick?.(video.channel, video.channelThumbnail)}
         className="flex-shrink-0 mt-0.5 active:scale-95 transition-transform"
       >
         {video.channelThumbnail ? (
@@ -72,7 +72,7 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
         </button>
         {/* Channel name — clickable */}
         <button
-          onClick={() => onChannelClick?.(video.channel)}
+          onClick={() => onChannelClick?.(video.channel, video.channelThumbnail)}
           className="text-left mt-1 active:underline"
         >
           <span className="text-xs text-muted-foreground hover:text-foreground transition-colors">

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -17,6 +17,7 @@ import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import ExploreScreen from "@/components/ExploreScreen";
+import ChannelProfile from "@/components/ChannelProfile";
 import BottomNav from "@/components/BottomNav";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import SearchSkeleton from "@/components/SearchSkeleton";
@@ -29,14 +30,17 @@ import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
+type Tab = "home" | "search" | "library" | "offline" | "profile";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
+type HomeMode = "music" | "video";
 
 const albumCovers = [album1, album2, album3, album4];
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [homeMode, setHomeMode] = useState<HomeMode>("music");
+  const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
@@ -257,7 +261,7 @@ const Index = () => {
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
-              {activeTab === "home" ? greeting : activeTab === "explore" ? "Explorar" : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+              {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
             </h2>
           </div>
           <div className="flex items-center gap-3">
@@ -277,8 +281,91 @@ const Index = () => {
         <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-6">
+              {/* Mode switcher: Xerife Music / Xerife Video */}
+              {!channelView && (
+                <div className="px-4 pt-1">
+                  <div className="flex gap-2 p-1 bg-secondary rounded-xl w-fit">
+                    <button
+                      onClick={() => setHomeMode("music")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        homeMode === "music"
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Music size={16} />
+                      Xerife Music
+                    </button>
+                    <button
+                      onClick={() => setHomeMode("video")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        homeMode === "video"
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <MonitorPlay size={16} />
+                      Xerife Video
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Channel Profile View */}
+              {channelView ? (
+                <ChannelProfile
+                  channelName={channelView.name}
+                  channelThumbnail={channelView.thumbnail}
+                  onBack={() => setChannelView(null)}
+                  onPlayVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onFullscreenVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                />
+              ) : homeMode === "video" ? (
+                <ExploreScreen
+                  onPlayVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onFullscreenVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
+                />
+              ) : (
+              <>
               {/* Greeting + Mood chips — YT Music style */}
-              <div className="px-4 pt-1">
+              <div className="px-4">
                 <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   {[
@@ -488,6 +575,8 @@ const Index = () => {
                   ))}
                 </div>
               </section>
+              </>
+              )}
             </div>
           )}
 
@@ -591,42 +680,6 @@ const Index = () => {
             </div>
           )}
 
-          {activeTab === "explore" && (
-            <ExploreScreen
-              onPlayVideo={(video) => {
-                const song: Song = {
-                  id: `yt-${video.videoId}`,
-                  youtubeId: video.videoId,
-                  title: video.title,
-                  artist: video.channel,
-                  album: video.title,
-                  cover: video.thumbnail,
-                  duration: video.lengthSeconds,
-                  votes: 0,
-                  isDownloaded: false,
-                };
-                handleSelect(song);
-                setPlayerMode("video");
-                setExpanded(true);
-              }}
-              onFullscreenVideo={(video) => {
-                const song: Song = {
-                  id: `yt-${video.videoId}`,
-                  youtubeId: video.videoId,
-                  title: video.title,
-                  artist: video.channel,
-                  album: video.title,
-                  cover: video.thumbnail,
-                  duration: video.lengthSeconds,
-                  votes: 0,
-                  isDownloaded: false,
-                };
-                handleSelect(song);
-                setPlayerMode("video");
-                setExpanded(true);
-              }}
-            />
-          )}
 
           {activeTab === "library" && (
             <div className="px-4 space-y-3">

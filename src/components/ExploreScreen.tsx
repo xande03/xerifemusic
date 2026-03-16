@@ -7,6 +7,7 @@ import VideoCard from "./VideoCard";
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
   onFullscreenVideo?: (video: VideoResult) => void;
+  onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
 }
 
 const CATEGORIES = [
@@ -24,7 +25,7 @@ const TRENDING_QUERIES = [
   "notícias hoje", "música nova 2026", "comédia stand up",
 ];
 
-const ExploreScreen = ({ onPlayVideo, onFullscreenVideo }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
@@ -83,11 +84,15 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo }: ExploreScreenProps) =
     doSearch(term);
   };
 
-  const handleChannelClick = (channelName: string) => {
+  const handleChannelClick = (channelName: string, channelThumbnail?: string) => {
     if (!channelName) return;
-    setQuery(channelName);
-    setActiveCategory("all");
-    doSearch(channelName);
+    if (onChannelClick) {
+      onChannelClick(channelName, channelThumbnail);
+    } else {
+      setQuery(channelName);
+      setActiveCategory("all");
+      doSearch(channelName);
+    }
   };
 
   const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {

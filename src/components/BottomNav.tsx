@@ -1,6 +1,6 @@
-import { Home, Library, Download, ListMusic, Compass } from "lucide-react";
+import { Home, Library, Download, ListMusic } from "lucide-react";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
+type Tab = "home" | "search" | "library" | "offline" | "profile";
 
 interface BottomNavProps {
   active: Tab;
@@ -9,7 +9,6 @@ interface BottomNavProps {
 
 const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "Início" },
-  { id: "explore", icon: Compass, label: "Explorar" },
   { id: "library", icon: Library, label: "Biblioteca" },
   { id: "offline", icon: Download, label: "Downloads" },
   { id: "search", icon: ListMusic, label: "Playlists" },

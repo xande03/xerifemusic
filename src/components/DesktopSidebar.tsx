@@ -1,7 +1,7 @@
-import { Home, Compass, Library, Download, ListMusic, Search, Settings, TrendingUp } from "lucide-react";
+import { Home, Library, Download, ListMusic, Settings } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
+type Tab = "home" | "search" | "library" | "offline" | "profile";
 
 interface DesktopSidebarProps {
   active: Tab;
@@ -10,7 +10,6 @@ interface DesktopSidebarProps {
 
 const mainTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "Início" },
-  { id: "explore", icon: Compass, label: "Explorar" },
   { id: "library", icon: Library, label: "Biblioteca" },
   { id: "offline", icon: Download, label: "Downloads" },
   { id: "search", icon: ListMusic, label: "Playlists" },
