@@ -14,6 +14,7 @@ export interface YouTubePlayerState {
   currentTime: number;
   duration: number;
   videoId: string | null;
+  isFullscreen: boolean;
 }
 
 let apiLoaded = false;
