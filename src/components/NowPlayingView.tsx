@@ -15,6 +15,7 @@ interface NowPlayingViewProps {
   onSeek: (fraction: number) => void;
   volume: number;
   onVolumeChange: (vol: number) => void;
+  onTogglePiP?: () => void;
 }
 
 const NowPlayingView = ({
