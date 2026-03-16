@@ -97,7 +97,7 @@ const NowPlayingView = ({
     }
   }, [isEnded]);
 
-
+  const handleModeChange = (newMode: PlayerMode) => {
     setMode(newMode);
     onModeChange?.(newMode);
     if (newMode === "lyrics" && !lyricsResult && !lyricsLoading) {
