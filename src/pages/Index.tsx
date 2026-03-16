@@ -15,6 +15,7 @@ import {
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
+import FloatingPiPPlayer from "@/components/FloatingPiPPlayer";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
@@ -35,6 +36,7 @@ const Index = () => {
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
+  const [showFloatingPiP, setShowFloatingPiP] = useState(false);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
@@ -696,7 +698,27 @@ const Index = () => {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {expanded && (
-          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
+          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
+            const result = await togglePiP();
+            if (result === 'fallback') {
+              setExpanded(false);
+              setShowFloatingPiP(true);
+            }
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
+        )}
+
+        {showFloatingPiP && !expanded && (
+          <FloatingPiPPlayer
+            song={currentSong}
+            isPlaying={playerState.isPlaying}
+            currentTime={ct}
+            duration={dur}
+            onTogglePlay={handleTogglePlay}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            onExpand={() => { setShowFloatingPiP(false); setExpanded(true); }}
+            onClose={() => setShowFloatingPiP(false)}
+          />
         )}
       </div>
     </>
