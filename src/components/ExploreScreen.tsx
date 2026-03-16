@@ -84,11 +84,15 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
     doSearch(term);
   };
 
-  const handleChannelClick = (channelName: string) => {
+  const handleChannelClick = (channelName: string, channelThumbnail?: string) => {
     if (!channelName) return;
-    setQuery(channelName);
-    setActiveCategory("all");
-    doSearch(channelName);
+    if (onChannelClick) {
+      onChannelClick(channelName, channelThumbnail);
+    } else {
+      setQuery(channelName);
+      setActiveCategory("all");
+      doSearch(channelName);
+    }
   };
 
   const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
