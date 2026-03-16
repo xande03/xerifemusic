@@ -32,7 +32,7 @@ const DesktopPlayer = ({
       {/* Song info */}
       <button onClick={onExpand} className="flex items-center gap-3 min-w-[200px] max-w-[280px] group">
         <img
-          src={song.cover}
+          src={hdThumbnail(song.cover)}
           alt={song.album}
           className="w-12 h-12 rounded-lg object-cover shadow-md group-hover:shadow-lg transition-shadow"
         />

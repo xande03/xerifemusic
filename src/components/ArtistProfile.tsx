@@ -140,7 +140,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                     className="group active:scale-95 transition-transform"
                   >
                     <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
-                      <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                      <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors flex items-center justify-center">
                         <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
                           <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
