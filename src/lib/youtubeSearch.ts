@@ -1,4 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
 import type { Song } from "@/data/mockSongs";
 
 export interface YouTubeSearchResult {
@@ -18,14 +17,6 @@ export async function searchYouTubeMusic(
   if (!query || query.length < 2) return [];
 
   try {
-    const { data, error } = await supabase.functions.invoke("youtube-search", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: null,
-    });
-
-    // supabase.functions.invoke doesn't support query params well for GET,
-    // so let's use fetch directly
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const url = `https://${projectId}.supabase.co/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}`;
 
@@ -59,16 +50,13 @@ export async function searchYouTubeMusic(
 
 export async function getSearchSuggestions(query: string): Promise<string[]> {
   if (!query || query.length < 2) return [];
-  
+
   try {
-    // Google's suggest endpoint with YouTube client
     const url = `https://clients1.google.com/complete/search?client=youtube&ds=yt&q=${encodeURIComponent(query)}`;
-    
-    // Use a CORS proxy approach - fetch as script/jsonp
-    // Since direct fetch may be blocked, we use a script injection approach
+
     return new Promise((resolve) => {
       const callbackName = `ytSuggest_${Date.now()}`;
-      
+
       (window as any)[callbackName] = (data: any) => {
         try {
           const suggestions = data[1]?.map((item: any) => item[0]) || [];
@@ -88,8 +76,7 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
         script.remove();
       };
       document.head.appendChild(script);
-      
-      // Timeout after 3s
+
       setTimeout(() => {
         if ((window as any)[callbackName]) {
           resolve([]);
