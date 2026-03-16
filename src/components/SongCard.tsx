@@ -23,7 +23,7 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = fa
     }`}
   >
     <button onClick={() => onSelect(song)} className="relative w-11 h-11 rounded flex-shrink-0 overflow-hidden">
-      <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
+      <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
       {isActive && (
         <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
           <div className="flex gap-[2px]">
