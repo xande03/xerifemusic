@@ -30,8 +30,9 @@ import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile" | "explore";
+type Tab = "home" | "search" | "library" | "offline" | "profile";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
+type HomeMode = "music" | "video";
 
 const albumCovers = [album1, album2, album3, album4];
 
