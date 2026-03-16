@@ -1,5 +1,6 @@
 import { Play, Pause, SkipForward } from "lucide-react";
 import { Song } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 
 interface MiniPlayerProps {
   song: Song;
@@ -22,7 +23,7 @@ const MiniPlayer = ({ song, isPlaying, currentTime, duration, onTogglePlay, onNe
       </div>
       <div className="flex items-center gap-3 p-2">
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0">
-          <img src={song.cover} alt={song.album} className="w-10 h-10 rounded object-cover" />
+          <img src={hdThumbnail(song.cover)} alt={song.album} className="w-10 h-10 rounded object-cover" />
           <div className="min-w-0">
             <p className="text-sm font-normal truncate text-foreground">{song.title}</p>
             <p className="text-xs text-muted-foreground truncate">{song.artist}</p>

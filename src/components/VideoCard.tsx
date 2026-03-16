@@ -1,5 +1,6 @@
 import { Play, Maximize } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
+import { hdThumbnail } from "@/lib/utils";
 
 interface VideoCardProps {
   video: VideoResult;
@@ -16,9 +17,9 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen }: VideoCardPro
       className="w-full text-left active:scale-[0.98] transition-transform"
     >
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-card group">
-        <img
-          src={video.thumbnail}
-          alt={video.title}
+         <img
+            src={hdThumbnail(video.thumbnail)}
+            alt={video.title}
           className="w-full h-full object-cover"
           loading="lazy"
         />

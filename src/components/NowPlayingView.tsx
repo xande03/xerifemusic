@@ -1,5 +1,6 @@
 import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
@@ -183,7 +184,7 @@ const NowPlayingView = ({
         {mode === "audio" && (
           <div className="w-full flex flex-col items-center gap-4 flex-shrink-0">
             <div className="w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl relative">
-              <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+              <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
             </div>
             <AudioVisualizer isPlaying={isPlaying} barCount={48} className="w-full max-w-[280px] h-10" />

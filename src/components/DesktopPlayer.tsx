@@ -1,5 +1,6 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Maximize2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 
 interface DesktopPlayerProps {
   song: Song;
@@ -31,7 +32,7 @@ const DesktopPlayer = ({
       {/* Song info */}
       <button onClick={onExpand} className="flex items-center gap-3 min-w-[200px] max-w-[280px] group">
         <img
-          src={song.cover}
+          src={hdThumbnail(song.cover)}
           alt={song.album}
           className="w-12 h-12 rounded-lg object-cover shadow-md group-hover:shadow-lg transition-shadow"
         />
