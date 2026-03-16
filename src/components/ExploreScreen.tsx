@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, TrendingUp, Loader2, X, Music2, Gamepad2, Trophy, GraduationCap, Newspaper } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
