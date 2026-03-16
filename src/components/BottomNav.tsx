@@ -15,7 +15,7 @@ const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
 ];
 
 const BottomNav = ({ active, onChange }: BottomNavProps) => (
-  <nav className="px-4 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+  <nav className="px-4 pt-1 flex-shrink-0" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
     <div className="flex items-center justify-around bg-card/90 backdrop-blur-xl rounded-2xl border border-border/30 py-1 px-1">
       {tabs.map(({ id, icon: Icon, label }) => (
         <button
