@@ -227,10 +227,10 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
-      {/* YouTube Player overlay */}
+      {/* YouTube Player - visible only in expanded video mode */}
       <div
-        className={expanded ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
-        style={expanded ? { top: "46px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "320px", maxWidth: "calc(100% - 32px)" } : {}}
+        className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
+        style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
       >
         <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
       </div>
