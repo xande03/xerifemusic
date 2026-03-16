@@ -274,7 +274,7 @@ const Index = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2">
+        <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
