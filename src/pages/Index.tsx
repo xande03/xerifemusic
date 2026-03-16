@@ -3,6 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp } from "lucide-r
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
+import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView from "@/components/NowPlayingView";
