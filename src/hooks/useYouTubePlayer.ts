@@ -111,7 +111,7 @@ export function useYouTubePlayer(containerId: string) {
           playsinline: 1, // Critical for iOS — prevents fullscreen
           iv_load_policy: 3,
           cc_load_policy: 0,
-          fs: 0,
+          fs: 1,
           disablekb: 1,
           origin: window.location.origin,
           // Workaround: enable JS API and allow autoplay with sound
