@@ -174,21 +174,29 @@ const NowPlayingView = ({
                 <p className="text-sm text-muted-foreground">Buscando letra...</p>
               </div>
             ) : lyricsResult && lyricsResult.lines.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-4 py-4">
                 {lyricsResult.lines.map((line, i) => {
                   const isActive = lyricsResult.synced && i === activeLineIndex;
                   const isPast = lyricsResult.synced && activeLineIndex >= 0 && i < activeLineIndex;
+                  const isFuture = lyricsResult.synced && activeLineIndex >= 0 && i > activeLineIndex;
                   return (
                     <p
                       key={i}
                       ref={isActive ? activeLineRef : undefined}
-                      className={`text-center transition-all duration-300 ${
+                      onClick={() => {
+                        if (lyricsResult.synced && line.time >= 0) {
+                          onSeek(line.time / (duration || 1));
+                        }
+                      }}
+                      className={`text-center transition-all duration-500 cursor-pointer ${
                         lyricsResult.synced
                           ? isActive
-                            ? "text-lg font-bold text-primary scale-105"
+                            ? "text-xl font-bold text-primary scale-105 drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
                             : isPast
-                              ? "text-sm text-muted-foreground/50"
-                              : "text-sm text-foreground/60"
+                              ? "text-sm text-muted-foreground/40"
+                              : isFuture
+                                ? "text-base text-foreground/50"
+                                : "text-sm text-foreground/60"
                           : "text-sm sm:text-base text-foreground/90 leading-relaxed"
                       }`}
                     >
