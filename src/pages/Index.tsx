@@ -769,6 +769,7 @@ const Index = () => {
             onClose={() => setShowFloatingPiP(false)}
           />
         )}
+        </div>{/* end main column */}
       </div>
     </>
   );
