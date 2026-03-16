@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Radio, Plus, Cast, Sun, Moon } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap } from "lucide-react";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -17,7 +17,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
-import RadioScreen from "@/components/RadioScreen";
+
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
@@ -34,7 +34,7 @@ const Index = () => {
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
-  const [showRadio, setShowRadio] = useState(false);
+  
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
   const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('demus-color') || 'red');
@@ -250,56 +250,81 @@ const Index = () => {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
-          {activeTab === "home" && showRadio && (
-            <RadioScreen
-              onBack={() => setShowRadio(false)}
-              onPlaySong={handleSelect}
-              onPlayAll={(playlist) => {
-                if (playlist.length > 0) handleSelect(playlist[0]);
-              }}
-            />
-          )}
-
-          {activeTab === "home" && !showRadio && (
+          {activeTab === "home" && (
             <div className="space-y-6">
-              {/* Mood chips — YT Music style */}
-              <div className="flex gap-2 overflow-x-auto px-4 pt-1 pb-1 scrollbar-hide">
-                {["Relax", "Workout", "Focus", "Energize", "Party", "Commute"].map((mood) => (
-                  <button key={mood} className="chip chip-inactive flex-shrink-0 whitespace-nowrap rounded-full">
-                    {mood}
-                  </button>
-                ))}
+              {/* Greeting + Mood chips — YT Music style */}
+              <div className="px-4 pt-1">
+                <h1 className="text-xl font-display font-bold text-foreground mb-3">{greeting}</h1>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                  {[
+                    { label: "Relax", icon: "🎧" },
+                    { label: "Workout", icon: "💪" },
+                    { label: "Focus", icon: "🎯" },
+                    { label: "Energize", icon: "⚡" },
+                    { label: "Party", icon: "🎉" },
+                    { label: "Commute", icon: "🚗" },
+                  ].map((mood) => (
+                    <button key={mood.label} className="chip chip-inactive flex-shrink-0 whitespace-nowrap rounded-full flex items-center gap-1">
+                      <span>{mood.icon}</span>
+                      {mood.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* CREATE A RADIO — hero section like YT Music */}
+              {/* Top Trending — hero banner like YT Music */}
               <section className="px-4">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Crie uma rádio</p>
-                <h2 className="text-lg font-display font-bold text-foreground mb-3">Seu sintonizador musical</h2>
-                <button
-                  onClick={() => setShowRadio(true)}
-                  className="relative w-full rounded-2xl overflow-hidden aspect-[16/9] group active:scale-[0.99] transition-transform"
-                >
-                  {/* Collage of album covers */}
-                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-2">
-                    {songs.slice(0, 6).map((s, i) => (
-                      <div key={s.id} className="overflow-hidden">
-                        <img src={s.cover} alt={s.album} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
+                <div className="relative w-full rounded-2xl overflow-hidden aspect-[2/1] group">
+                  <img src={queueSongs[0]?.cover} alt={queueSongs[0]?.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Flame size={14} className="text-primary" />
+                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta</span>
+                    </div>
+                    <p className="text-base font-bold text-foreground">{queueSongs[0]?.title}</p>
+                    <p className="text-xs text-muted-foreground">{queueSongs[0]?.artist}</p>
+                    <button
+                      onClick={() => queueSongs[0] && handleSelect(queueSongs[0])}
+                      className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
+                    >
+                      <Play size={14} fill="currentColor" className="ml-0.5" /> Ouvir agora
+                    </button>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
-                  {/* Plus button overlay */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-foreground/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Plus size={28} className="text-background" />
-                  </div>
-                </button>
+                </div>
+              </section>
+
+              {/* Quick picks — compact row like YT Music home */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-2">
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Zap size={16} className="text-primary" />
+                    Seleção rápida
+                  </h2>
+                </div>
+                <div className="grid grid-cols-2 gap-2 px-4">
+                  {songs.slice(0, 4).map((song) => (
+                    <button
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
+                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
+                      }`}
+                    >
+                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                    </button>
+                  ))}
+                </div>
               </section>
 
               {/* Listen again — grid layout like YT Music */}
               <section>
                 <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-lg font-display font-bold text-foreground">Ouvir novamente</h2>
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-muted-foreground" />
+                    <h2 className="text-base font-display font-medium text-foreground">Ouvir novamente</h2>
+                  </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-3 gap-3 px-4">
@@ -330,25 +355,36 @@ const Index = () => {
                 </div>
               </section>
 
-              {/* Quick picks row */}
-              <section>
-                <div className="flex items-center justify-between px-4 mb-3">
+              {/* Top Charts — numbered list like YT Music Charts */}
+              <section className="px-4">
+                <div className="flex items-center justify-between mb-3">
                   <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Sparkles size={16} className="text-primary" />
-                    Seleção rápida
+                    <TrendingUp size={16} className="text-primary" />
+                    Top Charts
                   </h2>
+                  <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-4">
-                  {songs.slice(0, 4).map((song) => (
+                <div className="space-y-1">
+                  {queueSongs.slice(0, 5).map((song, i) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
-                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
-                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all active:scale-[0.98] ${
+                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                      <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
+                        {i + 1}
+                      </span>
+                      <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <TrendingUp size={12} />
+                        <span>{song.votes}</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -357,7 +393,10 @@ const Index = () => {
               {/* For you carousel */}
               <section>
                 <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground">Para você</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Sparkles size={16} className="text-primary" />
+                    Para você
+                  </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
@@ -379,7 +418,10 @@ const Index = () => {
               {/* Featured mixes */}
               <section className="px-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground">Mixes populares</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Disc3 size={16} className="text-primary" />
+                    Mixes populares
+                  </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -409,7 +451,10 @@ const Index = () => {
               {/* Voting queue */}
               <section className="px-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground">Fila de votação</h2>
+                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                    <Headphones size={16} className="text-primary" />
+                    Fila de votação
+                  </h2>
                   <span className="text-xs text-primary font-medium">{songs.reduce((a, s) => a + s.votes, 0)} votos</span>
                 </div>
                 <div>
