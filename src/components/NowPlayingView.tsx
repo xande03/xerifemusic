@@ -105,6 +105,15 @@ const NowPlayingView = ({
         </button>
         <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Tocando agora</span>
         <div className="flex items-center gap-1">
+          {onAirPlay && (
+            <button
+              onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+              title="AirPlay"
+            >
+              <Airplay size={20} />
+            </button>
+          )}
           {onTogglePiP && (
             <button onClick={onTogglePiP} className="p-2 text-muted-foreground hover:text-foreground transition-colors active:scale-95" title="Picture-in-Picture">
               <PictureInPicture2 size={20} />
