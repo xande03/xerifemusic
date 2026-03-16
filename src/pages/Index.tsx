@@ -338,6 +338,7 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                    setTimeout(() => requestFullscreen(), 500);
                   }}
                 />
               ) : artistView ? (
