@@ -468,7 +468,7 @@ const Index = () => {
           onCollapse={() => setExpanded(false)}
           onSeek={handleSeek}
           volume={volume}
-          onVolumeChange={setVolume}
+          onVolumeChange={setVolumeState}
         />
       )}
     </div>
