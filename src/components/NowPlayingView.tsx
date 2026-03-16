@@ -26,7 +26,7 @@ interface NowPlayingViewProps {
 const NowPlayingView = ({
   song, isPlaying, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
