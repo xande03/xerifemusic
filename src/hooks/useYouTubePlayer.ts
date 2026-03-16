@@ -53,6 +53,8 @@ function ensureSilentAudio() {
   silentAudio.volume = 0.001; // Nearly silent
   silentAudio.setAttribute("playsinline", "true");
   silentAudio.setAttribute("webkit-playsinline", "true");
+  // Enable AirPlay on the audio element (Safari)
+  silentAudio.setAttribute("x-webkit-airplay", "allow");
   
   return silentAudio;
 }
@@ -230,5 +232,37 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, [state.videoId]);
 
-  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP };
+  const requestAirPlay = useCallback(async (mode: 'audio' | 'video') => {
+    try {
+      if (mode === 'video') {
+        // Try Remote Playback API on the iframe
+        const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
+        if (iframe && 'remote' in iframe) {
+          await (iframe as any).remote.prompt();
+          return;
+        }
+      }
+
+      // For audio mode or fallback: use the silent audio element with AirPlay
+      const audio = ensureSilentAudio();
+      
+      // Safari-specific: webkitShowPlaybackTargetPicker
+      if ((audio as any).webkitShowPlaybackTargetPicker) {
+        (audio as any).webkitShowPlaybackTargetPicker();
+        return;
+      }
+
+      // Web Remote Playback API
+      if ('remote' in audio) {
+        await (audio as any).remote.prompt();
+        return;
+      }
+
+      console.warn('AirPlay not supported on this browser');
+    } catch (err) {
+      console.warn('AirPlay error:', err);
+    }
+  }, []);
+
+  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay };
 }

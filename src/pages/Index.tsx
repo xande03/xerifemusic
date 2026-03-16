@@ -53,7 +53,7 @@ const Index = () => {
     return mockSongs.map((s) => ({ ...s, votes: savedVotes[s.id] ?? s.votes }));
   });
 
-  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP } = useYouTubePlayer("yt-player");
+  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay } = useYouTubePlayer("yt-player");
 
   useEffect(() => {
     const savedId = getCurrentSongId();
@@ -592,7 +592,7 @@ const Index = () => {
         <BottomNav active={activeTab} onChange={setActiveTab} />
 
         {expanded && (
-          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} />
+          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={togglePiP} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} />
         )}
       </div>
     </>
