@@ -313,7 +313,7 @@ const Index = () => {
                 </div>
               )}
 
-              {/* Channel Profile View */}
+              {/* Channel Profile View (Video mode) */}
               {channelView ? (
                 <ChannelProfile
                   channelName={channelView.name}
@@ -338,6 +338,16 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                  }}
+                />
+              ) : artistView ? (
+                <ArtistProfile
+                  artistName={artistView.name}
+                  artistImage={artistView.image}
+                  onBack={() => setArtistView(null)}
+                  onPlaySong={(song) => {
+                    handleSelect(song);
+                    setPlayerMode("audio");
                   }}
                 />
               ) : homeMode === "video" ? (
