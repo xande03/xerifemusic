@@ -6,60 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const INVIDIOUS_INSTANCES = [
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://invidious.jing.rocks",
-  "https://vid.puffyan.us",
-  "https://invidious.privacyredirect.com",
-];
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const url = new URL(req.url);
-    const region = url.searchParams.get("region") || "BR";
-
-    let results: any[] = [];
-
-    for (const base of INVIDIOUS_INSTANCES) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-
-        const res = await fetch(
-          `${base}/api/v1/trending?type=music&region=${encodeURIComponent(region)}`,
-          { signal: controller.signal }
-        );
-        clearTimeout(timeout);
-
-        if (!res.ok) continue;
-
-        const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) continue;
-
-        results = data
-          .filter((v: any) => v.videoId && v.lengthSeconds > 30)
-          .slice(0, 30)
-          .map((v: any, idx: number) => ({
-            id: `trending-${v.videoId}`,
-            youtubeId: v.videoId,
-            title: cleanTitle(v.title || ""),
-            artist: (v.author || "Desconhecido").replace(/\s*[-|]\s*Topic$/i, ""),
-            album: v.title || "",
-            cover: getBestThumbnail(v.videoThumbnails),
-            duration: v.lengthSeconds || 0,
-            votes: Math.max(0, 100 - idx * 5 + Math.floor(Math.random() * 10)),
-          }));
-
-        break; // success
-      } catch {
-        continue;
-      }
-    }
+    const results = await fetchTrendingFromYouTubeMusic();
 
     return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -73,6 +26,217 @@ serve(async (req) => {
   }
 });
 
+async function fetchTrendingFromYouTubeMusic() {
+  // Use YouTube Music internal API to get trending/charts
+  const body = {
+    context: {
+      client: {
+        clientName: "WEB_REMIX",
+        clientVersion: "1.20231204.01.00",
+        hl: "pt",
+        gl: "BR",
+      },
+    },
+    browseId: "FEmusic_charts",
+    formData: {
+      selectedValues: ["BR"],
+    },
+  };
+
+  const response = await fetch(
+    "https://music.youtube.com/youtubei/v1/browse?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+        Origin: "https://music.youtube.com",
+        Referer: "https://music.youtube.com/",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!response.ok) {
+    console.error("YouTube Music API error:", response.status);
+    // Fallback: search for trending music
+    return await searchTrendingFallback();
+  }
+
+  const data = await response.json();
+  const songs = parseCharts(data);
+
+  if (songs.length === 0) {
+    return await searchTrendingFallback();
+  }
+
+  return songs;
+}
+
+function parseCharts(data: any): any[] {
+  const results: any[] = [];
+
+  try {
+    // Navigate the browse response structure
+    const tabs = data?.contents?.singleColumnBrowseResultsRenderer?.tabs || [];
+
+    for (const tab of tabs) {
+      const sections = tab?.tabRenderer?.content?.sectionListRenderer?.contents || [];
+
+      for (const section of sections) {
+        const shelf = section?.musicCarouselShelfRenderer || section?.musicShelfRenderer;
+        if (!shelf) continue;
+
+        const items = shelf?.contents || [];
+
+        for (const item of items) {
+          const parsed = parseMusicItem(item);
+          if (parsed) results.push(parsed);
+          if (results.length >= 30) break;
+        }
+        if (results.length >= 30) break;
+      }
+      if (results.length >= 30) break;
+    }
+  } catch (e) {
+    console.error("Parse charts error:", e);
+  }
+
+  return results;
+}
+
+function parseMusicItem(item: any): any | null {
+  try {
+    const renderer =
+      item?.musicResponsiveListItemRenderer ||
+      item?.musicTwoRowItemRenderer;
+
+    if (!renderer) return null;
+
+    let title = "";
+    let artist = "";
+    let videoId = "";
+    let cover = "";
+    let duration = 0;
+
+    if (renderer.flexColumns) {
+      // musicResponsiveListItemRenderer
+      const flexColumns = renderer.flexColumns;
+      title = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.text || "";
+
+      const secondRuns = flexColumns[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
+      const parts = secondRuns
+        .filter((r: any) => r.text && !["•", " • ", "&", " & "].includes(r.text.trim()))
+        .map((r: any) => r.text.trim())
+        .filter((t: string) => !/^\d{1,2}:\d{2}/.test(t) && !/visualizações|views|reproduções/i.test(t));
+
+      const typeIndicators = ["Música", "Vídeo", "Song", "Video"];
+      artist = parts.filter((p: string) => !typeIndicators.includes(p))[0] || "";
+
+      // Duration
+      for (const run of secondRuns) {
+        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(run.text?.trim())) {
+          const segs = run.text.trim().split(":").map(Number);
+          duration = segs.length === 3 ? segs[0] * 3600 + segs[1] * 60 + segs[2] : segs[0] * 60 + segs[1];
+          break;
+        }
+      }
+
+      // Video ID
+      const overlay = renderer.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer;
+      videoId = overlay?.playNavigationEndpoint?.watchEndpoint?.videoId || "";
+      if (!videoId) {
+        videoId = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.watchEndpoint?.videoId || "";
+      }
+
+      // Thumbnail
+      const thumbnails = renderer.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
+      if (thumbnails.length > 0) {
+        const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+        cover = sorted[0]?.url || "";
+      }
+    } else if (renderer.title) {
+      // musicTwoRowItemRenderer
+      title = renderer.title?.runs?.[0]?.text || "";
+      artist = renderer.subtitle?.runs?.map((r: any) => r.text).join("").replace(/\s*•\s*/g, " ") || "";
+      videoId = renderer.navigationEndpoint?.watchEndpoint?.videoId || "";
+
+      const thumbnails = renderer.thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
+      if (thumbnails.length > 0) {
+        const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+        cover = sorted[0]?.url || "";
+      }
+    }
+
+    if (!title || !videoId) return null;
+
+    return {
+      id: `trending-${videoId}`,
+      youtubeId: videoId,
+      title: cleanTitle(title),
+      artist: artist || "Desconhecido",
+      album: title,
+      cover: cover.startsWith("//") ? `https:${cover}` : (cover || "/placeholder.svg"),
+      duration,
+      votes: 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function searchTrendingFallback(): Promise<any[]> {
+  // Fallback: search for popular Brazilian music
+  const body = {
+    context: {
+      client: {
+        clientName: "WEB_REMIX",
+        clientVersion: "1.20231204.01.00",
+        hl: "pt",
+        gl: "BR",
+      },
+    },
+    query: "músicas mais tocadas 2026",
+    params: "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D", // songs filter
+  };
+
+  const response = await fetch(
+    "https://music.youtube.com/youtubei/v1/search?alt=json&key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+        Origin: "https://music.youtube.com",
+        Referer: "https://music.youtube.com/",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  const results: any[] = [];
+
+  try {
+    const contents = data?.contents?.tabbedSearchResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
+    for (const section of contents) {
+      const items = section?.musicShelfRenderer?.contents || [];
+      for (const item of items) {
+        const parsed = parseMusicItem(item);
+        if (parsed) results.push(parsed);
+        if (results.length >= 30) break;
+      }
+      if (results.length >= 30) break;
+    }
+  } catch (e) {
+    console.error("Fallback parse error:", e);
+  }
+
+  return results;
+}
+
 function cleanTitle(title: string): string {
   return title
     .replace(/\s*\(Official\s*(Music\s*)?Video\)/gi, "")
@@ -84,10 +248,4 @@ function cleanTitle(title: string): string {
     .replace(/\s*\(Clipe Oficial\)/gi, "")
     .replace(/\s*[-|]\s*Topic$/gi, "")
     .trim();
-}
-
-function getBestThumbnail(thumbnails?: { url: string; quality: string }[]): string {
-  if (!thumbnails || thumbnails.length === 0) return "/placeholder.svg";
-  const medium = thumbnails.find((t) => t.quality === "medium" || t.quality === "high");
-  return medium?.url || thumbnails[0].url;
 }
