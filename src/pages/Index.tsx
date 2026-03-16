@@ -393,57 +393,14 @@ const Index = () => {
                 />
               ) : (
               <>
-              {/* Greeting + Mood chips — YT Music style */}
+              {/* Greeting */}
               <div className="px-4">
-                <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  {[
-                    { label: "Relax", icon: "🎧" },
-                    { label: "Workout", icon: "💪" },
-                    { label: "Focus", icon: "🎯" },
-                    { label: "Energize", icon: "⚡" },
-                    { label: "Party", icon: "🎉" },
-                    { label: "Commute", icon: "🚗" },
-                  ].map((mood) => (
-                    <button key={mood.label} className="chip chip-inactive flex-shrink-0 whitespace-nowrap rounded-full flex items-center gap-1">
-                      <span>{mood.icon}</span>
-                      {mood.label}
-                    </button>
-                  ))}
-                </div>
+                <h1 className="text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
               </div>
 
-              {/* Top Trending — hero banner like YT Music */}
+              {/* Quick picks — 2-col compact grid like reference */}
               <section className="px-4">
-                <div className="relative w-full rounded-2xl overflow-hidden aspect-[2/1] group">
-                  <img src={heroSong?.cover} alt={heroSong?.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Flame size={14} className="text-primary" />
-                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider">#1 Em Alta {trendingSongs.length > 0 ? "🔴 LIVE" : ""}</span>
-                    </div>
-                    <p className="text-base font-bold text-foreground">{heroSong?.title}</p>
-                    <button onClick={() => heroSong?.artist && setArtistView({ name: heroSong.artist, image: heroSong.cover })} className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors">{heroSong?.artist}</button>
-                    <button
-                      onClick={() => heroSong && handleSelect(heroSong)}
-                      className="mt-2 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
-                    >
-                      <Play size={14} fill="currentColor" className="ml-0.5" /> Ouvir agora
-                    </button>
-                  </div>
-                </div>
-              </section>
-
-              {/* Quick picks — compact row like YT Music home */}
-              <section>
-                <div className="flex items-center justify-between px-4 mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Zap size={16} className="text-primary" />
-                    Seleção rápida
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 px-4">
+                <div className="grid grid-cols-2 gap-2">
                   {quickPicks.map((song) => (
                     <button
                       key={song.id}
@@ -452,8 +409,32 @@ const Index = () => {
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-12 h-12 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3">{song.title}</span>
+                      <img src={song.cover} alt={song.album} className="w-14 h-14 object-cover flex-shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate pr-3 leading-tight">{song.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Álbuns em Destaque — large cards like reference */}
+              <section>
+                <div className="flex items-center justify-between px-4 mb-3">
+                  <h2 className="text-lg font-bold text-foreground">Álbuns em Destaque</h2>
+                  <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 px-4">
+                  {forYouSongs.slice(0, 4).map((song) => (
+                    <button
+                      key={song.id}
+                      onClick={() => handleSelect(song)}
+                      className="group active:scale-[0.97] transition-transform text-left"
+                    >
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 relative">
+                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
                     </button>
                   ))}
                 </div>
