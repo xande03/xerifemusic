@@ -2,3 +2,6 @@ project_id = "almvcphusfnqfhnybvdq"
 
 [functions.youtube-search]
 verify_jwt = false
+
+[functions.fetch-lyrics]
+verify_jwt = false
