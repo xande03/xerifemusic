@@ -17,6 +17,7 @@ import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import SplashScreen from "@/components/SplashScreen";
+import RadioScreen from "@/components/RadioScreen";
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
 import album3 from "@/assets/album-3.jpg";
@@ -33,6 +34,7 @@ const Index = () => {
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
+  const [showRadio, setShowRadio] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
@@ -246,7 +248,17 @@ const Index = () => {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
-          {activeTab === "home" && (
+          {activeTab === "home" && showRadio && (
+            <RadioScreen
+              onBack={() => setShowRadio(false)}
+              onPlaySong={handleSelect}
+              onPlayAll={(playlist) => {
+                if (playlist.length > 0) handleSelect(playlist[0]);
+              }}
+            />
+          )}
+
+          {activeTab === "home" && !showRadio && (
             <div className="space-y-6">
               {/* Mood chips — YT Music style */}
               <div className="flex gap-2 overflow-x-auto px-4 pt-1 pb-1 scrollbar-hide">
@@ -262,7 +274,7 @@ const Index = () => {
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">Crie uma rádio</p>
                 <h2 className="text-lg font-display font-bold text-foreground mb-3">Seu sintonizador musical</h2>
                 <button
-                  onClick={() => handleSelect(songs[Math.floor(Math.random() * songs.length)])}
+                  onClick={() => setShowRadio(true)}
                   className="relative w-full rounded-2xl overflow-hidden aspect-[16/9] group active:scale-[0.99] transition-transform"
                 >
                   {/* Collage of album covers */}
