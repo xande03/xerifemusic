@@ -313,7 +313,7 @@ const Index = () => {
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 gap-2 px-4">
-                  {songs.slice(0, 4).map((song) => (
+                  {quickPicks.map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
