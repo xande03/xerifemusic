@@ -39,6 +39,8 @@ const albumCovers = [album1, album2, album3, album4];
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [homeMode, setHomeMode] = useState<HomeMode>("music");
+  const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
