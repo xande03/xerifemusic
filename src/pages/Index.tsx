@@ -57,6 +57,14 @@ const Index = () => {
   });
 
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay } = useYouTubePlayer("yt-player");
+  const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
+
+  // Merge trending into display: use trending if available, fallback to mock
+  const heroSong = trendingSongs[0] || queueSongs[0];
+  const quickPicks = trendingSongs.length > 0 ? trendingSongs.slice(1, 5) : songs.slice(0, 4);
+  const topCharts = trendingSongs.length > 0 ? trendingSongs.slice(0, 10) : queueSongs.slice(0, 5);
+  const forYouSongs = trendingSongs.length > 0 ? trendingSongs.slice(5, 15) : songs.slice(0, 6);
+
 
   useEffect(() => {
     const savedId = getCurrentSongId();
