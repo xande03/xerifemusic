@@ -628,7 +628,7 @@ const Index = () => {
 
           {activeTab === "offline" && (
             <div className="px-4 space-y-3">
-              <h1 className="text-xl font-display font-bold text-foreground">Downloads</h1>
+              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Downloads</h1>
               <p className="text-xs text-muted-foreground">{offlineSongs.length} músicas salvas</p>
               {offlineSongs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
