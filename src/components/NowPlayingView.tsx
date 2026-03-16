@@ -1,8 +1,8 @@
-import { ChevronDown, Heart, Share2, Volume2 } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import AudioVisualizer from "./AudioVisualizer";
-import PlayerControls from "./PlayerControls";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useState } from "react";
 
 interface NowPlayingViewProps {
   song: Song;
@@ -23,65 +23,92 @@ const NowPlayingView = ({
   onTogglePlay, onNext, onPrev, onCollapse, onSeek,
   volume, onVolumeChange,
 }: NowPlayingViewProps) => {
+  const [showVideo, setShowVideo] = useState(true);
   const progress = duration > 0 ? currentTime / duration : 0;
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const fraction = (e.clientX - rect.left) / rect.width;
+    onSeek(Math.max(0, Math.min(1, fraction)));
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up">
       {/* Background art */}
       <div className="absolute inset-0 overflow-hidden">
-        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-20 blur-2xl scale-110" />
+        <img src={heroBg} alt="" className="w-full h-full object-cover opacity-10 blur-3xl scale-110" />
         <div className="absolute inset-0 gradient-mesh" />
       </div>
 
       {/* Content */}
-      <div className="relative flex flex-col h-full px-6 py-4">
+      <div className="relative flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between px-4 py-3">
           <button onClick={onCollapse} className="text-muted-foreground hover:text-foreground transition-colors">
             <ChevronDown size={28} />
           </button>
-          <div className="text-center">
-            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Reproduzindo via YouTube</span>
-          </div>
-          <div className="w-7" />
+          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            Reproduzindo via YouTube
+          </span>
+          <button
+            onClick={() => setShowVideo((v) => !v)}
+            className="text-muted-foreground hover:text-primary transition-colors"
+          >
+            {showVideo ? <Music2 size={20} /> : <Video size={20} />}
+          </button>
         </div>
 
-        {/* Album art */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 max-w-sm mx-auto w-full">
-          <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-glow-cyan">
-            <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+        {/* Main area */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4 max-w-lg mx-auto w-full">
+          {/* YouTube Player / Album Art */}
+          <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-glow-cyan bg-background">
+            {showVideo ? (
+              <div
+                id="yt-player"
+                className="w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center relative">
+                <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-background/30 flex items-center justify-center">
+                  <AudioVisualizer isPlaying={isPlaying} barCount={48} className="w-3/4 h-20" />
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Visualizer */}
-          <AudioVisualizer isPlaying={isPlaying} barCount={48} className="w-full" />
 
           {/* Song info */}
           <div className="w-full flex items-center justify-between">
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-bold text-foreground truncate">{song.title}</h2>
+              <h2 className="text-lg font-bold text-foreground truncate">{song.title}</h2>
               <p className="text-sm text-muted-foreground">{song.artist}</p>
             </div>
             <div className="flex gap-3">
               <button className="text-muted-foreground hover:text-secondary transition-colors">
-                <Heart size={22} />
+                <Heart size={20} />
               </button>
               <button className="text-muted-foreground hover:text-primary transition-colors">
-                <Share2 size={20} />
+                <Share2 size={18} />
               </button>
             </div>
           </div>
 
-          {/* Controls */}
-          <PlayerControls
-            song={song}
-            isPlaying={isPlaying}
-            currentTime={currentTime}
-            duration={duration}
-            onTogglePlay={onTogglePlay}
-            onNext={onNext}
-            onPrev={onPrev}
-            onSeek={onSeek}
-          />
+          {/* Progress bar */}
+          <div className="w-full space-y-1">
+            <div
+              className="h-1.5 w-full rounded-full bg-muted overflow-hidden cursor-pointer"
+              onClick={handleProgressClick}
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-200"
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground font-mono">
+              <span>{formatDuration(currentTime)}</span>
+              <span>{formatDuration(duration)}</span>
+            </div>
+          </div>
 
           {/* Volume */}
           <div className="w-full flex items-center gap-3">

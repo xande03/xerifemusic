@@ -60,16 +60,17 @@ export function useYouTubePlayer(containerId: string) {
       if (!el) return;
 
       playerRef.current = new window.YT.Player(containerId, {
-        height: "0",
-        width: "0",
+        height: "100%",
+        width: "100%",
         playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
+          autoplay: 1,
+          controls: 1,
           modestbranding: 1,
           rel: 0,
           playsinline: 1,
+          iv_load_policy: 3, // hide annotations
+          cc_load_policy: 0,
+          fs: 0,
         },
         events: {
           onReady: () => {
@@ -113,7 +114,7 @@ export function useYouTubePlayer(containerId: string) {
   const loadVideo = useCallback((videoId: string) => {
     if (playerRef.current?.loadVideoById) {
       playerRef.current.loadVideoById(videoId);
-      setState((s) => ({ ...s, videoId, currentTime: 0 }));
+      setState((s) => ({ ...s, videoId, currentTime: 0, isEnded: false }));
     }
   }, []);
 
