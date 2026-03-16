@@ -410,7 +410,7 @@ const Index = () => {
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
                 <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
-                  {songs.slice(0, 6).map((song) => (
+                  {forYouSongs.map((song) => (
                     <button key={song.id} onClick={() => handleSelect(song)} className="flex-shrink-0 w-[140px] group snap-start">
                       <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
