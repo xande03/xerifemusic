@@ -175,28 +175,56 @@ const ExploreScreen = ({ onPlayVideo }: ExploreScreenProps) => {
         })}
       </div>
 
-      {/* Trending chips (when no search) */}
+      {/* Trending chips + auto-loaded trending (when no search) */}
       {results.length === 0 && !loading && (
-        <div className="px-4">
-          <div className="flex items-center gap-2 mb-3 mt-2">
-            <TrendingUp size={16} className="text-primary" />
-            <h2 className="text-sm font-medium text-foreground">Em alta</h2>
+        <>
+          <div className="px-4">
+            <div className="flex items-center gap-2 mb-3 mt-2">
+              <TrendingUp size={16} className="text-primary" />
+              <h2 className="text-sm font-medium text-foreground">Pesquisas populares</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TRENDING_QUERIES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => handleSuggestionClick(t)}
+                  className="chip chip-inactive rounded-full text-xs"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {TRENDING_QUERIES.map((t) => (
-              <button
-                key={t}
-                onClick={() => handleSuggestionClick(t)}
-                className="chip chip-inactive rounded-full text-xs"
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
+
+          {/* Auto-loaded trending videos */}
+          {trendingLoading && (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <Loader2 size={24} className="text-primary animate-spin" />
+              <p className="text-xs text-muted-foreground">Carregando tendências...</p>
+            </div>
+          )}
+          {!trendingLoading && trendingResults.length > 0 && (
+            <div className="px-4">
+              <h2 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                <TrendingUp size={14} className="text-primary" />
+                Em alta agora
+              </h2>
+              <div className="space-y-6">
+                {trendingResults.map((video) => (
+                  <VideoCard
+                    key={video.videoId}
+                    video={video}
+                    onPlay={onPlayVideo}
+                    onChannelClick={handleChannelClick}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Loading */}
+      {/* Loading search */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 size={28} className="text-primary animate-spin" />
