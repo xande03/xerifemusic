@@ -10,6 +10,7 @@ declare global {
 export interface YouTubePlayerState {
   isReady: boolean;
   isPlaying: boolean;
+  isEnded: boolean;
   currentTime: number;
   duration: number;
   videoId: string | null;
