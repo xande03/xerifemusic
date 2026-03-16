@@ -490,26 +490,31 @@ const Index = () => {
                 </div>
                 <div className="space-y-1">
                   {topCharts.map((song, i) => (
-                    <button
+                    <div
                       key={song.id}
-                      onClick={() => handleSelect(song)}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all active:scale-[0.98] ${
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
                       <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
                         {i + 1}
                       </span>
-                      <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover flex-shrink-0" />
+                      <button onClick={() => handleSelect(song)} className="flex-shrink-0">
+                        <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover" />
+                      </button>
                       <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                        <button onClick={() => handleSelect(song)} className="w-full text-left">
+                          <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                        </button>
+                        <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
+                          <p className="text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                        </button>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <TrendingUp size={12} />
                         <span>{song.votes}</span>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </section>
