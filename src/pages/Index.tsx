@@ -600,73 +600,14 @@ const Index = () => {
           )}
 
           {activeTab === "search" && (
-            <div className="px-4 space-y-3">
-              <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Músicas, artistas, álbuns, podcasts"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  autoFocus
-                  className="w-full pl-10 pr-4 py-3 rounded-full bg-secondary border-none text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-muted-foreground/30"
-                />
-              </div>
-
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                {(["all", "songs", "artists", "albums"] as SearchFilter[]).map((f) => (
-                  <button key={f} onClick={() => setSearchFilter(f)} className={`chip flex-shrink-0 ${searchFilter === f ? "chip-active" : "chip-inactive"}`}>
-                    {f === "all" ? "Tudo" : f === "songs" ? "Músicas" : f === "artists" ? "Artistas" : "Álbuns"}
-                  </button>
-                ))}
-              </div>
-
-              {suggestions.length > 0 && searchQuery.length > 0 && (
-                <div className="rounded-lg overflow-hidden bg-card">
-                  {suggestions.map((term, i) => (
-                    <button key={i} onClick={() => handleSuggestionClick(term)} className="w-full flex items-center gap-3 px-3 py-3 text-sm text-foreground hover:bg-accent active:bg-accent transition-colors text-left">
-                      <Search size={14} className="text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{term}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {isSearching ? (
-                <SearchSkeleton />
-              ) : searchQuery.length >= 2 ? (
-                <div className="space-y-4">
-                  {(searchFilter === "all" || searchFilter === "artists") && uniqueArtists.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Artistas</h3>
-                      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                        {uniqueArtists.slice(0, 6).map((artist) => {
-                          const artistSong = searchResults.find((s) => s.artist === artist);
-                          return (
-                            <button key={artist} onClick={() => artistSong && handleSelect(artistSong)} className="flex flex-col items-center gap-1.5 flex-shrink-0 active:scale-95 transition-transform">
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border">
-                                {artistSong && <img src={artistSong.cover} alt={artist} className="w-full h-full object-cover" />}
-                              </div>
-                              <span className="text-xs text-foreground truncate max-w-[80px]">{artist}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {(searchFilter === "all" || searchFilter === "albums") && uniqueAlbums.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Álbuns</h3>
-                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                        {uniqueAlbums.slice(0, 6).map((raw) => {
-                          const [album, artist, cover] = raw.split("|||");
-                          return (
-                            <button key={raw} onClick={() => { const s = searchResults.find((s) => s.album === album); s && handleSelect(s); }} className="flex-shrink-0 w-[120px] active:scale-95 transition-transform">
-                              <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5">
-                                <img src={cover} alt={album} className="w-full h-full object-cover" />
-                              </div>
-                              <p className="text-xs font-medium text-foreground truncate text-left">{album}</p>
+            <SearchScreen
+              currentSongId={currentSong.id}
+              onSelect={handleSelect}
+              onArtistClick={(name, image) => {
+                setActiveTab("home");
+                setArtistView({ name, image });
+              }}
+            />
                               <p className="text-[11px] text-muted-foreground truncate text-left">{artist}</p>
                             </button>
                           );
