@@ -294,6 +294,50 @@ const NowPlayingView = ({
             className="flex-1 h-1 appearance-none rounded-full bg-muted accent-primary"
           />
         </div>
+
+        {/* Related / Comments tabs */}
+        <div className="w-full mt-4 flex-shrink-0">
+          <div className="flex items-center gap-1 mb-3">
+            <button
+              onClick={() => setBottomTab("related")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bottomTab === "related" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ListVideo size={14} />
+              A seguir
+            </button>
+            <button
+              onClick={() => setBottomTab("comments")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                bottomTab === "comments" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MessageSquare size={14} />
+              Comentários
+              {videoInfo && videoInfo.comments.length > 0 && (
+                <span className="text-[10px] opacity-60">({videoInfo.comments.length})</span>
+              )}
+            </button>
+          </div>
+
+          {bottomTab === "related" && (
+            <RelatedVideos
+              videos={videoInfo?.relatedVideos || []}
+              loading={videoInfoLoading}
+              onPlay={(video) => {
+                onPlayRelated?.(video);
+              }}
+            />
+          )}
+
+          {bottomTab === "comments" && (
+            <VideoComments
+              comments={videoInfo?.comments || []}
+              loading={videoInfoLoading}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
