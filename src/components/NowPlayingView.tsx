@@ -51,7 +51,23 @@ const NowPlayingView = ({
   const activeLineRef = useRef<HTMLParagraphElement>(null);
   const progress = duration > 0 ? currentTime / duration : 0;
 
-  // Fetch lyrics when song changes or lyrics mode is activated
+  // Auto-hide fullscreen controls after 3s
+  const resetFsControlsTimer = useCallback(() => {
+    setShowFsControls(true);
+    if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+    fsControlsTimerRef.current = setTimeout(() => setShowFsControls(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      resetFsControlsTimer();
+    } else {
+      setShowFsControls(true);
+      if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current);
+    }
+    return () => { if (fsControlsTimerRef.current) clearTimeout(fsControlsTimerRef.current); };
+  }, [isFullscreen, resetFsControlsTimer]);
+
   useEffect(() => {
     if (mode === "lyrics" && !lyricsResult && !lyricsLoading) {
       setLyricsLoading(true);
