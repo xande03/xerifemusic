@@ -94,6 +94,16 @@ const Index = () => {
   const handleSelect = useCallback((song: Song) => {
     setCurrentSong(song);
     saveCurrentSong(song.id);
+    addToHistory({
+      songId: song.id,
+      youtubeId: song.youtubeId,
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      cover: song.cover,
+      duration: song.duration,
+    });
+    setRecentHistory(getHistory());
     loadVideo(song.youtubeId);
   }, [loadVideo]);
 
