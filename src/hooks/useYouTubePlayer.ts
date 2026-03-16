@@ -190,15 +190,42 @@ export function useYouTubePlayer(containerId: string) {
       const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
       if (!iframe) return;
 
-      // Try to get the video element inside the iframe (same-origin only)
-      // YouTube iframe is cross-origin, so we use the iframe itself with documentPictureInPicture
-      // or fall back to the standard video PiP via requestPictureInPicture on iframe
+      // Method 1: Try to access the video element inside the iframe (YouPIP approach)
+      // This works when same-origin or when Safari allows access
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (iframeDoc) {
+          const video = iframeDoc.querySelector('video');
+          if (video) {
+            // Safari/iOS: use webkitSetPresentationMode (the YouPIP shortcut technique)
+            if ((video as any).webkitSetPresentationMode) {
+              const currentMode = (video as any).webkitPresentationMode;
+              if (currentMode === 'picture-in-picture') {
+                (video as any).webkitSetPresentationMode('inline');
+              } else {
+                (video as any).webkitSetPresentationMode('picture-in-picture');
+              }
+              return;
+            }
+            // Standard PiP API
+            if (video.requestPictureInPicture) {
+              if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+              } else {
+                await video.requestPictureInPicture();
+              }
+              return;
+            }
+          }
+        }
+      } catch (_crossOriginError) {
+        // Cross-origin — expected, continue to fallback methods
+      }
 
-      // Method 1: Document PiP API (Chrome 116+)
+      // Method 2: Document PiP API (Chrome 116+)
       if ('documentPictureInPicture' in window) {
         const docPiP = (window as any).documentPictureInPicture;
         if (docPiP.window) {
-          // Already in PiP, close it
           docPiP.window.close();
           return;
         }
@@ -216,20 +243,25 @@ export function useYouTubePlayer(containerId: string) {
         return;
       }
 
-      // Method 2: Standard PiP on the iframe element (limited support)
-      if ((iframe as any).requestPictureInPicture) {
-        await (iframe as any).requestPictureInPicture();
-        return;
-      }
-
-      // Method 3: Open a mini player popup as last resort
+      // Method 3: iOS Safari fallback — open embed in new page where native PiP controls work
+      // Safari shows native PiP button on fullscreen video players
       const videoId = state.videoId;
       if (videoId) {
-        window.open(
-          `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1`,
-          'demus-pip',
-          'width=400,height=225,top=50,left=50'
-        );
+        // Use piped or embed URL that Safari can natively PiP from fullscreen
+        const pipUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&controls=1&fs=1`;
+        
+        // On iOS Safari, opening in a new tab allows the user to use Safari's native PiP
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          // Open in same window with a back option, or new tab
+          window.open(pipUrl, '_blank');
+        } else {
+          window.open(
+            pipUrl,
+            'demus-pip',
+            'width=400,height=225,top=50,left=50'
+          );
+        }
       }
     } catch (err) {
       console.warn('PiP not available:', err);
