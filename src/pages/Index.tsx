@@ -13,7 +13,7 @@ import {
 } from "@/lib/localStorage";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
-import NowPlayingView from "@/components/NowPlayingView";
+import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
 import BottomNav from "@/components/BottomNav";
 import SearchSkeleton from "@/components/SearchSkeleton";
 import album1 from "@/assets/album-1.jpg";
