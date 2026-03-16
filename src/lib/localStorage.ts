@@ -129,11 +129,3 @@ export function getPrefs(): UserPrefs {
     return { displayName: "Convidado", isHost: false, theme: "dark" };
   }
 }
-
-export function getPrefs(): UserPrefs {
-  try {
-    return JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") as UserPrefs;
-  } catch {
-    return { displayName: "Convidado", isHost: false, theme: "dark" };
-  }
-}
