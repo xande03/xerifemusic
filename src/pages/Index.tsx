@@ -281,8 +281,91 @@ const Index = () => {
         <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-6">
+              {/* Mode switcher: Xerife Music / Xerife Video */}
+              {!channelView && (
+                <div className="px-4 pt-1">
+                  <div className="flex gap-2 p-1 bg-secondary rounded-xl w-fit">
+                    <button
+                      onClick={() => setHomeMode("music")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        homeMode === "music"
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Music size={16} />
+                      Xerife Music
+                    </button>
+                    <button
+                      onClick={() => setHomeMode("video")}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        homeMode === "video"
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <MonitorPlay size={16} />
+                      Xerife Video
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Channel Profile View */}
+              {channelView ? (
+                <ChannelProfile
+                  channelName={channelView.name}
+                  channelThumbnail={channelView.thumbnail}
+                  onBack={() => setChannelView(null)}
+                  onPlayVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onFullscreenVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                />
+              ) : homeMode === "video" ? (
+                <ExploreScreen
+                  onPlayVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onFullscreenVideo={(video) => {
+                    const song: Song = {
+                      id: `yt-${video.videoId}`, youtubeId: video.videoId,
+                      title: video.title, artist: video.channel, album: video.title,
+                      cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                    };
+                    handleSelect(song);
+                    setPlayerMode("video");
+                    setExpanded(true);
+                  }}
+                  onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
+                />
+              ) : (
+              <>
               {/* Greeting + Mood chips — YT Music style */}
-              <div className="px-4 pt-1">
+              <div className="px-4">
                 <h1 className="text-xl font-display font-bold text-foreground mb-3 lg:hidden">{greeting}</h1>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   {[
