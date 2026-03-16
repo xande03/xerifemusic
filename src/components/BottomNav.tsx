@@ -1,4 +1,4 @@
-import { Home, Radio, Monitor, Film } from "lucide-react";
+import { Home, Library, Download, ListMusic } from "lucide-react";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile";
 
@@ -9,9 +9,9 @@ interface BottomNavProps {
 
 const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "home", icon: Home, label: "Início" },
-  { id: "search", icon: Radio, label: "TV ao vivo" },
-  { id: "library", icon: Monitor, label: "Séries" },
-  { id: "offline", icon: Film, label: "Filmes" },
+  { id: "library", icon: Library, label: "Biblioteca" },
+  { id: "offline", icon: Download, label: "Downloads" },
+  { id: "search", icon: ListMusic, label: "Playlists" },
 ];
 
 const BottomNav = ({ active, onChange }: BottomNavProps) => (
