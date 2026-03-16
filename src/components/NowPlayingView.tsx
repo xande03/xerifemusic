@@ -33,12 +33,14 @@ interface NowPlayingViewProps {
   onFullscreen?: () => void;
   onExitFullscreen?: () => void;
   isFullscreen?: boolean;
+  context?: "music" | "video";
 }
 
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
+  context = "music",
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
