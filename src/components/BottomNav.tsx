@@ -15,7 +15,7 @@ const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
 ];
 
 const BottomNav = ({ active, onChange }: BottomNavProps) => (
-  <nav className="px-4 pb-safe py-2">
+  <nav className="px-4 pb-safe py-4">
     <div className="flex items-center justify-around bg-card/90 backdrop-blur-xl rounded-2xl border border-border/30 py-1 px-1">
       {tabs.map(({ id, icon: Icon, label }) => (
         <button
