@@ -1,5 +1,6 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Maximize2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
+import { hdThumbnail } from "@/lib/utils";
 
 interface DesktopPlayerProps {
   song: Song;
