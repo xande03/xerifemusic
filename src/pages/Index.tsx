@@ -68,7 +68,7 @@ const Index = () => {
     return mockSongs.map((s) => ({ ...s, votes: savedVotes[s.id] ?? s.votes }));
   });
 
-  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay } = useYouTubePlayer("yt-player");
+  const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay, requestFullscreen } = useYouTubePlayer("yt-player");
   const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
 
 
@@ -338,6 +338,7 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                    setTimeout(() => requestFullscreen(), 500);
                   }}
                 />
               ) : artistView ? (
@@ -371,6 +372,7 @@ const Index = () => {
                     handleSelect(song);
                     setPlayerMode("video");
                     setExpanded(true);
+                    setTimeout(() => requestFullscreen(), 500);
                   }}
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
                 />
@@ -861,7 +863,7 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} />
+          }} onFullscreen={requestFullscreen} />
         )}
 
         {showFloatingPiP && !expanded && (

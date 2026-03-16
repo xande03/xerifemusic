@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
@@ -28,12 +28,13 @@ interface NowPlayingViewProps {
   onModeChange?: (mode: PlayerMode) => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
   onPlayRelated?: (video: VideoResult) => void;
+  onFullscreen?: () => void;
 }
 
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>("video");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -173,10 +174,19 @@ const NowPlayingView = ({
 
         {/* Video mode */}
         {mode === "video" && (
-          <div className="w-full aspect-video rounded-xl overflow-hidden bg-card shadow-lg flex-shrink-0">
+          <div className="w-full aspect-video rounded-xl overflow-hidden bg-card shadow-lg flex-shrink-0 relative group">
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
               Player do YouTube
             </div>
+            {onFullscreen && (
+              <button
+                onClick={onFullscreen}
+                className="absolute bottom-3 right-3 w-9 h-9 rounded-lg bg-background/70 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-background/90 z-10"
+                title="Tela cheia"
+              >
+                <Maximize2 size={16} className="text-foreground" />
+              </button>
+            )}
           </div>
         )}
 

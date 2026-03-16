@@ -111,7 +111,7 @@ export function useYouTubePlayer(containerId: string) {
           playsinline: 1, // Critical for iOS — prevents fullscreen
           iv_load_policy: 3,
           cc_load_policy: 0,
-          fs: 0,
+          fs: 1,
           disablekb: 1,
           origin: window.location.origin,
           // Workaround: enable JS API and allow autoplay with sound
@@ -248,6 +248,28 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, [state.videoId]);
 
+  const requestFullscreen = useCallback(async () => {
+    try {
+      const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
+      if (!iframe) return;
+
+      // Try the container first (for better controls), then iframe itself
+      const target = iframe.parentElement || iframe;
+      
+      if (target.requestFullscreen) {
+        await target.requestFullscreen();
+      } else if ((target as any).webkitRequestFullscreen) {
+        (target as any).webkitRequestFullscreen();
+      } else if ((target as any).webkitEnterFullscreen) {
+        (target as any).webkitEnterFullscreen();
+      } else if ((iframe as any).requestFullscreen) {
+        await (iframe as any).requestFullscreen();
+      }
+    } catch (err) {
+      console.warn("Fullscreen request failed:", err);
+    }
+  }, []);
+
   const requestAirPlay = useCallback(async (mode: 'audio' | 'video') => {
     try {
       if (mode === 'video') {
@@ -280,5 +302,5 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, []);
 
-  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay };
+  return { state, loadVideo, play, pause, seekTo, setVolume, togglePiP, requestAirPlay, requestFullscreen };
 }
