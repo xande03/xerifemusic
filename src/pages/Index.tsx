@@ -234,7 +234,12 @@ const Index = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        {/* Desktop Sidebar */}
+        <DesktopSidebar active={activeTab} onChange={setActiveTab} />
+
+        {/* Main column */}
+        <div className="flex-1 flex flex-col min-w-0">
         {/* YouTube Player */}
         <div
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
@@ -243,11 +248,16 @@ const Index = () => {
           <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden" />
         </div>
 
-        {/* Header — YouTube Music style */}
-        <header className="flex items-center justify-between px-4 py-2.5 flex-shrink-0">
-          <div className="flex items-center gap-2">
+        {/* Header */}
+        <header className="flex items-center justify-between px-4 lg:px-6 py-2.5 flex-shrink-0">
+          <div className="flex items-center gap-2 lg:hidden">
             <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 rounded-lg" />
             <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
+          </div>
+          <div className="hidden lg:flex items-center gap-3">
+            <h2 className="text-lg font-display font-semibold text-foreground">
+              {activeTab === "home" ? greeting : activeTab === "explore" ? "Explorar" : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : "Playlists"}
+            </h2>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setActiveTab("search")} className="text-muted-foreground hover:text-foreground transition-colors">
