@@ -104,6 +104,7 @@ const Index = () => {
   const handleSelect = useCallback(
     (song: Song) => {
       setCurrentSong(song);
+      saveCurrentSong(song.id);
       loadVideo(song.youtubeId);
     },
     [loadVideo]
