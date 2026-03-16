@@ -19,7 +19,7 @@ const FloatingPiPPlayer = ({
   onTogglePlay, onNext, onPrev, onExpand, onClose,
 }: FloatingPiPPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 16, y: 80 });
+  const [position, setPosition] = useState({ x: 16, y: Math.max(80, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0') + 60) });
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const progress = duration > 0 ? currentTime / duration : 0;

@@ -97,7 +97,7 @@ const NowPlayingView = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up safe-area-inset">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-up" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
         <button onClick={onCollapse} className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors active:scale-95">
@@ -123,7 +123,7 @@ const NowPlayingView = ({
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-3 max-w-lg mx-auto w-full overflow-y-auto pb-6">
+      <div className="flex-1 flex flex-col items-center px-4 sm:px-8 gap-3 max-w-lg mx-auto w-full overflow-y-auto pb-8">
         
         {/* Mode tabs */}
         <div className="flex items-center gap-1 bg-secondary/60 rounded-full p-1 w-fit flex-shrink-0">
@@ -237,23 +237,23 @@ const NowPlayingView = ({
         </div>
 
         {/* Transport controls */}
-        <div className="w-full flex items-center justify-between px-4 sm:px-8 py-1 flex-shrink-0">
-          <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+        <div className="w-full flex items-center justify-between px-2 sm:px-8 py-2 flex-shrink-0">
+          <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
             <Shuffle size={20} />
           </button>
-          <button onClick={onPrev} className="p-3 text-foreground hover:text-primary active:scale-90 transition-all">
+        <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
             <SkipBack size={28} fill="currentColor" />
           </button>
           <button
             onClick={onTogglePlay}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform shadow-lg"
+            className="w-16 h-16 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform shadow-lg"
           >
             {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
           </button>
-          <button onClick={onNext} className="p-3 text-foreground hover:text-primary active:scale-90 transition-all">
+          <button onClick={onNext} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
             <SkipForward size={28} fill="currentColor" />
           </button>
-          <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+          <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
             <Repeat size={20} />
           </button>
         </div>

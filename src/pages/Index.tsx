@@ -230,7 +230,7 @@ const Index = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden">
+      <div className="flex flex-col h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* YouTube Player */}
         <div
           className={(expanded && playerMode === "video") ? "fixed z-[60]" : "absolute -top-[9999px] -left-[9999px]"}
@@ -261,7 +261,7 @@ const Index = () => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-36 overscroll-contain">
+        <main className="flex-1 overflow-y-auto pb-44 overscroll-contain">
           {activeTab === "home" && (
             <div className="space-y-6">
               {/* Greeting + Mood chips — YT Music style */}
