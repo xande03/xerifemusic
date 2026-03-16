@@ -248,6 +248,28 @@ export function useYouTubePlayer(containerId: string) {
     }
   }, [state.videoId]);
 
+  const requestFullscreen = useCallback(async () => {
+    try {
+      const iframe = playerRef.current?.getIframe?.() as HTMLIFrameElement | null;
+      if (!iframe) return;
+
+      // Try the container first (for better controls), then iframe itself
+      const target = iframe.parentElement || iframe;
+      
+      if (target.requestFullscreen) {
+        await target.requestFullscreen();
+      } else if ((target as any).webkitRequestFullscreen) {
+        (target as any).webkitRequestFullscreen();
+      } else if ((target as any).webkitEnterFullscreen) {
+        (target as any).webkitEnterFullscreen();
+      } else if ((iframe as any).requestFullscreen) {
+        await (iframe as any).requestFullscreen();
+      }
+    } catch (err) {
+      console.warn("Fullscreen request failed:", err);
+    }
+  }, []);
+
   const requestAirPlay = useCallback(async (mode: 'audio' | 'video') => {
     try {
       if (mode === 'video') {
