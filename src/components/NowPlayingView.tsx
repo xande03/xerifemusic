@@ -238,7 +238,7 @@ const NowPlayingView = ({
 
         {/* Transport controls */}
         <div className="w-full flex items-center justify-between px-2 sm:px-8 py-2 flex-shrink-0">
-          <button className="p-2 text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+          <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
             <Shuffle size={20} />
           </button>
         <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
