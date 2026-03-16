@@ -174,10 +174,19 @@ const NowPlayingView = ({
 
         {/* Video mode */}
         {mode === "video" && (
-          <div className="w-full aspect-video rounded-xl overflow-hidden bg-card shadow-lg flex-shrink-0">
+          <div className="w-full aspect-video rounded-xl overflow-hidden bg-card shadow-lg flex-shrink-0 relative group">
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
               Player do YouTube
             </div>
+            {onFullscreen && (
+              <button
+                onClick={onFullscreen}
+                className="absolute bottom-3 right-3 w-9 h-9 rounded-lg bg-background/70 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-background/90 z-10"
+                title="Tela cheia"
+              >
+                <Maximize2 size={16} className="text-foreground" />
+              </button>
+            )}
           </div>
         )}
 
