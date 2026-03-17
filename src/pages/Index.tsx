@@ -908,8 +908,22 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} />
+          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} onShowQueue={() => setShowQueue(true)} queueCount={smartQueueList.length} />
         )}
+
+        <AnimatePresence>
+          {showQueue && (
+            <QueueDrawer
+              isOpen={showQueue}
+              onClose={() => setShowQueue(false)}
+              currentSong={currentSong}
+              queue={smartQueueList}
+              onPlayFromQueue={handlePlayFromQueue}
+              onRemoveFromQueue={handleRemoveFromQueue}
+              onClearQueue={handleClearQueue}
+            />
+          )}
+        </AnimatePresence>
 
         {showFloatingPiP && !expanded && (
           <FloatingPiPPlayer
