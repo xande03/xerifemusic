@@ -341,17 +341,17 @@ const NowPlayingView = ({
               >
                 <Shuffle size={20} />
               </button>
-              <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipBack size={28} fill="currentColor" />
+              <button onClick={onPrev} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
+                <SkipBack size={24} fill="currentColor" />
               </button>
               <button
                 onClick={onTogglePlay}
-                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/30"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/30"
               >
-                {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
+                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
               </button>
-              <button onClick={onNext} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipForward size={28} fill="currentColor" />
+              <button onClick={onNext} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
+                <SkipForward size={24} fill="currentColor" />
               </button>
               <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
                 <Repeat size={20} />
