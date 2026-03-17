@@ -665,7 +665,7 @@ const Index = () => {
                     <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
                   ))}
                 </div>
-              </section>
+              </motion.section>
               </motion.div>
               )}
             </div>
