@@ -59,7 +59,7 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0, 0, 0.2, 1] as const } },
 };
 
-const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistProfileProps) => {
+const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPlayingSong, isPlaying = false, currentTime = 0, duration = 0, onTogglePlay, onNext, onPrev, onExpand }: ArtistProfileProps) => {
   const [artistData, setArtistData] = useState<ArtistData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumItem | null>(null);
