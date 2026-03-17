@@ -84,7 +84,6 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
 
   const handleFilterChange = (f: MusicFilter) => {
     setFilter(f);
-    if (query.length >= 2) doSearch(query, f);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
