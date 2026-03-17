@@ -126,6 +126,16 @@ const Index = () => {
 
   useEffect(() => {
     if (playerState.isEnded && !expanded) {
+      // If playing from album queue, advance to next album track
+      if (albumQueue && albumQueue.length > 0) {
+        const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+        if (idx >= 0 && idx < albumQueue.length - 1) {
+          handleSelect(albumQueue[idx + 1]);
+          return;
+        }
+        // Album ended, clear album queue
+        setAlbumQueue(null);
+      }
       // In music mode, use smart queue for auto-next
       if (homeMode === "music") {
         const next = popNextFromQueue();
