@@ -341,10 +341,10 @@ const Index = () => {
         </div>
 
         {/* Header */}
-        <header className="flex items-center justify-between px-4 lg:px-6 py-2.5 flex-shrink-0">
+        <header className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2 lg:hidden">
-            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-10 h-10 rounded-lg" />
-            <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
+            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg" />
+            <span className="font-display font-bold text-foreground text-sm sm:text-base tracking-tight">Xerife Hub</span>
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
