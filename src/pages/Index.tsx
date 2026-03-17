@@ -587,7 +587,7 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* For you carousel */}
               <section>
