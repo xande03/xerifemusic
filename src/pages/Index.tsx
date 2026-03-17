@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, MoreHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
@@ -459,14 +460,18 @@ const Index = () => {
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
                 />
               ) : (
-              <>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+              >
               {/* Greeting */}
-              <div className="px-4">
+              <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-4">
                 <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
-              </div>
+              </motion.div>
 
               {/* Quick picks — 2-col compact grid like reference */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {quickPicks.map((song) => (
                     <button
@@ -481,10 +486,10 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Álbuns em Destaque — large cards like reference */}
-              <section>
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
                   <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
@@ -505,10 +510,10 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Listen again — grid layout like YT Music */}
-              <section>
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-muted-foreground" />
@@ -542,10 +547,10 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Top Charts — numbered list like YT Music Charts */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />
@@ -582,10 +587,10 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* For you carousel */}
-              <section>
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Sparkles size={16} className="text-primary" />
@@ -611,10 +616,10 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Featured mixes */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Disc3 size={16} className="text-primary" />
@@ -644,10 +649,10 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Voting queue */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Headphones size={16} className="text-primary" />
@@ -660,8 +665,8 @@ const Index = () => {
                     <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
                   ))}
                 </div>
-              </section>
-              </>
+              </motion.section>
+              </motion.div>
               )}
             </div>
           )}
