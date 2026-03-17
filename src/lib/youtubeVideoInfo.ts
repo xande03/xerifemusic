@@ -64,9 +64,12 @@ export async function fetchVideoInfo(videoId: string): Promise<VideoInfo> {
       comments: data.comments || [],
     };
 
-    const updated = getCache();
-    updated[videoId] = { data: result, ts: Date.now() };
-    setCache(updated);
+    // Only cache if we got actual data
+    if (result.relatedVideos.length > 0 || result.comments.length > 0) {
+      const updated = getCache();
+      updated[videoId] = { data: result, ts: Date.now() };
+      setCache(updated);
+    }
 
     return result;
   } catch (err) {
