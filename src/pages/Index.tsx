@@ -180,6 +180,16 @@ const Index = () => {
   }, [playerState, pause, play, loadVideo, currentSong]);
 
   const handleNext = useCallback(async () => {
+    // If playing from album, go to next album track
+    if (albumQueue && albumQueue.length > 0) {
+      const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+      if (idx >= 0 && idx < albumQueue.length - 1) {
+        handleSelect(albumQueue[idx + 1]);
+        return;
+      }
+      // Album ended, clear and fall through
+      setAlbumQueue(null);
+    }
     if (homeMode === "music") {
       // Try smart queue first
       const next = popNextFromQueue();
@@ -201,7 +211,7 @@ const Index = () => {
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx + 1) % sorted.length]);
-  }, [currentSong, songs, handleSelect, homeMode]);
+  }, [currentSong, songs, handleSelect, homeMode, albumQueue]);
 
   const handlePrev = useCallback(() => {
     // Go back through history
