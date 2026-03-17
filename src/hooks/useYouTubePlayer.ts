@@ -264,6 +264,15 @@ export function useYouTubePlayer(containerId: string) {
       } else if ((target as any).webkitEnterFullscreen) {
         (target as any).webkitEnterFullscreen();
       }
+
+      // Lock to landscape on mobile for video rotation
+      try {
+        if (screen.orientation && (screen.orientation as any).lock) {
+          await (screen.orientation as any).lock("landscape");
+        }
+      } catch {
+        // orientation lock not supported or denied — that's fine
+      }
     } catch (err) {
       console.warn("Fullscreen request failed:", err);
     }
@@ -276,6 +285,12 @@ export function useYouTubePlayer(containerId: string) {
       } else if ((document as any).webkitExitFullscreen) {
         (document as any).webkitExitFullscreen();
       }
+      // Unlock orientation on exit
+      try {
+        if (screen.orientation && (screen.orientation as any).unlock) {
+          (screen.orientation as any).unlock();
+        }
+      } catch {}
     } catch (err) {
       console.warn("Exit fullscreen failed:", err);
     }
