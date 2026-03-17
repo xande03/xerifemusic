@@ -268,7 +268,7 @@ const NowPlayingView = ({
                 {([
                   { id: "video" as PlayerMode, icon: Video, label: "Vídeo" },
                   { id: "audio" as PlayerMode, icon: Music2, label: "Áudio" },
-                  { id: "lyrics" as PlayerMode, icon: Mic2, label: "Letra" },
+                  ...(context !== "video" ? [{ id: "lyrics" as PlayerMode, icon: Mic2, label: "Letra" }] : []),
                 ]).map(({ id, icon: Icon, label }) => (
                   <button
                     key={id}

@@ -285,6 +285,12 @@ export function useYouTubePlayer(containerId: string) {
       } else if ((document as any).webkitExitFullscreen) {
         (document as any).webkitExitFullscreen();
       }
+      // Unlock orientation on exit
+      try {
+        if (screen.orientation && (screen.orientation as any).unlock) {
+          (screen.orientation as any).unlock();
+        }
+      } catch {}
     } catch (err) {
       console.warn("Exit fullscreen failed:", err);
     }
