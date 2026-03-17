@@ -510,7 +510,7 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Listen again — grid layout like YT Music */}
               <section>
