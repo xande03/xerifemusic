@@ -28,6 +28,8 @@ interface NowPlayingViewProps {
   onVolumeChange: (vol: number) => void;
   onTogglePiP?: () => void;
   onModeChange?: (mode: PlayerMode) => void;
+  isShuffled?: boolean;
+  onShuffle?: () => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
   onPlayRelated?: (video: VideoResult) => void;
   onFullscreen?: () => void;

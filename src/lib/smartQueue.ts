@@ -97,7 +97,32 @@ export function popNextFromQueue(): Song | null {
 }
 
 /**
- * Get previous song from history (managed externally via localStorage history).
+ * Shuffle the smart queue in place using Fisher-Yates algorithm.
+ * Returns true if shuffle was applied, false if queue was empty.
+ */
+export function shuffleSmartQueue(): boolean {
+  const cached = getQueue();
+  if (!cached || cached.songs.length <= 1) return false;
+
+  const arr = [...cached.songs];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  saveQueue({ ...cached, songs: arr });
+  return true;
+}
+
+/**
+ * Check if smart queue has songs.
+ */
+export function hasSmartQueue(): boolean {
+  const cached = getQueue();
+  return !!cached && cached.songs.length > 0;
+}
+
+/**
+ * Clear the smart queue.
  */
 export function clearSmartQueue() {
   localStorage.removeItem(QUEUE_KEY);
