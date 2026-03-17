@@ -113,6 +113,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
       votes: 0,
       isDownloaded: false,
     };
+    setSelectedAlbum(null);
     onPlaySong(song);
   };
 
