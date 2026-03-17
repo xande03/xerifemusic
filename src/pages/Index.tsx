@@ -8,6 +8,7 @@ import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
 import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue, shuffleSmartQueue, hasSmartQueue } from "@/lib/smartQueue";
+import QueueDrawer from "@/components/QueueDrawer";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
