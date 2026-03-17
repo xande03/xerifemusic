@@ -27,20 +27,20 @@ const BottomNav = ({ active, onChange, homeMode = "music" }: BottomNavProps) => 
   const tabs = homeMode === "video" ? videoTabs : musicTabs;
 
   return (
-    <nav className="px-2 pt-1 flex-shrink-0" style={{ paddingBottom: 'calc(0.25rem + env(safe-area-inset-bottom))' }}>
-      <div className="flex items-center justify-around py-1">
+    <nav className="px-1 sm:px-2 pt-0.5 sm:pt-1 flex-shrink-0 bg-background/95 backdrop-blur-sm" style={{ paddingBottom: 'calc(0.25rem + env(safe-area-inset-bottom))' }}>
+      <div className="flex items-center justify-around py-0.5 sm:py-1">
         {tabs.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onChange(id)}
-            className={`flex flex-col items-center gap-0.5 px-4 py-2 transition-all min-w-[64px] ${
+            className={`flex flex-col items-center gap-0.5 px-3 sm:px-4 py-1.5 sm:py-2 transition-all min-w-[56px] sm:min-w-[64px] ${
               active === id
                 ? "text-primary"
                 : "text-muted-foreground"
             }`}
           >
-            <Icon size={24} strokeWidth={active === id ? 2.2 : 1.5} />
-            <span className="text-[10px] font-medium">{label}</span>
+            <Icon size={22} strokeWidth={active === id ? 2.2 : 1.5} />
+            <span className="text-[9px] sm:text-[10px] font-medium">{label}</span>
           </button>
         ))}
       </div>
