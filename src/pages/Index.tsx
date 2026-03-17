@@ -341,10 +341,10 @@ const Index = () => {
         </div>
 
         {/* Header */}
-        <header className="flex items-center justify-between px-4 lg:px-6 py-2.5 flex-shrink-0">
+        <header className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2 lg:hidden">
-            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-10 h-10 rounded-lg" />
-            <span className="font-display font-bold text-foreground text-base tracking-tight">Xerife Hub</span>
+            <img src={xerifeHubLogo} alt="Xerife Hub" className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg" />
+            <span className="font-display font-bold text-foreground text-sm sm:text-base tracking-tight">Xerife Hub</span>
           </div>
           <div className="hidden lg:flex items-center gap-3">
             <h2 className="text-lg font-display font-semibold text-foreground">
@@ -367,28 +367,28 @@ const Index = () => {
             <div className="space-y-4 sm:space-y-6">
               {/* Mode switcher: Xerife Music / Xerife Video */}
               {!channelView && !artistView && (
-                <div className="px-4 pt-1">
-                  <div className="flex gap-2 p-1 bg-secondary rounded-xl w-fit">
+                <div className="px-3 sm:px-4 pt-1">
+                  <div className="flex gap-1.5 sm:gap-2 p-0.5 sm:p-1 bg-secondary rounded-xl w-fit">
                     <button
                       onClick={() => setHomeMode("music")}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                         homeMode === "music"
                           ? "bg-primary text-primary-foreground shadow-md"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <Music size={16} />
+                      <Music size={14} />
                       Xerife Music
                     </button>
                     <button
                       onClick={() => setHomeMode("video")}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                         homeMode === "video"
                           ? "bg-primary text-primary-foreground shadow-md"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <MonitorPlay size={16} />
+                      <MonitorPlay size={14} />
                       Xerife Video
                     </button>
                   </div>

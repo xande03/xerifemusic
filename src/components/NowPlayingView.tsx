@@ -157,10 +157,10 @@ const NowPlayingView = ({
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col max-w-lg mx-auto w-full">
+        <div className="flex flex-col min-h-full max-w-lg mx-auto w-full">
 
           {/* Hero artwork area with gradient overlay */}
-          <div className={`relative w-full flex-shrink-0 ${mode === "lyrics" ? "aspect-[3/4]" : "aspect-square"} transition-all duration-300`}>
+          <div className={`relative w-full flex-shrink-0 transition-all duration-300`} style={{ aspectRatio: mode === "lyrics" ? '3/4' : undefined, height: mode !== "lyrics" ? 'clamp(240px, 45vh, 420px)' : undefined }}>
             {/* Background artwork */}
             {mode === "video" ? (
               <div className="w-full h-full bg-card relative group">
