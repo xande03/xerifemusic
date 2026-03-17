@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, Play, MoreHorizontal, Users, Disc3, Music2, ChevronRight, X } from "lucide-react";
+import { ArrowLeft, Loader2, Play, MoreHorizontal, Users, Disc3, Music2, ChevronRight, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
@@ -58,6 +58,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
   const [albumTracks, setAlbumTracks] = useState<AlbumTrack[]>([]);
   const [albumLoading, setAlbumLoading] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<"albums" | "singles" | "features" | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -319,89 +320,193 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
           {/* Albums */}
           {artistData.albums.length > 0 && (
             <motion.section variants={fadeUp}>
-              <div className="flex items-center justify-between px-4 mb-3">
+              <button
+                onClick={() => setExpandedSection(expandedSection === "albums" ? null : "albums")}
+                className="flex items-center justify-between px-4 mb-3 w-full"
+              >
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <Disc3 size={16} className="text-primary" />
                   Álbuns
+                  <span className="text-xs font-normal text-muted-foreground">({artistData.albums.length})</span>
                 </h3>
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-                {artistData.albums.map((album) => (
-                  <button
-                    key={album.browseId || album.title}
-                    onClick={() => handleAlbumClick(album)}
-                    className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                <motion.div animate={{ rotate: expandedSection === "albums" ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronRight size={18} className="text-muted-foreground" />
+                </motion.div>
+              </button>
+              <AnimatePresence mode="wait">
+                {expandedSection === "albums" ? (
+                  <motion.div
+                    key="albums-grid"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-4 pb-2 overflow-hidden"
                   >
-                    <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
-                      {album.cover && <img src={hdThumbnail(album.cover)} alt={album.title} className="w-full h-full object-cover" />}
-                      <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                          <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                    {artistData.albums.map((album) => (
+                      <button
+                        key={album.browseId || album.title}
+                        onClick={() => handleAlbumClick(album)}
+                        className="group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {album.cover && <img src={hdThumbnail(album.cover)} alt={album.title} className="w-full h-full object-cover" />}
+                          <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                              <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <p className="text-xs font-medium text-foreground truncate">{album.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{album.subtitle}</p>
-                  </button>
-                ))}
-              </div>
+                        <p className="text-xs font-medium text-foreground truncate">{album.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{album.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div key="albums-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+                    {artistData.albums.slice(0, 6).map((album) => (
+                      <button
+                        key={album.browseId || album.title}
+                        onClick={() => handleAlbumClick(album)}
+                        className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {album.cover && <img src={hdThumbnail(album.cover)} alt={album.title} className="w-full h-full object-cover" />}
+                          <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                              <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs font-medium text-foreground truncate">{album.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{album.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.section>
           )}
 
           {/* Singles */}
           {artistData.singles.length > 0 && (
             <motion.section variants={fadeUp}>
-              <div className="flex items-center justify-between px-4 mb-3">
+              <button
+                onClick={() => setExpandedSection(expandedSection === "singles" ? null : "singles")}
+                className="flex items-center justify-between px-4 mb-3 w-full"
+              >
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <Music2 size={16} className="text-primary" />
                   Singles e EPs
+                  <span className="text-xs font-normal text-muted-foreground">({artistData.singles.length})</span>
                 </h3>
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-                {artistData.singles.map((single) => (
-                  <button
-                    key={single.browseId || single.title}
-                    onClick={() => handleAlbumClick(single)}
-                    className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                <motion.div animate={{ rotate: expandedSection === "singles" ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronRight size={18} className="text-muted-foreground" />
+                </motion.div>
+              </button>
+              <AnimatePresence mode="wait">
+                {expandedSection === "singles" ? (
+                  <motion.div
+                    key="singles-grid"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-4 pb-2 overflow-hidden"
                   >
-                    <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
-                      {single.cover && <img src={hdThumbnail(single.cover)} alt={single.title} className="w-full h-full object-cover" />}
-                    </div>
-                    <p className="text-xs font-medium text-foreground truncate">{single.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{single.subtitle}</p>
-                  </button>
-                ))}
-              </div>
+                    {artistData.singles.map((single) => (
+                      <button
+                        key={single.browseId || single.title}
+                        onClick={() => handleAlbumClick(single)}
+                        className="group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {single.cover && <img src={hdThumbnail(single.cover)} alt={single.title} className="w-full h-full object-cover" />}
+                        </div>
+                        <p className="text-xs font-medium text-foreground truncate">{single.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{single.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div key="singles-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+                    {artistData.singles.slice(0, 6).map((single) => (
+                      <button
+                        key={single.browseId || single.title}
+                        onClick={() => handleAlbumClick(single)}
+                        className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {single.cover && <img src={hdThumbnail(single.cover)} alt={single.title} className="w-full h-full object-cover" />}
+                        </div>
+                        <p className="text-xs font-medium text-foreground truncate">{single.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{single.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.section>
           )}
 
           {/* Features / Appears on */}
           {artistData.features.length > 0 && (
             <motion.section variants={fadeUp}>
-              <div className="flex items-center justify-between px-4 mb-3">
+              <button
+                onClick={() => setExpandedSection(expandedSection === "features" ? null : "features")}
+                className="flex items-center justify-between px-4 mb-3 w-full"
+              >
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <Users size={16} className="text-primary" />
                   Participações
+                  <span className="text-xs font-normal text-muted-foreground">({artistData.features.length})</span>
                 </h3>
-                <ChevronRight size={18} className="text-muted-foreground" />
-              </div>
-              <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-                {artistData.features.map((feat) => (
-                  <button
-                    key={feat.browseId || feat.title}
-                    onClick={() => handleAlbumClick(feat)}
-                    className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                <motion.div animate={{ rotate: expandedSection === "features" ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronRight size={18} className="text-muted-foreground" />
+                </motion.div>
+              </button>
+              <AnimatePresence mode="wait">
+                {expandedSection === "features" ? (
+                  <motion.div
+                    key="features-grid"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-4 pb-2 overflow-hidden"
                   >
-                    <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
-                      {feat.cover && <img src={hdThumbnail(feat.cover)} alt={feat.title} className="w-full h-full object-cover" />}
-                    </div>
-                    <p className="text-xs font-medium text-foreground truncate">{feat.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{feat.subtitle}</p>
-                  </button>
-                ))}
-              </div>
+                    {artistData.features.map((feat) => (
+                      <button
+                        key={feat.browseId || feat.title}
+                        onClick={() => handleAlbumClick(feat)}
+                        className="group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {feat.cover && <img src={hdThumbnail(feat.cover)} alt={feat.title} className="w-full h-full object-cover" />}
+                        </div>
+                        <p className="text-xs font-medium text-foreground truncate">{feat.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{feat.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div key="features-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+                    {artistData.features.slice(0, 6).map((feat) => (
+                      <button
+                        key={feat.browseId || feat.title}
+                        onClick={() => handleAlbumClick(feat)}
+                        className="flex-shrink-0 w-[130px] sm:w-[150px] group active:scale-95 transition-transform text-left"
+                      >
+                        <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 relative bg-secondary">
+                          {feat.cover && <img src={hdThumbnail(feat.cover)} alt={feat.title} className="w-full h-full object-cover" />}
+                        </div>
+                        <p className="text-xs font-medium text-foreground truncate">{feat.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{feat.subtitle}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.section>
           )}
         </motion.div>
