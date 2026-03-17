@@ -57,6 +57,7 @@ const Index = () => {
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
+  const [albumQueue, setAlbumQueue] = useState<Song[] | null>(null);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
@@ -125,6 +126,16 @@ const Index = () => {
 
   useEffect(() => {
     if (playerState.isEnded && !expanded) {
+      // If playing from album queue, advance to next album track
+      if (albumQueue && albumQueue.length > 0) {
+        const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+        if (idx >= 0 && idx < albumQueue.length - 1) {
+          handleSelect(albumQueue[idx + 1]);
+          return;
+        }
+        // Album ended, clear album queue
+        setAlbumQueue(null);
+      }
       // In music mode, use smart queue for auto-next
       if (homeMode === "music") {
         const next = popNextFromQueue();
@@ -169,6 +180,16 @@ const Index = () => {
   }, [playerState, pause, play, loadVideo, currentSong]);
 
   const handleNext = useCallback(async () => {
+    // If playing from album, go to next album track
+    if (albumQueue && albumQueue.length > 0) {
+      const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+      if (idx >= 0 && idx < albumQueue.length - 1) {
+        handleSelect(albumQueue[idx + 1]);
+        return;
+      }
+      // Album ended, clear and fall through
+      setAlbumQueue(null);
+    }
     if (homeMode === "music") {
       // Try smart queue first
       const next = popNextFromQueue();
@@ -190,9 +211,17 @@ const Index = () => {
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx + 1) % sorted.length]);
-  }, [currentSong, songs, handleSelect, homeMode]);
+  }, [currentSong, songs, handleSelect, homeMode, albumQueue]);
 
   const handlePrev = useCallback(() => {
+    // If playing from album, go to previous album track
+    if (albumQueue && albumQueue.length > 0) {
+      const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+      if (idx > 0) {
+        handleSelect(albumQueue[idx - 1]);
+        return;
+      }
+    }
     // Go back through history
     const history = getHistory();
     const currentIdx = history.findIndex((h) => h.youtubeId === currentSong.youtubeId);
@@ -216,7 +245,7 @@ const Index = () => {
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx - 1 + sorted.length) % sorted.length]);
-  }, [currentSong, songs, handleSelect]);
+  }, [currentSong, songs, handleSelect, albumQueue]);
 
   const handleShuffle = useCallback(() => {
     const shuffled = shuffleSmartQueue();
@@ -475,10 +504,19 @@ const Index = () => {
                   artistName={artistView.name}
                   artistImage={artistView.image}
                   onBack={() => setArtistView(null)}
-                  onPlaySong={(song) => {
+                  onPlaySong={(song, queue) => {
+                    if (queue) setAlbumQueue(queue);
                     handleSelect(song);
                     setPlayerMode("audio");
                   }}
+                  currentPlayingSong={currentSong}
+                  isPlaying={playerState.isPlaying}
+                  currentTime={ct}
+                  duration={dur}
+                  onTogglePlay={handleTogglePlay}
+                  onNext={handleNext}
+                  onPrev={handlePrev}
+                  onExpand={() => setExpanded(true)}
                 />
               ) : homeMode === "video" ? (
                 <ExploreScreen

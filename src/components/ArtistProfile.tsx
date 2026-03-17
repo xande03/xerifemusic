@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, Play, MoreHorizontal, Users, Disc3, Music2, ChevronRight, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, Loader2, Play, Pause, SkipForward, SkipBack, MoreHorizontal, Users, Disc3, Music2, ChevronRight, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
@@ -10,7 +10,15 @@ interface ArtistProfileProps {
   artistName: string;
   artistImage?: string;
   onBack: () => void;
-  onPlaySong: (song: Song) => void;
+  onPlaySong: (song: Song, albumQueue?: Song[]) => void;
+  currentPlayingSong?: Song | null;
+  isPlaying?: boolean;
+  currentTime?: number;
+  duration?: number;
+  onTogglePlay?: () => void;
+  onNext?: () => void;
+  onPrev?: () => void;
+  onExpand?: () => void;
 }
 
 interface AlbumItem {
@@ -51,7 +59,7 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0, 0, 0.2, 1] as const } },
 };
 
-const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistProfileProps) => {
+const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPlayingSong, isPlaying = false, currentTime = 0, duration = 0, onTogglePlay, onNext, onPrev, onExpand }: ArtistProfileProps) => {
   const [artistData, setArtistData] = useState<ArtistData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumItem | null>(null);
@@ -101,21 +109,28 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
       .catch(() => setAlbumLoading(false));
   };
 
-  const handlePlayTrack = (track: AlbumTrack) => {
-    const song: Song = {
-      id: track.id,
-      youtubeId: track.youtubeId,
-      title: track.title,
-      artist: track.artist || artistName,
-      album: selectedAlbum?.title || track.title,
-      cover: track.cover || selectedAlbum?.cover || "",
-      duration: track.duration,
+  const albumTracksAsSongs = (tracks: AlbumTrack[]): Song[] =>
+    tracks.map((t) => ({
+      id: t.id,
+      youtubeId: t.youtubeId,
+      title: t.title,
+      artist: t.artist || artistName,
+      album: selectedAlbum?.title || t.title,
+      cover: t.cover || selectedAlbum?.cover || "",
+      duration: t.duration,
       votes: 0,
       isDownloaded: false,
-    };
-    setSelectedAlbum(null);
-    onPlaySong(song);
+    }));
+
+  const handlePlayTrack = (track: AlbumTrack) => {
+    const songs = albumTracksAsSongs(albumTracks);
+    const song = songs.find((s) => s.youtubeId === track.youtubeId) || songs[0];
+    // Keep album open — pass album queue so parent can wire next/prev
+    onPlaySong(song, songs);
   };
+
+  const isTrackPlaying = (track: AlbumTrack) =>
+    currentPlayingSong?.youtubeId === track.youtubeId;
 
   const thumbnail = artistData?.thumbnail || artistImage;
 
@@ -135,7 +150,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="h-full overflow-y-auto"
+              className="h-full flex flex-col"
             >
               {/* Album header */}
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-background/90 backdrop-blur-md" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}>
@@ -145,7 +160,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                 </button>
               </div>
 
-              <div className="px-4 pb-8">
+              <div className="flex-1 overflow-y-auto px-4 pb-28">
                 {/* Album cover + info */}
                 <div className="flex flex-col items-center mb-6">
                   <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-xl overflow-hidden shadow-2xl mb-4">
@@ -176,29 +191,79 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
                   </div>
                 ) : (
                   <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-0.5">
-                    {albumTracks.map((track, i) => (
-                      <motion.button
-                        key={track.id}
-                        variants={fadeUp}
-                        onClick={() => handlePlayTrack(track)}
-                        className="w-full flex items-center gap-3 py-3 hover:bg-accent/50 active:bg-accent rounded-lg transition-colors px-1"
-                      >
-                        <span className="text-sm font-medium w-5 text-center text-muted-foreground">{i + 1}</span>
-                        <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
-                          <img src={hdThumbnail(track.cover || selectedAlbum.cover)} alt={track.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <p className="text-sm font-medium text-foreground truncate">{track.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{track.artist || artistName}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
-                          {track.duration > 0 ? formatDuration(track.duration) : ""}
-                        </span>
-                      </motion.button>
-                    ))}
+                    {albumTracks.map((track, i) => {
+                      const playing = isTrackPlaying(track);
+                      return (
+                        <motion.button
+                          key={track.id}
+                          variants={fadeUp}
+                          onClick={() => handlePlayTrack(track)}
+                          className={`w-full flex items-center gap-3 py-3 rounded-lg transition-colors px-1 ${
+                            playing ? "bg-primary/10 ring-1 ring-primary/20" : "hover:bg-accent/50 active:bg-accent"
+                          }`}
+                        >
+                          {playing ? (
+                            <div className="w-5 flex justify-center">
+                              <div className="flex items-end gap-[2px] h-4">
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "60%", animationDelay: "0ms" }} />
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "100%", animationDelay: "150ms" }} />
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "40%", animationDelay: "300ms" }} />
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-sm font-medium w-5 text-center text-muted-foreground">{i + 1}</span>
+                          )}
+                          <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
+                            <img src={hdThumbnail(track.cover || selectedAlbum.cover)} alt={track.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className={`text-sm font-medium truncate ${playing ? "text-primary" : "text-foreground"}`}>{track.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{track.artist || artistName}</p>
+                          </div>
+                          <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
+                            {track.duration > 0 ? formatDuration(track.duration) : ""}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </div>
+
+              {/* Mini player at bottom of album overlay */}
+              {currentPlayingSong && (
+                <div className="sticky bottom-0 z-20 bg-card/95 backdrop-blur-md border-t border-border/30">
+                  <div className="h-[2px] bg-muted">
+                    <div className="h-full bg-primary transition-all duration-200" style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
+                  </div>
+                  <div className="flex items-center gap-3 p-2 pr-3">
+                    <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={hdThumbnail(currentPlayingSong.cover)} alt={currentPlayingSong.album} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate text-foreground">{currentPlayingSong.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{currentPlayingSong.artist}</p>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-0.5">
+                      {onPrev && (
+                        <button onClick={onPrev} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                          <SkipBack size={18} />
+                        </button>
+                      )}
+                      <button onClick={onTogglePlay} className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform">
+                        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+                      </button>
+                      {onNext && (
+                        <button onClick={onNext} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                          <SkipForward size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
