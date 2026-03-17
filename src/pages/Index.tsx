@@ -504,10 +504,19 @@ const Index = () => {
                   artistName={artistView.name}
                   artistImage={artistView.image}
                   onBack={() => setArtistView(null)}
-                  onPlaySong={(song) => {
+                  onPlaySong={(song, queue) => {
+                    if (queue) setAlbumQueue(queue);
                     handleSelect(song);
                     setPlayerMode("audio");
                   }}
+                  currentPlayingSong={currentSong}
+                  isPlaying={playerState.isPlaying}
+                  currentTime={ct}
+                  duration={dur}
+                  onTogglePlay={handleTogglePlay}
+                  onNext={handleNext}
+                  onPrev={handlePrev}
+                  onExpand={() => setExpanded(true)}
                 />
               ) : homeMode === "video" ? (
                 <ExploreScreen
