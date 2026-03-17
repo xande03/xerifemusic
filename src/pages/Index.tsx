@@ -57,6 +57,7 @@ const Index = () => {
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
+  const [albumQueue, setAlbumQueue] = useState<Song[] | null>(null);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
