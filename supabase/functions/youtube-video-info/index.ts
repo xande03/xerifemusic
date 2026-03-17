@@ -122,8 +122,13 @@ async function fetchVideoInfo(videoId: string) {
     }
   }
 
-  // Fallback: YouTube innertube API for related videos
-  console.log("[youtube-video-info] Trying innertube fallback");
+  // Fallback: full innertube
+  const innertube = await fetchFromInnertube(videoId);
+  return innertube;
+}
+
+async function fetchFromInnertube(videoId: string): Promise<{ relatedVideos: any[]; comments: any[] }> {
+  console.log("[youtube-video-info] Trying innertube");
   try {
     const body = {
       context: {
@@ -149,7 +154,6 @@ async function fetchVideoInfo(videoId: string) {
     if (res.ok) {
       const data = await res.json();
       
-      // Extract related videos
       const items = data?.contents?.twoColumnWatchNextResults?.secondaryResults
         ?.secondaryResults?.results || [];
 
@@ -173,7 +177,6 @@ async function fetchVideoInfo(videoId: string) {
           };
         });
 
-      // Try extracting comments from engagement panels
       let comments: any[] = [];
       try {
         const engagementPanels = data?.engagementPanels || [];
@@ -185,16 +188,12 @@ async function fetchVideoInfo(videoId: string) {
               ?.continuationEndpoint?.continuationCommand?.token;
             
             if (continuation) {
-              const commentsBody = {
-                context: body.context,
-                continuation,
-              };
               const cRes = await fetch(
                 "https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-                  body: JSON.stringify(commentsBody),
+                  body: JSON.stringify({ context: body.context, continuation }),
                 }
               );
               if (cRes.ok) {
@@ -225,11 +224,9 @@ async function fetchVideoInfo(videoId: string) {
 
       console.log(`[youtube-video-info] Innertube: ${relatedVideos.length} related, ${comments.length} comments`);
       return { relatedVideos, comments };
-    } else {
-      console.warn(`[youtube-video-info] Innertube returned ${res.status}`);
     }
   } catch (err) {
-    console.warn("[youtube-video-info] Innertube fallback failed:", err);
+    console.warn("[youtube-video-info] Innertube failed:", err);
   }
 
   return { relatedVideos: [], comments: [] };
