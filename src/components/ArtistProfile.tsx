@@ -109,21 +109,28 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
       .catch(() => setAlbumLoading(false));
   };
 
-  const handlePlayTrack = (track: AlbumTrack) => {
-    const song: Song = {
-      id: track.id,
-      youtubeId: track.youtubeId,
-      title: track.title,
-      artist: track.artist || artistName,
-      album: selectedAlbum?.title || track.title,
-      cover: track.cover || selectedAlbum?.cover || "",
-      duration: track.duration,
+  const albumTracksAsSongs = (tracks: AlbumTrack[]): Song[] =>
+    tracks.map((t) => ({
+      id: t.id,
+      youtubeId: t.youtubeId,
+      title: t.title,
+      artist: t.artist || artistName,
+      album: selectedAlbum?.title || t.title,
+      cover: t.cover || selectedAlbum?.cover || "",
+      duration: t.duration,
       votes: 0,
       isDownloaded: false,
-    };
-    setSelectedAlbum(null);
-    onPlaySong(song);
+    }));
+
+  const handlePlayTrack = (track: AlbumTrack) => {
+    const songs = albumTracksAsSongs(albumTracks);
+    const song = songs.find((s) => s.youtubeId === track.youtubeId) || songs[0];
+    // Keep album open — pass album queue so parent can wire next/prev
+    onPlaySong(song, songs);
   };
+
+  const isTrackPlaying = (track: AlbumTrack) =>
+    currentPlayingSong?.youtubeId === track.youtubeId;
 
   const thumbnail = artistData?.thumbnail || artistImage;
 
