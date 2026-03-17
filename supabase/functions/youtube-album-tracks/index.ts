@@ -50,6 +50,28 @@ serve(async (req) => {
     const tracks = parseAlbumTracks(data);
     const albumHeader = parseAlbumHeader(data);
 
+    // Debug: log structure keys
+    console.log("Header keys:", JSON.stringify(Object.keys(data?.header || {})));
+    console.log("Contents keys:", JSON.stringify(Object.keys(data?.contents || {})));
+    const tabs = data?.contents?.singleColumnBrowseResultsRenderer?.tabs || data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+    console.log("Tabs count:", tabs.length);
+    if (tabs[0]) {
+      const sections = tabs[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
+      console.log("Sections count:", sections.length);
+      if (sections[0]) {
+        console.log("First section keys:", JSON.stringify(Object.keys(sections[0])));
+        const shelf = sections[0]?.musicShelfRenderer;
+        if (shelf) {
+          console.log("Shelf contents count:", shelf?.contents?.length);
+          if (shelf?.contents?.[0]) {
+            console.log("First item keys:", JSON.stringify(Object.keys(shelf.contents[0])));
+          }
+        }
+      }
+    }
+    // Also check for frameworkUpdates or other top level keys
+    console.log("Top-level keys:", JSON.stringify(Object.keys(data)));
+
     return new Response(JSON.stringify({ ...albumHeader, tracks }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
