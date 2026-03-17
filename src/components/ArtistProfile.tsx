@@ -48,7 +48,7 @@ const stagger = {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0, 0, 0.2, 1] as const } },
 };
 
 const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistProfileProps) => {

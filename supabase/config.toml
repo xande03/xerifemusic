@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.youtube-video-info]
 verify_jwt = false
+
+[functions.youtube-artist-info]
+verify_jwt = false
+
+[functions.youtube-album-tracks]
+verify_jwt = false
