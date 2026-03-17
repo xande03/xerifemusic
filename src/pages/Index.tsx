@@ -838,6 +838,8 @@ const Index = () => {
               onExpand={() => setExpanded(true)}
               onSeek={handleSeek}
               onVolumeChange={setVolumeState}
+              isShuffled={isShuffled}
+              onShuffle={handleShuffle}
             />
           </>
         )}
