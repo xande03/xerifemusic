@@ -46,6 +46,7 @@ const NowPlayingView = ({
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
   isShuffled, onShuffle,
   context = "music",
+  onShowQueue, queueCount = 0,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
