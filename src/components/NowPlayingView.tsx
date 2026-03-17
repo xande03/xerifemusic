@@ -175,8 +175,8 @@ const NowPlayingView = ({
             ) : mode === "lyrics" ? (
               <div className="w-full h-full relative">
                 <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
-                <div ref={lyricsContainerRef} className="absolute inset-0 overflow-y-auto px-6 py-10">
+                <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-md" />
+                <div ref={lyricsContainerRef} className="absolute inset-0 z-20 overflow-y-auto px-6 py-10">
                   {lyricsLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3">
                       <Loader2 size={24} className="text-primary animate-spin" />
