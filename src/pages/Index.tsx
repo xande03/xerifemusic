@@ -119,7 +119,7 @@ const Index = () => {
   // Pre-fetch related queue when a song starts playing in music mode
   useEffect(() => {
     if (homeMode === "music" && currentSong.youtubeId) {
-      fetchRelatedQueue(currentSong).catch(() => {});
+      fetchRelatedQueue(currentSong).then((q) => setSmartQueueList(q)).catch(() => {});
     }
   }, [currentSong.id, homeMode]);
 
