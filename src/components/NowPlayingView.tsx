@@ -290,8 +290,8 @@ const NowPlayingView = ({
             {/* Song info — centered */}
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-bold text-foreground truncate">{song.title}</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">{song.artist}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">{song.title}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{song.artist}</p>
               </div>
               <div className="flex gap-0.5">
                 <button className="p-2.5 text-muted-foreground hover:text-primary active:scale-95 transition-all"><Heart size={22} /></button>
