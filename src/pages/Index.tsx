@@ -649,7 +649,7 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Voting queue */}
               <section className="px-3 sm:px-4">
