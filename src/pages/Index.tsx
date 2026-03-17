@@ -616,7 +616,7 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Featured mixes */}
               <section className="px-3 sm:px-4">
