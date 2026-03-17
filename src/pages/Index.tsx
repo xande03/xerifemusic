@@ -486,7 +486,7 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Álbuns em Destaque — large cards like reference */}
               <section>
