@@ -31,7 +31,6 @@ serve(async (req) => {
       });
     }
 
-    // Step 1: Search for artist browseId
     const browseId = await findArtistBrowseId(artistName);
 
     if (!browseId) {
@@ -41,7 +40,6 @@ serve(async (req) => {
       });
     }
 
-    // Step 2: Browse artist page
     const artistData = await browseArtistPage(browseId, artistName);
 
     return new Response(JSON.stringify(artistData), {
@@ -76,7 +74,6 @@ async function ytMusicPost(endpoint: string, body: any) {
 
 async function findArtistBrowseId(name: string): Promise<string | null> {
   try {
-    // Search with artist filter
     const data = await ytMusicPost("search", {
       context: CLIENT_CONTEXT,
       query: name,
@@ -86,23 +83,19 @@ async function findArtistBrowseId(name: string): Promise<string | null> {
     const contents = data?.contents?.tabbedSearchResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
 
     for (const section of contents) {
-      // Top result card
       const card = section?.musicCardShelfRenderer;
       if (card) {
         const navEp = card?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint;
         if (navEp?.browseId?.startsWith("UC")) return navEp.browseId;
       }
 
-      // Regular list items
       const items = section?.musicShelfRenderer?.contents || [];
       for (const item of items) {
         const renderer = item?.musicResponsiveListItemRenderer;
         if (!renderer) continue;
         const navEp = renderer?.navigationEndpoint?.browseEndpoint;
         if (navEp?.browseId?.startsWith("UC")) return navEp.browseId;
-        // Also check overlay navigation
-        const overlayNav = renderer?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer?.playNavigationEndpoint?.watchEndpoint;
-        if (!navEp?.browseId && renderer?.flexColumns) {
+        if (renderer?.flexColumns) {
           for (const fc of renderer.flexColumns) {
             const runs = fc?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
             for (const run of runs) {
@@ -114,7 +107,7 @@ async function findArtistBrowseId(name: string): Promise<string | null> {
       }
     }
 
-    // Try without filter as fallback
+    // Fallback: search without filter
     const data2 = await ytMusicPost("search", {
       context: CLIENT_CONTEXT,
       query: name,
@@ -126,7 +119,6 @@ async function findArtistBrowseId(name: string): Promise<string | null> {
       if (card) {
         const navEp = card?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint;
         if (navEp?.browseId?.startsWith("UC")) return navEp.browseId;
-        // Check subtitle for artist link
         const subtitleRuns = card?.subtitle?.runs || [];
         for (const run of subtitleRuns) {
           const bid = run?.navigationEndpoint?.browseEndpoint?.browseId;
@@ -147,11 +139,149 @@ async function browseArtistPage(browseId: string, artistName: string) {
     browseId,
   });
 
-  return parseArtistPage(data, artistName);
+  return parseArtistPage(data, artistName, browseId);
 }
 
-function parseArtistPage(data: any, fallbackName: string) {
-  // Handle multiple header types
+/**
+ * Fetch ALL items from a "See All" carousel endpoint.
+ * The carousel header has a moreContentButton with a browseEndpoint.
+ */
+async function fetchFullCarousel(moreBrowseId: string, moreParams?: string): Promise<any[]> {
+  try {
+    const body: any = { context: CLIENT_CONTEXT, browseId: moreBrowseId };
+    if (moreParams) body.params = moreParams;
+
+    const data = await ytMusicPost("browse", body);
+
+    // The response is a grid/list page
+    const tabs = data?.contents?.singleColumnBrowseResultsRenderer?.tabs ||
+      data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+    const sections = tabs[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
+
+    const items: any[] = [];
+
+    for (const section of sections) {
+      // Grid renderer (most common for "see all" pages)
+      const grid = section?.gridRenderer;
+      if (grid) {
+        for (const gridItem of (grid?.items || [])) {
+          const renderer = gridItem?.musicTwoRowItemRenderer;
+          if (renderer) {
+            items.push(parseTwoRowItem(renderer));
+          }
+        }
+      }
+
+      // musicShelfRenderer (list format)
+      const shelf = section?.musicShelfRenderer;
+      if (shelf) {
+        for (const shelfItem of (shelf?.contents || [])) {
+          const renderer = shelfItem?.musicTwoRowItemRenderer;
+          if (renderer) {
+            items.push(parseTwoRowItem(renderer));
+          }
+        }
+      }
+
+      // musicCarouselShelfRenderer (carousel within the page)
+      const carousel = section?.musicCarouselShelfRenderer;
+      if (carousel) {
+        items.push(...parseCarouselItems(carousel));
+      }
+    }
+
+    // Also check for grid in the tab content directly
+    const gridContent = tabs[0]?.tabRenderer?.content?.gridRenderer;
+    if (gridContent) {
+      for (const gridItem of (gridContent?.items || [])) {
+        const renderer = gridItem?.musicTwoRowItemRenderer;
+        if (renderer) {
+          items.push(parseTwoRowItem(renderer));
+        }
+      }
+    }
+
+    // Check sectionListRenderer directly for musicResponsiveListItemRenderer
+    for (const section of sections) {
+      const respItems = section?.musicShelfRenderer?.contents || [];
+      for (const item of respItems) {
+        const respRenderer = item?.musicResponsiveListItemRenderer;
+        if (respRenderer) {
+          const parsed = parseResponsiveItem(respRenderer);
+          if (parsed) items.push(parsed);
+        }
+      }
+    }
+
+    return items.filter((i) => i && i.title);
+  } catch (e) {
+    console.error("fetchFullCarousel error:", e);
+    return [];
+  }
+}
+
+function parseTwoRowItem(renderer: any): any {
+  const title = renderer?.title?.runs?.[0]?.text || "";
+  const subtitle = renderer?.subtitle?.runs?.map((r: any) => r.text).join("") || "";
+
+  const browseId = renderer?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId ||
+    renderer?.navigationEndpoint?.browseEndpoint?.browseId || "";
+  const pageType =
+    renderer?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType ||
+    renderer?.navigationEndpoint?.browseEndpoint?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType || "";
+
+  const thumbnails = renderer?.thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
+  const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+  let cover = sorted[0]?.url || "";
+  if (cover.startsWith("//")) cover = `https:${cover}`;
+
+  return { title, subtitle, browseId, pageType, cover };
+}
+
+function parseResponsiveItem(renderer: any): any | null {
+  const flexColumns = renderer?.flexColumns || [];
+  const title = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.text || "";
+  const subtitle = flexColumns[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.map((r: any) => r.text).join("") || "";
+
+  let browseId = "";
+  const navEp = renderer?.navigationEndpoint?.browseEndpoint;
+  if (navEp) browseId = navEp.browseId || "";
+  if (!browseId) {
+    browseId = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId || "";
+  }
+
+  const thumbnails = renderer?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
+  const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+  let cover = sorted[0]?.url || "";
+  if (cover.startsWith("//")) cover = `https:${cover}`;
+
+  if (!title) return null;
+  return { title, subtitle, browseId, pageType: "", cover };
+}
+
+/**
+ * Extract the "See All" browseId and params from a carousel header.
+ */
+function getCarouselMoreEndpoint(carousel: any): { browseId: string; params?: string } | null {
+  const header = carousel?.header?.musicCarouselShelfBasicHeaderRenderer;
+  if (!header) return null;
+
+  // Check moreContentButton
+  const moreBtn = header?.moreContentButton?.buttonRenderer?.navigationEndpoint?.browseEndpoint;
+  if (moreBtn?.browseId) {
+    return { browseId: moreBtn.browseId, params: moreBtn.params };
+  }
+
+  // Check title navigation
+  const titleNav = header?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint;
+  if (titleNav?.browseId) {
+    return { browseId: titleNav.browseId, params: titleNav.params };
+  }
+
+  return null;
+}
+
+async function parseArtistPage(data: any, fallbackName: string, artistBrowseId: string) {
   const header =
     data?.header?.musicImmersiveHeaderRenderer ||
     data?.header?.musicVisualHeaderRenderer ||
@@ -160,7 +290,6 @@ function parseArtistPage(data: any, fallbackName: string) {
 
   const name = header?.title?.runs?.[0]?.text || fallbackName;
 
-  // Description can be in different places
   const description =
     header?.description?.runs?.map((r: any) => r.text).join("") ||
     header?.description?.musicDescriptionShelfRenderer?.description?.runs?.map((r: any) => r.text).join("") ||
@@ -171,7 +300,6 @@ function parseArtistPage(data: any, fallbackName: string) {
     header?.subtitle?.runs?.map((r: any) => r.text).join("") ||
     "";
 
-  // Get best thumbnail
   const thumbSources = [
     header?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails,
     header?.foregroundThumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails,
@@ -187,7 +315,6 @@ function parseArtistPage(data: any, fallbackName: string) {
   }
   if (thumbnail.startsWith("//")) thumbnail = `https:${thumbnail}`;
 
-  // Parse all sections
   const tabs = data?.contents?.singleColumnBrowseResultsRenderer?.tabs || [];
   const sections = tabs[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
 
@@ -202,14 +329,15 @@ function parseArtistPage(data: any, fallbackName: string) {
     features: [],
   };
 
-  // Also look for description in sections
+  // Collect "more" endpoints for parallel fetching
+  const moreEndpoints: { category: string; endpoint: { browseId: string; params?: string } }[] = [];
+
   for (const section of sections) {
     const descShelf = section?.musicDescriptionShelfRenderer;
     if (descShelf && !result.description) {
       result.description = descShelf?.description?.runs?.map((r: any) => r.text).join("") || "";
     }
 
-    // musicShelfRenderer = songs list
     const shelf = section?.musicShelfRenderer;
     if (shelf) {
       const title = (shelf?.title?.runs?.[0]?.text || "").toLowerCase();
@@ -218,33 +346,58 @@ function parseArtistPage(data: any, fallbackName: string) {
       }
     }
 
-    // musicCarouselShelfRenderer = horizontal carousel (albums, singles, features)
     const carousel = section?.musicCarouselShelfRenderer;
     if (carousel) {
       const rawTitle = carousel?.header?.musicCarouselShelfBasicHeaderRenderer?.title?.runs?.[0]?.text || "";
       const title = rawTitle.toLowerCase();
-      const items = parseCarouselItems(carousel);
+      const inlineItems = parseCarouselItems(carousel);
+      const moreEndpoint = getCarouselMoreEndpoint(carousel);
 
+      let category = "";
       if (title.includes("álbuns") || title.includes("albums") || title.includes("álbum")) {
-        result.albums = items;
+        category = "albums";
       } else if (title.includes("singles") || title.includes("single") || title.includes("eps")) {
-        result.singles = items;
+        category = "singles";
       } else if (
         title.includes("participações") || title.includes("feat") ||
         title.includes("aparece em") || title.includes("appears") ||
         title.includes("colaborações")
       ) {
-        result.features = items;
+        category = "features";
       } else if (title.includes("vídeos") || title.includes("videos") || title.includes("clipes")) {
-        // Skip videos section for now
+        category = "";
       } else if (title.includes("fãs") || title.includes("fans") || title.includes("relacionados") || title.includes("related")) {
-        // Skip related artists
-      } else if (items.length > 0) {
-        // Assign to first empty category
-        if (result.albums.length === 0) {
-          result.albums = items;
-        } else if (result.singles.length === 0) {
-          result.singles = items;
+        category = "";
+      } else if (inlineItems.length > 0) {
+        if (result.albums.length === 0) category = "albums";
+        else if (result.singles.length === 0) category = "singles";
+      }
+
+      if (category) {
+        (result as any)[category] = inlineItems;
+        // If there's a "see all" endpoint and we got items, fetch the full list
+        if (moreEndpoint) {
+          moreEndpoints.push({ category, endpoint: moreEndpoint });
+        }
+      }
+    }
+  }
+
+  // Fetch full lists in parallel for categories that have "see all" endpoints
+  if (moreEndpoints.length > 0) {
+    const fetchPromises = moreEndpoints.map(async ({ category, endpoint }) => {
+      const fullItems = await fetchFullCarousel(endpoint.browseId, endpoint.params);
+      return { category, fullItems };
+    });
+
+    const results = await Promise.allSettled(fetchPromises);
+
+    for (const r of results) {
+      if (r.status === "fulfilled" && r.value.fullItems.length > 0) {
+        // Only replace if we got more items than the inline carousel
+        const current = (result as any)[r.value.category] || [];
+        if (r.value.fullItems.length >= current.length) {
+          (result as any)[r.value.category] = r.value.fullItems;
         }
       }
     }
@@ -269,25 +422,18 @@ function parseShelfSongs(shelf: any): any[] {
       .filter((r: any) => r.text && r.text.trim() !== "•" && r.text.trim() !== " • ")
       .map((r: any) => r.text.trim());
 
-    // Get video ID from multiple sources
     let videoId = "";
     const overlay = renderer?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer;
     videoId = overlay?.playNavigationEndpoint?.watchEndpoint?.videoId || "";
-    if (!videoId) {
-      videoId = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.watchEndpoint?.videoId || "";
-    }
-    if (!videoId) {
-      videoId = renderer?.playlistItemData?.videoId || "";
-    }
+    if (!videoId) videoId = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.watchEndpoint?.videoId || "";
+    if (!videoId) videoId = renderer?.playlistItemData?.videoId || "";
 
     const thumbnails = renderer?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
     const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
     let cover = sorted[0]?.url || "";
     if (cover.startsWith("//")) cover = `https:${cover}`;
 
-    // Parse duration
     let duration = 0;
-    // Check fixedColumns first
     const fixedColumns = renderer?.fixedColumns || [];
     for (const fc of fixedColumns) {
       const text = fc?.musicResponsiveListItemFixedColumnRenderer?.text?.runs?.[0]?.text || "";
@@ -296,7 +442,6 @@ function parseShelfSongs(shelf: any): any[] {
         duration = segs.length === 3 ? segs[0] * 3600 + segs[1] * 60 + segs[2] : segs[0] * 60 + segs[1];
       }
     }
-    // Fallback to flex column runs
     if (duration === 0) {
       for (const part of parts) {
         if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(part)) {
@@ -333,27 +478,10 @@ function parseCarouselItems(carousel: any): any[] {
   for (const item of contents) {
     const renderer = item?.musicTwoRowItemRenderer;
     if (!renderer) continue;
-
-    const title = renderer?.title?.runs?.[0]?.text || "";
-    const subtitle = renderer?.subtitle?.runs?.map((r: any) => r.text).join("") || "";
-
-    const browseId = renderer?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId ||
-      renderer?.navigationEndpoint?.browseEndpoint?.browseId || "";
-    const pageType =
-      renderer?.title?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType ||
-      renderer?.navigationEndpoint?.browseEndpoint?.browseEndpointContextSupportedConfigs?.browseEndpointContextMusicConfig?.pageType || "";
-
-    const thumbnails = renderer?.thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
-    const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
-    let cover = sorted[0]?.url || "";
-    if (cover.startsWith("//")) cover = `https:${cover}`;
-
-    if (title) {
-      items.push({ title, subtitle, browseId, pageType, cover });
-    }
+    items.push(parseTwoRowItem(renderer));
   }
 
-  return items;
+  return items.filter((i) => i && i.title);
 }
 
 async function searchFallback(artistName: string) {
@@ -384,27 +512,17 @@ async function searchFallback(artistName: string) {
 
         if (title && videoId) {
           songs.push({
-            id: `yt-${videoId}`,
-            youtubeId: videoId,
-            title: cleanTitle(title),
-            artist: artistName,
-            album: title,
-            cover,
-            duration: 0,
+            id: `yt-${videoId}`, youtubeId: videoId, title: cleanTitle(title),
+            artist: artistName, album: title, cover, duration: 0,
           });
         }
       }
     }
 
     return {
-      name: artistName,
-      description: "",
-      subscriberCount: "",
+      name: artistName, description: "", subscriberCount: "",
       thumbnail: songs[0]?.cover || "",
-      topSongs: songs.slice(0, 10),
-      albums: [],
-      singles: [],
-      features: [],
+      topSongs: songs.slice(0, 10), albums: [], singles: [], features: [],
     };
   } catch {
     return {
