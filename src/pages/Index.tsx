@@ -52,6 +52,7 @@ const Index = () => {
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
