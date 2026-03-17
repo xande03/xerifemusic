@@ -14,11 +14,14 @@ interface DesktopPlayerProps {
   onExpand: () => void;
   onSeek: (fraction: number) => void;
   onVolumeChange: (vol: number) => void;
+  isShuffled?: boolean;
+  onShuffle?: () => void;
 }
 
 const DesktopPlayer = ({
   song, isPlaying, currentTime, duration, volume,
   onTogglePlay, onNext, onPrev, onExpand, onSeek, onVolumeChange,
+  isShuffled, onShuffle,
 }: DesktopPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
 
