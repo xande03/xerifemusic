@@ -15,7 +15,7 @@ export interface VideoInfo {
 }
 
 const CACHE_KEY = "demus_video_info_cache";
-const CACHE_TTL = 30 * 60 * 1000; // 30 min
+const CACHE_TTL = 10 * 60 * 1000; // 10 min
 
 function getCache(): Record<string, { data: VideoInfo; ts: number }> {
   try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); } catch { return {}; }
@@ -64,9 +64,12 @@ export async function fetchVideoInfo(videoId: string): Promise<VideoInfo> {
       comments: data.comments || [],
     };
 
-    const updated = getCache();
-    updated[videoId] = { data: result, ts: Date.now() };
-    setCache(updated);
+    // Only cache if we got actual data
+    if (result.relatedVideos.length > 0 || result.comments.length > 0) {
+      const updated = getCache();
+      updated[videoId] = { data: result, ts: Date.now() };
+      setCache(updated);
+    }
 
     return result;
   } catch (err) {

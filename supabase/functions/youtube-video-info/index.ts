@@ -7,9 +7,12 @@ const corsHeaders = {
 };
 
 const INVIDIOUS_INSTANCES = [
+  "https://vid.puffyan.us",
+  "https://invidious.fdn.fr",
   "https://inv.nadeko.net",
   "https://invidious.nerdvpn.de",
   "https://invidious.jing.rocks",
+  "https://iv.nboez.com",
 ];
 
 serve(async (req) => {
@@ -47,14 +50,16 @@ async function fetchVideoInfo(videoId: string) {
   for (const base of INVIDIOUS_INSTANCES) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), 6000);
 
       const [videoRes, commentsRes] = await Promise.all([
         fetch(`${base}/api/v1/videos/${videoId}?fields=recommendedVideos`, {
           signal: controller.signal,
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; Bot/1.0)" },
         }),
         fetch(`${base}/api/v1/comments/${videoId}?sort_by=top`, {
           signal: controller.signal,
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; Bot/1.0)" },
         }).catch(() => null),
       ]);
       clearTimeout(timeout);
@@ -95,14 +100,35 @@ async function fetchVideoInfo(videoId: string) {
           }));
       }
 
-      return { relatedVideos, comments };
+      // If we got both, return immediately
+      if (relatedVideos.length > 0 && comments.length > 0) {
+        console.log(`[youtube-video-info] Full success from ${base}: ${relatedVideos.length} related, ${comments.length} comments`);
+        return { relatedVideos, comments };
+      }
+      // If we got partial data, save it and try to fill the rest
+      if (relatedVideos.length > 0 || comments.length > 0) {
+        console.log(`[youtube-video-info] Partial from ${base}: ${relatedVideos.length} related, ${comments.length} comments — will try innertube for missing`);
+        // Try innertube to fill in missing data
+        const innertube = await fetchFromInnertube(videoId);
+        return {
+          relatedVideos: relatedVideos.length > 0 ? relatedVideos : innertube.relatedVideos,
+          comments: comments.length > 0 ? comments : innertube.comments,
+        };
+      }
+      console.warn(`[youtube-video-info] ${base} returned empty data`);
     } catch (err) {
-      console.warn(`Instance ${base} failed:`, err);
+      console.warn(`[youtube-video-info] Instance ${base} failed:`, err);
       continue;
     }
   }
 
-  // Fallback: try YouTube innertube for related videos
+  // Fallback: full innertube
+  const innertube = await fetchFromInnertube(videoId);
+  return innertube;
+}
+
+async function fetchFromInnertube(videoId: string): Promise<{ relatedVideos: any[]; comments: any[] }> {
+  console.log("[youtube-video-info] Trying innertube");
   try {
     const body = {
       context: {
@@ -120,13 +146,14 @@ async function fetchVideoInfo(videoId: string) {
       "https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+        headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" },
         body: JSON.stringify(body),
       }
     );
 
     if (res.ok) {
       const data = await res.json();
+      
       const items = data?.contents?.twoColumnWatchNextResults?.secondaryResults
         ?.secondaryResults?.results || [];
 
@@ -150,9 +177,57 @@ async function fetchVideoInfo(videoId: string) {
           };
         });
 
-      return { relatedVideos, comments: [] };
+      let comments: any[] = [];
+      try {
+        const engagementPanels = data?.engagementPanels || [];
+        for (const panel of engagementPanels) {
+          const section = panel?.engagementPanelSectionListRenderer;
+          if (section?.targetId === "comments-section") {
+            const continuation = section?.content?.sectionListRenderer?.contents?.[0]
+              ?.itemSectionRenderer?.contents?.[0]?.continuationItemRenderer
+              ?.continuationEndpoint?.continuationCommand?.token;
+            
+            if (continuation) {
+              const cRes = await fetch(
+                "https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+                  body: JSON.stringify({ context: body.context, continuation }),
+                }
+              );
+              if (cRes.ok) {
+                const cData = await cRes.json();
+                const commentItems = cData?.onResponseReceivedEndpoints?.[1]
+                  ?.reloadContinuationItemsCommand?.continuationItems || [];
+                comments = commentItems
+                  .filter((c: any) => c.commentThreadRenderer)
+                  .slice(0, 20)
+                  .map((c: any) => {
+                    const cr = c.commentThreadRenderer.comment.commentRenderer;
+                    return {
+                      author: cr.authorText?.simpleText || "Anônimo",
+                      authorThumbnail: cr.authorThumbnail?.thumbnails?.[0]?.url || "",
+                      content: cr.contentText?.runs?.map((r: any) => r.text).join("") || "",
+                      likes: parseInt(cr.voteCount?.simpleText?.replace(/\D/g, "") || "0") || 0,
+                      publishedTime: cr.publishedTimeText?.runs?.[0]?.text || "",
+                      isHearted: !!cr.actionButtons?.commentActionButtonsRenderer?.creatorHeart,
+                    };
+                  });
+              }
+            }
+          }
+        }
+      } catch (ce) {
+        console.warn("[youtube-video-info] Comments extraction failed:", ce);
+      }
+
+      console.log(`[youtube-video-info] Innertube: ${relatedVideos.length} related, ${comments.length} comments`);
+      return { relatedVideos, comments };
     }
-  } catch {}
+  } catch (err) {
+    console.warn("[youtube-video-info] Innertube failed:", err);
+  }
 
   return { relatedVideos: [], comments: [] };
 }
