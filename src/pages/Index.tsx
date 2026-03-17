@@ -485,23 +485,23 @@ const Index = () => {
 
               {/* Álbuns em Destaque — large cards like reference */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-lg font-bold text-foreground">Álbuns em Destaque</h2>
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
+                  <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
                   <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
                 </div>
-                <div className="grid grid-cols-2 gap-3 px-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 px-3 sm:px-4">
                   {forYouSongs.slice(0, 4).map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
                       className="group active:scale-[0.97] transition-transform text-left"
                     >
-                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 relative">
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 sm:mb-2 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
                       </div>
-                      <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                      <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.artist}</p>
                     </button>
                   ))}
                 </div>
