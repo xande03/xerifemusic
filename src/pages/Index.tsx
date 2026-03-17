@@ -545,37 +545,37 @@ const Index = () => {
               </section>
 
               {/* Top Charts — numbered list like YT Music Charts */}
-              <section className="px-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />
                     Top Charts
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5 sm:space-y-1">
                   {topCharts.map((song, i) => (
                     <div
                       key={song.id}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${
+                      className={`w-full flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
-                      <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
+                      <span className={`text-base sm:text-lg font-bold w-5 sm:w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
                         {i + 1}
                       </span>
                       <button onClick={() => handleSelect(song)} className="flex-shrink-0">
-                        <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover" />
+                        <img src={song.cover} alt={song.album} className="w-10 h-10 sm:w-11 sm:h-11 rounded-md object-cover" />
                       </button>
                       <div className="flex-1 min-w-0 text-left">
                         <button onClick={() => handleSelect(song)} className="w-full text-left">
-                          <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                          <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
                         </button>
                         <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
-                          <p className="text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
                         </button>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                         <TrendingUp size={12} />
                         <span>{song.votes}</span>
                       </div>
