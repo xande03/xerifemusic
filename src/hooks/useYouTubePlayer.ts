@@ -264,6 +264,15 @@ export function useYouTubePlayer(containerId: string) {
       } else if ((target as any).webkitEnterFullscreen) {
         (target as any).webkitEnterFullscreen();
       }
+
+      // Lock to landscape on mobile for video rotation
+      try {
+        if (screen.orientation && (screen.orientation as any).lock) {
+          await (screen.orientation as any).lock("landscape");
+        }
+      } catch {
+        // orientation lock not supported or denied — that's fine
+      }
     } catch (err) {
       console.warn("Fullscreen request failed:", err);
     }
