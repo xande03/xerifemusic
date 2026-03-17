@@ -160,7 +160,7 @@ const NowPlayingView = ({
         <div className="flex flex-col min-h-full max-w-lg mx-auto w-full">
 
           {/* Hero artwork area with gradient overlay */}
-          <div className={`relative w-full flex-shrink-0 ${mode === "lyrics" ? "aspect-[3/4]" : "aspect-[4/3.5] sm:aspect-square"} transition-all duration-300`}>
+          <div className={`relative w-full flex-shrink-0 transition-all duration-300`} style={{ aspectRatio: mode === "lyrics" ? '3/4' : undefined, height: mode !== "lyrics" ? 'min(55vw, 50vh)' : undefined }}>
             {/* Background artwork */}
             {mode === "video" ? (
               <div className="w-full h-full bg-card relative group">
