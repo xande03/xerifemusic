@@ -933,6 +933,7 @@ const Index = () => {
               onPlayFromQueue={handlePlayFromQueue}
               onRemoveFromQueue={handleRemoveFromQueue}
               onClearQueue={handleClearQueue}
+              onReorder={handleReorderQueue}
             />
           )}
         </AnimatePresence>
