@@ -586,27 +586,27 @@ const Index = () => {
 
               {/* For you carousel */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Sparkles size={16} className="text-primary" />
                     Para você
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
+                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto px-3 sm:px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
                   {forYouSongs.map((song) => (
-                    <div key={song.id} className="flex-shrink-0 w-[140px] group snap-start">
+                    <div key={song.id} className="flex-shrink-0 w-[120px] sm:w-[140px] group snap-start">
                       <button onClick={() => handleSelect(song)} className="w-full">
-                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
+                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 relative">
                           <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
-                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          <div className="absolute bottom-1.5 right-1.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
+                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
                           </div>
                         </div>
-                        <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
+                        <p className="text-[11px] sm:text-xs font-medium text-foreground truncate text-left">{song.title}</p>
                       </button>
                       <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
-                        <p className="text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
                       </button>
                     </div>
                   ))}
