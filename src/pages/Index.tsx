@@ -74,6 +74,7 @@ const Index = () => {
 
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay, requestFullscreen, exitFullscreen } = useYouTubePlayer("yt-player");
   const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
+  useNativeCapabilities(playerState.isPlaying);
 
 
 

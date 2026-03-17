@@ -17,6 +17,7 @@ createRoot(document.getElementById("root")!).render(
   </React.StrictMode>
 );
 
+// Register Service Worker and request persistent storage
 if ("serviceWorker" in navigator) {
   if (import.meta.env.PROD) {
     window.addEventListener("load", () => {
@@ -33,4 +34,11 @@ if ("serviceWorker" in navigator) {
       keys.forEach((key) => caches.delete(key));
     });
   }
+}
+
+// Request persistent storage so browser doesn't evict IndexedDB/cache
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().then((granted) => {
+    if (granted) console.log("Persistent storage granted");
+  });
 }
