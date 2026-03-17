@@ -258,29 +258,31 @@ const NowPlayingView = ({
           </div>
 
           {/* Controls section below artwork */}
-          <div className="px-5 -mt-8 relative z-10 flex flex-col gap-4 pb-4">
+          <div className="px-5 -mt-8 relative z-10 flex flex-col gap-5 pb-4">
 
-            {/* Mode tabs */}
-            <div className="flex items-center gap-1 bg-secondary/60 backdrop-blur-sm rounded-full p-1 w-fit">
-              {([
-                { id: "video" as PlayerMode, icon: Video, label: "Vídeo" },
-                { id: "audio" as PlayerMode, icon: Music2, label: "Áudio" },
-                { id: "lyrics" as PlayerMode, icon: Mic2, label: "Letra" },
-              ]).map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => handleModeChange(id)}
-                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    mode === id ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Icon size={14} />
-                  <span>{label}</span>
-                </button>
-              ))}
+            {/* Mode tabs — centered */}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-1 bg-secondary/60 backdrop-blur-sm rounded-full p-1">
+                {([
+                  { id: "video" as PlayerMode, icon: Video, label: "Vídeo" },
+                  { id: "audio" as PlayerMode, icon: Music2, label: "Áudio" },
+                  { id: "lyrics" as PlayerMode, icon: Mic2, label: "Letra" },
+                ]).map(({ id, icon: Icon, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleModeChange(id)}
+                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      mode === id ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon size={14} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Song info */}
+            {/* Song info — centered */}
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-bold text-foreground truncate">{song.title}</h2>
@@ -292,7 +294,7 @@ const NowPlayingView = ({
               </div>
             </div>
 
-            {/* Progress bar — draggable */}
+            {/* Progress bar */}
             <div className="space-y-1">
               <Slider
                 value={[progress * 100]}
@@ -303,14 +305,14 @@ const NowPlayingView = ({
                 trackClassName="h-[5px] bg-muted"
                 thumbClassName="w-4 h-4"
               />
-              <div className="flex justify-between text-[11px] text-primary font-mono">
-                <span>{formatDuration(currentTime)}</span>
+              <div className="flex justify-between text-[11px] font-mono">
+                <span className="text-primary">{formatDuration(currentTime)}</span>
                 <span className="text-muted-foreground">{formatDuration(duration)}</span>
               </div>
             </div>
 
-            {/* Transport controls */}
-            <div className="flex items-center justify-between px-2">
+            {/* Transport controls — centered */}
+            <div className="flex items-center justify-center gap-5">
               <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
                 <Shuffle size={20} />
               </button>
@@ -331,8 +333,8 @@ const NowPlayingView = ({
               </button>
             </div>
 
-            {/* Volume + Autoplay row */}
-            <div className="flex items-center gap-3">
+            {/* Volume + Autoplay row — centered */}
+            <div className="flex items-center gap-3 justify-center">
               <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
                 {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
               </button>
@@ -341,7 +343,7 @@ const NowPlayingView = ({
                 max={100}
                 step={1}
                 onValueChange={([v]) => onVolumeChange(v)}
-                className="flex-1"
+                className="flex-1 max-w-[200px]"
                 trackClassName="h-1 bg-muted"
                 thumbClassName="w-3.5 h-3.5"
               />
@@ -360,54 +362,56 @@ const NowPlayingView = ({
               </div>
             </div>
 
-            {/* Video info (video context) */}
+            {/* Video info (video context only) */}
             {context === "video" && !videoInfoLoading && videoInfo && (
-              <div className="bg-secondary/40 rounded-xl p-3 mt-2">
+              <div className="bg-secondary/40 rounded-xl p-3 mt-1">
                 <p className="text-xs text-foreground font-medium line-clamp-2">{song.title}</p>
                 <p className="text-[10px] text-muted-foreground mt-1">{song.artist}</p>
               </div>
             )}
 
-            {/* Related / Comments tabs */}
-            <div className="mt-2">
-              <div className="flex items-center gap-1 mb-3">
-                <button
-                  onClick={() => setBottomTab("related")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    bottomTab === "related" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <ListVideo size={14} />
-                  A seguir
-                </button>
-                <button
-                  onClick={() => setBottomTab("comments")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    bottomTab === "comments" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <MessageSquare size={14} />
-                  Comentários
-                  {videoInfo && videoInfo.comments.length > 0 && (
-                    <span className="text-[10px] opacity-60">({videoInfo.comments.length})</span>
-                  )}
-                </button>
-              </div>
+            {/* Related / Comments tabs — video context only */}
+            {context === "video" && (
+              <div className="mt-1">
+                <div className="flex items-center justify-center gap-1 mb-3">
+                  <button
+                    onClick={() => setBottomTab("related")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      bottomTab === "related" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <ListVideo size={14} />
+                    A seguir
+                  </button>
+                  <button
+                    onClick={() => setBottomTab("comments")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      bottomTab === "comments" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <MessageSquare size={14} />
+                    Comentários
+                    {videoInfo && videoInfo.comments.length > 0 && (
+                      <span className="text-[10px] opacity-60">({videoInfo.comments.length})</span>
+                    )}
+                  </button>
+                </div>
 
-              {bottomTab === "related" && (
-                <RelatedVideos
-                  videos={videoInfo?.relatedVideos || []}
-                  loading={videoInfoLoading}
-                  onPlay={(video) => onPlayRelated?.(video)}
-                />
-              )}
-              {bottomTab === "comments" && (
-                <VideoComments
-                  comments={videoInfo?.comments || []}
-                  loading={videoInfoLoading}
-                />
-              )}
-            </div>
+                {bottomTab === "related" && (
+                  <RelatedVideos
+                    videos={videoInfo?.relatedVideos || []}
+                    loading={videoInfoLoading}
+                    onPlay={(video) => onPlayRelated?.(video)}
+                  />
+                )}
+                {bottomTab === "comments" && (
+                  <VideoComments
+                    comments={videoInfo?.comments || []}
+                    loading={videoInfoLoading}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
