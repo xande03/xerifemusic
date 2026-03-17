@@ -44,11 +44,11 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const doSearch = async (q: string, f: MusicFilter = filter) => {
+  const doSearch = async (q: string) => {
     if (q.length < 2) return;
     setLoading(true);
     setShowSuggestions(false);
-    const res = await searchYouTubeMusic(q, f === "all" ? "all" : f);
+    const res = await searchYouTubeMusic(q, "all");
     setResults(res);
     setLoading(false);
   };
@@ -84,7 +84,6 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
 
   const handleFilterChange = (f: MusicFilter) => {
     setFilter(f);
-    if (query.length >= 2) doSearch(query, f);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
