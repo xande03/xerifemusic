@@ -36,6 +36,8 @@ interface NowPlayingViewProps {
   onExitFullscreen?: () => void;
   isFullscreen?: boolean;
   context?: "music" | "video";
+  onShowQueue?: () => void;
+  queueCount?: number;
 }
 
 const NowPlayingView = ({
