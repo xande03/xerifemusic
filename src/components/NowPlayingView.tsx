@@ -361,6 +361,24 @@ const NowPlayingView = ({
               </button>
             </div>
 
+            {/* Queue button */}
+            {onShowQueue && (
+              <div className="flex justify-center">
+                <button
+                  onClick={onShowQueue}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/60 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all active:scale-95"
+                >
+                  <ListMusic size={16} />
+                  <span>Fila</span>
+                  {queueCount > 0 && (
+                    <span className="text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium">
+                      {queueCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+
             {/* Volume + Autoplay row — centered */}
             <div className="flex items-center gap-3 justify-center">
               <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
