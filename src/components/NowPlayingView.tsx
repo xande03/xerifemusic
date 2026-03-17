@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2 } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
@@ -36,6 +36,8 @@ interface NowPlayingViewProps {
   onExitFullscreen?: () => void;
   isFullscreen?: boolean;
   context?: "music" | "video";
+  onShowQueue?: () => void;
+  queueCount?: number;
 }
 
 const NowPlayingView = ({
@@ -44,6 +46,7 @@ const NowPlayingView = ({
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
   isShuffled, onShuffle,
   context = "music",
+  onShowQueue, queueCount = 0,
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -357,6 +360,24 @@ const NowPlayingView = ({
                 <Repeat size={20} />
               </button>
             </div>
+
+            {/* Queue button */}
+            {onShowQueue && (
+              <div className="flex justify-center">
+                <button
+                  onClick={onShowQueue}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/60 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all active:scale-95"
+                >
+                  <ListMusic size={16} />
+                  <span>Fila</span>
+                  {queueCount > 0 && (
+                    <span className="text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium">
+                      {queueCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Volume + Autoplay row — centered */}
             <div className="flex items-center gap-3 justify-center">

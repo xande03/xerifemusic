@@ -8,6 +8,7 @@ import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
 import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue, shuffleSmartQueue, hasSmartQueue } from "@/lib/smartQueue";
+import QueueDrawer from "@/components/QueueDrawer";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
@@ -54,6 +55,8 @@ const Index = () => {
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
+  const [showQueue, setShowQueue] = useState(false);
+  const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
@@ -116,7 +119,7 @@ const Index = () => {
   // Pre-fetch related queue when a song starts playing in music mode
   useEffect(() => {
     if (homeMode === "music" && currentSong.youtubeId) {
-      fetchRelatedQueue(currentSong).catch(() => {});
+      fetchRelatedQueue(currentSong).then((q) => setSmartQueueList(q)).catch(() => {});
     }
   }, [currentSong.id, homeMode]);
 
@@ -149,6 +152,14 @@ const Index = () => {
     });
     setRecentHistory(getHistory());
     loadVideo(song.youtubeId);
+    // Refresh queue list from localStorage
+    try {
+      const raw = localStorage.getItem("demus_smart_queue");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setSmartQueueList(parsed.songs || []);
+      }
+    } catch {}
   }, [loadVideo]);
 
   const handleTogglePlay = useCallback(() => {
@@ -219,6 +230,29 @@ const Index = () => {
   const handleSeek = useCallback((fraction: number) => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
   }, [seekTo, playerState.duration, currentSong.duration]);
+
+  const handlePlayFromQueue = useCallback((song: Song, index: number) => {
+    // Pop items up to and including the selected index
+    for (let i = 0; i <= index; i++) popNextFromQueue();
+    handleSelect(song);
+  }, [handleSelect]);
+
+  const handleRemoveFromQueue = useCallback((index: number) => {
+    try {
+      const raw = localStorage.getItem("demus_smart_queue");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        parsed.songs.splice(index, 1);
+        localStorage.setItem("demus_smart_queue", JSON.stringify(parsed));
+        setSmartQueueList([...parsed.songs]);
+      }
+    } catch {}
+  }, []);
+
+  const handleClearQueue = useCallback(() => {
+    clearSmartQueue();
+    setSmartQueueList([]);
+  }, []);
 
   const handleSeekAbsolute = useCallback((seconds: number) => {
     seekTo(seconds);
@@ -874,8 +908,22 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} />
+          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} onShowQueue={() => setShowQueue(true)} queueCount={smartQueueList.length} />
         )}
+
+        <AnimatePresence>
+          {showQueue && (
+            <QueueDrawer
+              isOpen={showQueue}
+              onClose={() => setShowQueue(false)}
+              currentSong={currentSong}
+              queue={smartQueueList}
+              onPlayFromQueue={handlePlayFromQueue}
+              onRemoveFromQueue={handleRemoveFromQueue}
+              onClearQueue={handleClearQueue}
+            />
+          )}
+        </AnimatePresence>
 
         {showFloatingPiP && !expanded && (
           <FloatingPiPPlayer
