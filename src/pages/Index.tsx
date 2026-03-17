@@ -619,7 +619,7 @@ const Index = () => {
               </motion.section>
 
               {/* Featured mixes */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Disc3 size={16} className="text-primary" />
