@@ -258,7 +258,7 @@ const NowPlayingView = ({
           </div>
 
           {/* Controls section below artwork */}
-          <div className="px-5 -mt-8 relative z-10 flex flex-col gap-5 pb-4">
+          <div className="px-5 mt-2 relative z-10 flex flex-col gap-5 pb-4">
 
             {/* Mode tabs — centered */}
             <div className="flex justify-center">
