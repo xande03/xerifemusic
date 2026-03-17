@@ -44,7 +44,7 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const doSearch = async (q: string, f: MusicFilter = filter) => {
+  const doSearch = async (q: string) => {
     if (q.length < 2) return;
     setLoading(true);
     setShowSuggestions(false);
