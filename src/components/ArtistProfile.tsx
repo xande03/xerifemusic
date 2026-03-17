@@ -58,6 +58,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong }: ArtistPr
   const [albumTracks, setAlbumTracks] = useState<AlbumTrack[]>([]);
   const [albumLoading, setAlbumLoading] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<"albums" | "singles" | "features" | null>(null);
 
   useEffect(() => {
     setLoading(true);
