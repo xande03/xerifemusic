@@ -254,6 +254,18 @@ const Index = () => {
     setSmartQueueList([]);
   }, []);
 
+  const handleReorderQueue = useCallback((newQueue: Song[]) => {
+    setSmartQueueList(newQueue);
+    try {
+      const raw = localStorage.getItem("demus_smart_queue");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        parsed.songs = newQueue;
+        localStorage.setItem("demus_smart_queue", JSON.stringify(parsed));
+      }
+    } catch {}
+  }, []);
+
   const handleSeekAbsolute = useCallback((seconds: number) => {
     seekTo(seconds);
   }, [seekTo]);
@@ -921,6 +933,7 @@ const Index = () => {
               onPlayFromQueue={handlePlayFromQueue}
               onRemoveFromQueue={handleRemoveFromQueue}
               onClearQueue={handleClearQueue}
+              onReorder={handleReorderQueue}
             />
           )}
         </AnimatePresence>
