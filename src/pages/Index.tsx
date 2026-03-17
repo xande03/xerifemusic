@@ -6,7 +6,7 @@ import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
-import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue } from "@/lib/smartQueue";
+import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue, shuffleSmartQueue, hasSmartQueue } from "@/lib/smartQueue";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
@@ -52,6 +52,7 @@ const Index = () => {
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
@@ -204,6 +205,15 @@ const Index = () => {
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx - 1 + sorted.length) % sorted.length]);
   }, [currentSong, songs, handleSelect]);
+
+  const handleShuffle = useCallback(() => {
+    const shuffled = shuffleSmartQueue();
+    setIsShuffled((prev) => !prev);
+    if (!shuffled && !hasSmartQueue()) {
+      // If no smart queue, shuffle local songs
+      setSongs((prev) => [...prev].sort(() => Math.random() - 0.5));
+    }
+  }, []);
 
   const handleSeek = useCallback((fraction: number) => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
@@ -828,6 +838,8 @@ const Index = () => {
               onExpand={() => setExpanded(true)}
               onSeek={handleSeek}
               onVolumeChange={setVolumeState}
+              isShuffled={isShuffled}
+              onShuffle={handleShuffle}
             />
           </>
         )}
@@ -857,7 +869,7 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} context={homeMode} />
+          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} />
         )}
 
         {showFloatingPiP && !expanded && (

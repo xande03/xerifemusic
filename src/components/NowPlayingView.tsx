@@ -28,6 +28,8 @@ interface NowPlayingViewProps {
   onVolumeChange: (vol: number) => void;
   onTogglePiP?: () => void;
   onModeChange?: (mode: PlayerMode) => void;
+  isShuffled?: boolean;
+  onShuffle?: () => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
   onPlayRelated?: (video: VideoResult) => void;
   onFullscreen?: () => void;
@@ -40,6 +42,7 @@ const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
   onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
+  isShuffled, onShuffle,
   context = "music",
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
@@ -332,7 +335,10 @@ const NowPlayingView = ({
 
             {/* Transport controls — centered */}
             <div className="flex items-center justify-center gap-5">
-              <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
+              <button
+                onClick={onShuffle}
+                className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-90 transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              >
                 <Shuffle size={20} />
               </button>
               <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">

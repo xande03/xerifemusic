@@ -14,11 +14,14 @@ interface DesktopPlayerProps {
   onExpand: () => void;
   onSeek: (fraction: number) => void;
   onVolumeChange: (vol: number) => void;
+  isShuffled?: boolean;
+  onShuffle?: () => void;
 }
 
 const DesktopPlayer = ({
   song, isPlaying, currentTime, duration, volume,
   onTogglePlay, onNext, onPrev, onExpand, onSeek, onVolumeChange,
+  isShuffled, onShuffle,
 }: DesktopPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
 
@@ -46,7 +49,7 @@ const DesktopPlayer = ({
       <div className="flex-1 flex flex-col items-center gap-1 max-w-[600px] mx-auto">
         {/* Transport */}
         <div className="flex items-center gap-3">
-          <button className="p-1.5 text-muted-foreground hover:text-foreground transition-colors active:scale-90">
+          <button onClick={onShuffle} className={`p-1.5 transition-colors active:scale-90 ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             <Shuffle size={16} />
           </button>
           <button onClick={onPrev} className="p-1.5 text-foreground hover:text-primary transition-colors active:scale-90">
