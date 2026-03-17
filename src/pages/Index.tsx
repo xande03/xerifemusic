@@ -6,6 +6,7 @@ import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
+import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue } from "@/lib/smartQueue";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
