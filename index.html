@@ -3,28 +3,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- PWA / Native App Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Xerife Hub" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Xerife Hub" />
+    <meta name="msapplication-TileColor" content="#121212" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Prevent phone number/email detection -->
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+    
+    <!-- Theme -->
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="dark light" />
+    
+    <!-- Screen orientation -->
+    <meta name="screen-orientation" content="any" />
+    
+    <!-- Disable iOS features that break PWA experience -->
+    <meta name="apple-touch-fullscreen" content="yes" />
+    
+    <!-- Icons -->
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+    
+    <!-- Splash screen for iOS (prevents white flash) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
     <title>Xerife Hub</title>
-    <meta name="description" content="Xerife Hub - Streaming de música com catálogo ilimitado">
+    <meta name="description" content="Xerife Hub - Streaming de música e vídeo com catálogo ilimitado" />
     <meta name="author" content="Xerife Hub" />
-    <meta name="theme-color" content="#d4a017" />
-    <meta name="format-detection" content="telephone=no" />
+    
     <link rel="manifest" href="/manifest.json" />
+    <link rel="canonical" href="https://xerifemusic.lovable.app/" />
 
+    <!-- OG / Social -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icons/icon-512x512.png">
+    <meta property="og:image" content="/icons/icon-512x512.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/icons/icon-512x512.png">
-    <meta property="og:title" content="Xerife Hub">
-    <meta name="twitter:title" content="Xerife Hub">
-    <meta property="og:description" content="Xerife Hub - Streaming de música com catálogo ilimitado">
-    <meta name="twitter:description" content="Xerife Hub - Streaming de música com catálogo ilimitado">
-    <link rel="icon" type="image/png" href="/icons/icon-192x192.png">
+    <meta name="twitter:image" content="/icons/icon-512x512.png" />
+    <meta property="og:title" content="Xerife Hub" />
+    <meta name="twitter:title" content="Xerife Hub" />
+    <meta property="og:description" content="Xerife Hub - Streaming de música e vídeo com catálogo ilimitado" />
+    <meta name="twitter:description" content="Xerife Hub - Streaming de música e vídeo com catálogo ilimitado" />
+    
+    <style>
+      /* Prevent iOS rubber-banding / overscroll */
+      html, body { 
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      /* Prevent text selection on interactive elements */
+      button, a, [role="button"] {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+      /* Prevent tap highlight on Android/iOS */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Safe area padding for notched devices */
+      :root {
+        --sat: env(safe-area-inset-top);
+        --sar: env(safe-area-inset-right);
+        --sab: env(safe-area-inset-bottom);
+        --sal: env(safe-area-inset-left);
+      }
+    </style>
   </head>
 
   <body>
