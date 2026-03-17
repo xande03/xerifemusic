@@ -334,7 +334,7 @@ const NowPlayingView = ({
             </div>
 
             {/* Transport controls — centered */}
-            <div className="flex items-center justify-center gap-5">
+            <div className="flex items-center justify-center gap-3 sm:gap-5">
               <button
                 onClick={onShuffle}
                 className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-90 transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
