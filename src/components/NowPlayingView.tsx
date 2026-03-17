@@ -298,17 +298,34 @@ const NowPlayingView = ({
 
             {/* Progress bar */}
             <div className="space-y-1">
-              <Slider
-                value={[progress * 100]}
-                max={100}
-                step={0.1}
-                onValueChange={([v]) => onSeek(v / 100)}
-                className="w-full"
-                trackClassName="h-[5px] bg-muted"
-                thumbClassName="w-4 h-4"
-              />
+              <div className="relative">
+                {isSeeking && (
+                  <div
+                    className="absolute -top-8 px-2 py-0.5 rounded bg-primary text-primary-foreground text-[11px] font-mono pointer-events-none transition-all z-20"
+                    style={{ left: `calc(${seekValue}% - 18px)` }}
+                  >
+                    {formatDuration((seekValue / 100) * duration)}
+                  </div>
+                )}
+                <Slider
+                  value={[isSeeking ? seekValue : progress * 100]}
+                  max={100}
+                  step={0.1}
+                  onValueChange={([v]) => {
+                    setIsSeeking(true);
+                    setSeekValue(v);
+                  }}
+                  onValueCommit={([v]) => {
+                    onSeek(v / 100);
+                    setIsSeeking(false);
+                  }}
+                  className="w-full"
+                  trackClassName="h-[5px] bg-muted"
+                  thumbClassName="w-4 h-4"
+                />
+              </div>
               <div className="flex justify-between text-[11px] font-mono">
-                <span className="text-primary">{formatDuration(currentTime)}</span>
+                <span className="text-primary">{formatDuration(isSeeking ? (seekValue / 100) * duration : currentTime)}</span>
                 <span className="text-muted-foreground">{formatDuration(duration)}</span>
               </div>
             </div>
