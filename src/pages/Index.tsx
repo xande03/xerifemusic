@@ -489,7 +489,7 @@ const Index = () => {
               </motion.section>
 
               {/* Álbuns em Destaque — large cards like reference */}
-              <section>
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
                   <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
