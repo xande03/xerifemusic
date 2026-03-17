@@ -462,22 +462,22 @@ const Index = () => {
               <>
               {/* Greeting */}
               <div className="px-4">
-                <h1 className="text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
               </div>
 
               {/* Quick picks — 2-col compact grid like reference */}
-              <section className="px-4">
-                <div className="grid grid-cols-2 gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {quickPicks.map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
-                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
+                      className={`flex items-center gap-2 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-14 h-14 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3 leading-tight">{song.title}</span>
+                      <img src={song.cover} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
+                      <span className="text-[11px] sm:text-xs font-medium text-foreground truncate pr-2 leading-tight">{song.title}</span>
                     </button>
                   ))}
                 </div>
