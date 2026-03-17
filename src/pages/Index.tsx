@@ -547,7 +547,7 @@ const Index = () => {
                     </button>
                   ))}
                 </div>
-              </section>
+              </motion.section>
 
               {/* Top Charts — numbered list like YT Music Charts */}
               <section className="px-3 sm:px-4">
