@@ -1,16 +1,38 @@
 {
   "short_name": "Xerife Hub",
-  "name": "Xerife Hub - Music Streaming",
+  "name": "Xerife Hub - Music & Video Streaming",
   "icons": [
     { "src": "/icons/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+    { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable any" }
   ],
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "id": "/",
   "background_color": "#121212",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
   "scope": "/",
-  "theme_color": "#d4a017",
-  "description": "Xerife Hub - Streaming de música com catálogo ilimitado",
-  "orientation": "portrait",
-  "categories": ["music", "entertainment"]
+  "theme_color": "#121212",
+  "description": "Xerife Hub - Streaming de música e vídeo com catálogo ilimitado",
+  "orientation": "any",
+  "categories": ["music", "entertainment", "video"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "screenshots": [],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
