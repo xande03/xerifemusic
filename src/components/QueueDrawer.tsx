@@ -1,8 +1,9 @@
-import { X, Play, Trash2, GripVertical, ListMusic } from "lucide-react";
+import { X, Play, GripVertical, ListMusic } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import BlurImage from "@/components/BlurImage";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
+import { useRef } from "react";
 
 interface QueueDrawerProps {
   isOpen: boolean;
@@ -12,7 +13,75 @@ interface QueueDrawerProps {
   onPlayFromQueue: (song: Song, index: number) => void;
   onRemoveFromQueue: (index: number) => void;
   onClearQueue: () => void;
+  onReorder: (newQueue: Song[]) => void;
 }
+
+const QueueItem = ({
+  song,
+  index,
+  onPlay,
+  onRemove,
+}: {
+  song: Song;
+  index: number;
+  onPlay: () => void;
+  onRemove: () => void;
+}) => {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item
+      value={song}
+      dragListener={false}
+      dragControls={dragControls}
+      className="flex items-center gap-2 px-4 py-2 hover:bg-secondary/50 transition-colors group bg-background"
+      whileDrag={{ scale: 1.02, boxShadow: "0 8px 24px rgba(0,0,0,0.2)", zIndex: 50 }}
+    >
+      <button
+        onPointerDown={(e) => dragControls.start(e)}
+        className="p-1 text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
+      >
+        <GripVertical size={16} />
+      </button>
+      <span className="text-xs text-muted-foreground w-5 text-center font-mono flex-shrink-0">
+        {index + 1}
+      </span>
+      <button
+        onClick={onPlay}
+        className="flex items-center gap-3 flex-1 min-w-0"
+      >
+        <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 group-hover:ring-1 ring-primary/30 transition-all">
+          <img
+            src={hdThumbnail(song.cover)}
+            alt={song.album}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 flex items-center justify-center transition-colors">
+            <Play
+              size={14}
+              className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-0.5"
+              fill="currentColor"
+            />
+          </div>
+        </div>
+        <div className="min-w-0 text-left">
+          <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+          <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+        </div>
+      </button>
+      <span className="text-[11px] text-muted-foreground font-mono flex-shrink-0">
+        {formatDuration(song.duration)}
+      </span>
+      <button
+        onClick={onRemove}
+        className="p-1.5 text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+        title="Remover da fila"
+      >
+        <X size={14} />
+      </button>
+    </Reorder.Item>
+  );
+};
 
 const QueueDrawer = ({
   isOpen,
@@ -22,6 +91,7 @@ const QueueDrawer = ({
   onPlayFromQueue,
   onRemoveFromQueue,
   onClearQueue,
+  onReorder,
 }: QueueDrawerProps) => {
   if (!isOpen) return null;
 
@@ -91,58 +161,24 @@ const QueueDrawer = ({
         ) : (
           <div className="py-1">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-4 py-2">
-              A seguir
+              A seguir — arraste para reordenar
             </p>
-            <AnimatePresence initial={false}>
+            <Reorder.Group
+              axis="y"
+              values={queue}
+              onReorder={onReorder}
+              className="list-none"
+            >
               {queue.map((song, index) => (
-                <motion.div
+                <QueueItem
                   key={`${song.youtubeId}-${index}`}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-secondary/50 transition-colors group"
-                >
-                  <span className="text-xs text-muted-foreground w-5 text-center font-mono flex-shrink-0">
-                    {index + 1}
-                  </span>
-                  <button
-                    onClick={() => onPlayFromQueue(song, index)}
-                    className="flex items-center gap-3 flex-1 min-w-0"
-                  >
-                    <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 group-hover:ring-1 ring-primary/30 transition-all">
-                      <img
-                        src={hdThumbnail(song.cover)}
-                        alt={song.album}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 flex items-center justify-center transition-colors">
-                        <Play
-                          size={14}
-                          className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-0.5"
-                          fill="currentColor"
-                        />
-                      </div>
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
-                    </div>
-                  </button>
-                  <span className="text-[11px] text-muted-foreground font-mono flex-shrink-0">
-                    {formatDuration(song.duration)}
-                  </span>
-                  <button
-                    onClick={() => onRemoveFromQueue(index)}
-                    className="p-1.5 text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
-                    title="Remover da fila"
-                  >
-                    <X size={14} />
-                  </button>
-                </motion.div>
+                  song={song}
+                  index={index}
+                  onPlay={() => onPlayFromQueue(song, index)}
+                  onRemove={() => onRemoveFromQueue(index)}
+                />
               ))}
-            </AnimatePresence>
+            </Reorder.Group>
           </div>
         )}
       </div>
