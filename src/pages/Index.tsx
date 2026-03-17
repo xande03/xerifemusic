@@ -471,7 +471,7 @@ const Index = () => {
               </motion.div>
 
               {/* Quick picks — 2-col compact grid like reference */}
-              <section className="px-3 sm:px-4">
+              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {quickPicks.map((song) => (
                     <button
