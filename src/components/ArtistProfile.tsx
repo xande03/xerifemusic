@@ -150,7 +150,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="h-full overflow-y-auto"
+              className="h-full flex flex-col"
             >
               {/* Album header */}
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-background/90 backdrop-blur-md" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}>
@@ -160,7 +160,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
                 </button>
               </div>
 
-              <div className="px-4 pb-8">
+              <div className="flex-1 overflow-y-auto px-4 pb-28">
                 {/* Album cover + info */}
                 <div className="flex flex-col items-center mb-6">
                   <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-xl overflow-hidden shadow-2xl mb-4">
@@ -191,29 +191,79 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
                   </div>
                 ) : (
                   <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-0.5">
-                    {albumTracks.map((track, i) => (
-                      <motion.button
-                        key={track.id}
-                        variants={fadeUp}
-                        onClick={() => handlePlayTrack(track)}
-                        className="w-full flex items-center gap-3 py-3 hover:bg-accent/50 active:bg-accent rounded-lg transition-colors px-1"
-                      >
-                        <span className="text-sm font-medium w-5 text-center text-muted-foreground">{i + 1}</span>
-                        <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
-                          <img src={hdThumbnail(track.cover || selectedAlbum.cover)} alt={track.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <p className="text-sm font-medium text-foreground truncate">{track.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{track.artist || artistName}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
-                          {track.duration > 0 ? formatDuration(track.duration) : ""}
-                        </span>
-                      </motion.button>
-                    ))}
+                    {albumTracks.map((track, i) => {
+                      const playing = isTrackPlaying(track);
+                      return (
+                        <motion.button
+                          key={track.id}
+                          variants={fadeUp}
+                          onClick={() => handlePlayTrack(track)}
+                          className={`w-full flex items-center gap-3 py-3 rounded-lg transition-colors px-1 ${
+                            playing ? "bg-primary/10 ring-1 ring-primary/20" : "hover:bg-accent/50 active:bg-accent"
+                          }`}
+                        >
+                          {playing ? (
+                            <div className="w-5 flex justify-center">
+                              <div className="flex items-end gap-[2px] h-4">
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "60%", animationDelay: "0ms" }} />
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "100%", animationDelay: "150ms" }} />
+                                <span className="w-[3px] bg-primary rounded-full animate-pulse" style={{ height: "40%", animationDelay: "300ms" }} />
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-sm font-medium w-5 text-center text-muted-foreground">{i + 1}</span>
+                          )}
+                          <div className="w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
+                            <img src={hdThumbnail(track.cover || selectedAlbum.cover)} alt={track.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className={`text-sm font-medium truncate ${playing ? "text-primary" : "text-foreground"}`}>{track.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{track.artist || artistName}</p>
+                          </div>
+                          <span className="text-xs text-muted-foreground font-mono flex-shrink-0">
+                            {track.duration > 0 ? formatDuration(track.duration) : ""}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </div>
+
+              {/* Mini player at bottom of album overlay */}
+              {currentPlayingSong && (
+                <div className="sticky bottom-0 z-20 bg-card/95 backdrop-blur-md border-t border-border/30">
+                  <div className="h-[2px] bg-muted">
+                    <div className="h-full bg-primary transition-all duration-200" style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
+                  </div>
+                  <div className="flex items-center gap-3 p-2 pr-3">
+                    <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={hdThumbnail(currentPlayingSong.cover)} alt={currentPlayingSong.album} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate text-foreground">{currentPlayingSong.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{currentPlayingSong.artist}</p>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-0.5">
+                      {onPrev && (
+                        <button onClick={onPrev} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                          <SkipBack size={18} />
+                        </button>
+                      )}
+                      <button onClick={onTogglePlay} className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform">
+                        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+                      </button>
+                      {onNext && (
+                        <button onClick={onNext} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                          <SkipForward size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
