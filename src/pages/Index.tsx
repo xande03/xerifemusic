@@ -364,7 +364,7 @@ const Index = () => {
         {/* Main content */}
         <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Mode switcher: Xerife Music / Xerife Video */}
               {!channelView && !artistView && (
                 <div className="px-4 pt-1">
@@ -462,22 +462,22 @@ const Index = () => {
               <>
               {/* Greeting */}
               <div className="px-4">
-                <h1 className="text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
               </div>
 
               {/* Quick picks — 2-col compact grid like reference */}
-              <section className="px-4">
-                <div className="grid grid-cols-2 gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {quickPicks.map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
-                      className={`flex items-center gap-2.5 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
+                      className={`flex items-center gap-2 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-14 h-14 object-cover flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground truncate pr-3 leading-tight">{song.title}</span>
+                      <img src={song.cover} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
+                      <span className="text-[11px] sm:text-xs font-medium text-foreground truncate pr-2 leading-tight">{song.title}</span>
                     </button>
                   ))}
                 </div>
@@ -485,23 +485,23 @@ const Index = () => {
 
               {/* Álbuns em Destaque — large cards like reference */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-lg font-bold text-foreground">Álbuns em Destaque</h2>
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
+                  <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
                   <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
                 </div>
-                <div className="grid grid-cols-2 gap-3 px-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 px-3 sm:px-4">
                   {forYouSongs.slice(0, 4).map((song) => (
                     <button
                       key={song.id}
                       onClick={() => handleSelect(song)}
                       className="group active:scale-[0.97] transition-transform text-left"
                     >
-                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-2 relative">
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 sm:mb-2 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
                       </div>
-                      <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                      <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.artist}</p>
                     </button>
                   ))}
                 </div>
@@ -509,14 +509,14 @@ const Index = () => {
 
               {/* Listen again — grid layout like YT Music */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-muted-foreground" />
-                    <h2 className="text-base font-display font-medium text-foreground">Ouvir novamente</h2>
+                    <h2 className="text-sm sm:text-base font-display font-medium text-foreground">Ouvir novamente</h2>
                   </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 px-4">
+                <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 px-3 sm:px-4">
                   {(recentHistory.length > 0
                     ? recentHistory.slice(0, 6).map(e => ({
                         id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
@@ -529,53 +529,53 @@ const Index = () => {
                       onClick={() => handleSelect(song)}
                       className="group relative active:scale-95 transition-transform"
                     >
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
+                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1 sm:mb-1.5 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 group-active:bg-background/30 transition-colors flex items-center justify-center">
-                          <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
-                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
+                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
                           </div>
                         </div>
                       </div>
-                      <p className="text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
-                      <p className="text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
+                      <p className="text-[10px] sm:text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
                     </button>
                   ))}
                 </div>
               </section>
 
               {/* Top Charts — numbered list like YT Music Charts */}
-              <section className="px-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <TrendingUp size={16} className="text-primary" />
                     Top Charts
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5 sm:space-y-1">
                   {topCharts.map((song, i) => (
                     <div
                       key={song.id}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${
+                      className={`w-full flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all ${
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
                       }`}
                     >
-                      <span className={`text-lg font-bold w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
+                      <span className={`text-base sm:text-lg font-bold w-5 sm:w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
                         {i + 1}
                       </span>
                       <button onClick={() => handleSelect(song)} className="flex-shrink-0">
-                        <img src={song.cover} alt={song.album} className="w-11 h-11 rounded-md object-cover" />
+                        <img src={song.cover} alt={song.album} className="w-10 h-10 sm:w-11 sm:h-11 rounded-md object-cover" />
                       </button>
                       <div className="flex-1 min-w-0 text-left">
                         <button onClick={() => handleSelect(song)} className="w-full text-left">
-                          <p className="text-sm font-medium text-foreground truncate">{song.title}</p>
+                          <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
                         </button>
                         <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
-                          <p className="text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
                         </button>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                         <TrendingUp size={12} />
                         <span>{song.votes}</span>
                       </div>
@@ -586,27 +586,27 @@ const Index = () => {
 
               {/* For you carousel */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Sparkles size={16} className="text-primary" />
                     Para você
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
+                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto px-3 sm:px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
                   {forYouSongs.map((song) => (
-                    <div key={song.id} className="flex-shrink-0 w-[140px] group snap-start">
+                    <div key={song.id} className="flex-shrink-0 w-[120px] sm:w-[140px] group snap-start">
                       <button onClick={() => handleSelect(song)} className="w-full">
-                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-2 relative">
+                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 relative">
                           <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
-                          <div className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
-                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          <div className="absolute bottom-1.5 right-1.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
+                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
                           </div>
                         </div>
-                        <p className="text-xs font-medium text-foreground truncate text-left">{song.title}</p>
+                        <p className="text-[11px] sm:text-xs font-medium text-foreground truncate text-left">{song.title}</p>
                       </button>
                       <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
-                        <p className="text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
                       </button>
                     </div>
                   ))}
@@ -614,15 +614,15 @@ const Index = () => {
               </section>
 
               {/* Featured mixes */}
-              <section className="px-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Disc3 size={16} className="text-primary" />
                     Mixes populares
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
                   {[
                     { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
                     { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
@@ -637,9 +637,9 @@ const Index = () => {
                       <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover" />
                       <div className={`absolute inset-0 bg-gradient-to-t ${mix.color}`} />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-sm font-semibold text-foreground text-left">{mix.title}</p>
-                        <p className="text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3">
+                        <p className="text-xs sm:text-sm font-semibold text-foreground text-left">{mix.title}</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
                       </div>
                     </button>
                   ))}
@@ -647,9 +647,9 @@ const Index = () => {
               </section>
 
               {/* Voting queue */}
-              <section className="px-4">
+              <section className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Headphones size={16} className="text-primary" />
                     Fila de votação
                   </h2>

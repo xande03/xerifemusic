@@ -263,7 +263,7 @@ const NowPlayingView = ({
           </div>
 
           {/* Controls section below artwork */}
-          <div className="px-5 mt-2 relative z-10 flex flex-col gap-5 pb-4">
+          <div className="px-4 sm:px-5 mt-1 sm:mt-2 relative z-10 flex flex-col gap-3 sm:gap-5 pb-4">
 
             {/* Mode tabs — centered */}
             <div className="flex justify-center">
@@ -290,8 +290,8 @@ const NowPlayingView = ({
             {/* Song info — centered */}
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-bold text-foreground truncate">{song.title}</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">{song.artist}</p>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">{song.title}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{song.artist}</p>
               </div>
               <div className="flex gap-0.5">
                 <button className="p-2.5 text-muted-foreground hover:text-primary active:scale-95 transition-all"><Heart size={22} /></button>
@@ -334,24 +334,24 @@ const NowPlayingView = ({
             </div>
 
             {/* Transport controls — centered */}
-            <div className="flex items-center justify-center gap-5">
+            <div className="flex items-center justify-center gap-3 sm:gap-5">
               <button
                 onClick={onShuffle}
                 className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-90 transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 <Shuffle size={20} />
               </button>
-              <button onClick={onPrev} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipBack size={28} fill="currentColor" />
+              <button onClick={onPrev} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
+                <SkipBack size={24} fill="currentColor" />
               </button>
               <button
                 onClick={onTogglePlay}
-                className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/30"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/30"
               >
-                {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
+                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
               </button>
-              <button onClick={onNext} className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipForward size={28} fill="currentColor" />
+              <button onClick={onNext} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
+                <SkipForward size={24} fill="currentColor" />
               </button>
               <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
                 <Repeat size={20} />
