@@ -206,6 +206,15 @@ const Index = () => {
     handleSelect(sorted[(idx - 1 + sorted.length) % sorted.length]);
   }, [currentSong, songs, handleSelect]);
 
+  const handleShuffle = useCallback(() => {
+    const shuffled = shuffleSmartQueue();
+    setIsShuffled((prev) => !prev);
+    if (!shuffled && !hasSmartQueue()) {
+      // If no smart queue, shuffle local songs
+      setSongs((prev) => [...prev].sort(() => Math.random() - 0.5));
+    }
+  }, []);
+
   const handleSeek = useCallback((fraction: number) => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
   }, [seekTo, playerState.duration, currentSong.duration]);
