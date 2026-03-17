@@ -214,6 +214,14 @@ const Index = () => {
   }, [currentSong, songs, handleSelect, homeMode, albumQueue]);
 
   const handlePrev = useCallback(() => {
+    // If playing from album, go to previous album track
+    if (albumQueue && albumQueue.length > 0) {
+      const idx = albumQueue.findIndex((s) => s.youtubeId === currentSong.youtubeId);
+      if (idx > 0) {
+        handleSelect(albumQueue[idx - 1]);
+        return;
+      }
+    }
     // Go back through history
     const history = getHistory();
     const currentIdx = history.findIndex((h) => h.youtubeId === currentSong.youtubeId);
@@ -237,7 +245,7 @@ const Index = () => {
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx - 1 + sorted.length) % sorted.length]);
-  }, [currentSong, songs, handleSelect]);
+  }, [currentSong, songs, handleSelect, albumQueue]);
 
   const handleShuffle = useCallback(() => {
     const shuffled = shuffleSmartQueue();
