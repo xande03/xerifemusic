@@ -867,7 +867,7 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} context={homeMode} />
+          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} />
         )}
 
         {showFloatingPiP && !expanded && (
