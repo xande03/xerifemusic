@@ -39,7 +39,12 @@ serve(async (req) => {
       `https://music.youtube.com/youtubei/v1/browse?alt=json&key=${YT_MUSIC_KEY}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0", Origin: "https://music.youtube.com" },
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Origin: "https://music.youtube.com",
+          Referer: "https://music.youtube.com/",
+        },
         body: JSON.stringify(body),
       }
     );
@@ -62,73 +67,103 @@ serve(async (req) => {
 });
 
 function parseAlbumPage(data: any) {
-  // Try both renderer types
-  const browseRenderer = data?.contents?.twoColumnBrowseResultsRenderer || data?.contents?.singleColumnBrowseResultsRenderer;
+  // Handle multiple renderer types
+  const browseRenderer =
+    data?.contents?.twoColumnBrowseResultsRenderer ||
+    data?.contents?.singleColumnBrowseResultsRenderer;
   const tabs = browseRenderer?.tabs || [];
-  const sections = tabs[0]?.tabRenderer?.content?.sectionListRenderer?.contents || [];
+  const tabContent = tabs[0]?.tabRenderer?.content;
+  const sections = tabContent?.sectionListRenderer?.contents || [];
 
   let albumTitle = "";
   let albumSubtitle = "";
   let albumCover = "";
   const tracks: any[] = [];
 
+  // Try to get header info from the response header
+  const headerRenderer =
+    data?.header?.musicImmersiveHeaderRenderer ||
+    data?.header?.musicVisualHeaderRenderer ||
+    data?.header?.musicHeaderRenderer ||
+    null;
+
+  if (headerRenderer) {
+    albumTitle = headerRenderer?.title?.runs?.[0]?.text || "";
+    albumSubtitle = headerRenderer?.subtitle?.runs?.map((r: any) => r.text).join("") || "";
+    const thumbs = headerRenderer?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails ||
+      headerRenderer?.foregroundThumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
+    if (thumbs.length) {
+      const sorted = [...thumbs].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+      albumCover = sorted[0]?.url || "";
+      if (albumCover.startsWith("//")) albumCover = `https:${albumCover}`;
+    }
+  }
+
+  // Parse sections for tracks and header info
   for (const section of sections) {
-    // Parse header from musicResponsiveHeaderRenderer
-    const headerRenderer = section?.musicResponsiveHeaderRenderer;
-    if (headerRenderer) {
-      albumTitle = headerRenderer?.title?.runs?.[0]?.text || "";
-      albumSubtitle = headerRenderer?.subtitle?.runs?.map((r: any) => r.text).join("") || "";
-      
-      // Get thumbnail from strapline or thumbnail
-      const thumbSources = [
-        headerRenderer?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails,
-        headerRenderer?.thumbnail?.croppedSquareThumbnailRenderer?.thumbnail?.thumbnails,
-      ];
-      for (const thumbs of thumbSources) {
-        if (thumbs?.length) {
-          const sorted = [...thumbs].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
-          albumCover = sorted[0]?.url || "";
-          if (albumCover.startsWith("//")) albumCover = `https:${albumCover}`;
-          break;
+    // musicResponsiveHeaderRenderer (album page header)
+    const respHeader = section?.musicResponsiveHeaderRenderer;
+    if (respHeader) {
+      if (!albumTitle) albumTitle = respHeader?.title?.runs?.[0]?.text || "";
+      if (!albumSubtitle) albumSubtitle = respHeader?.subtitle?.runs?.map((r: any) => r.text).join("") || "";
+      if (!albumCover) {
+        const thumbSources = [
+          respHeader?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails,
+          respHeader?.thumbnail?.croppedSquareThumbnailRenderer?.thumbnail?.thumbnails,
+        ];
+        for (const thumbs of thumbSources) {
+          if (thumbs?.length) {
+            const sorted = [...thumbs].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
+            albumCover = sorted[0]?.url || "";
+            if (albumCover.startsWith("//")) albumCover = `https:${albumCover}`;
+            break;
+          }
         }
       }
     }
 
-    // Parse tracks from musicShelfRenderer
+    // musicShelfRenderer contains the track list
     const shelf = section?.musicShelfRenderer;
     if (shelf) {
       for (const item of (shelf.contents || [])) {
-        const track = parseTrackItem(item);
+        const track = parseTrackItem(item, albumCover);
         if (track) tracks.push(track);
       }
     }
   }
 
-  // Also check secondary contents (twoColumnBrowseResultsRenderer has secondaryContents)
+  // Also check secondaryContents
   const secondaryContents = browseRenderer?.secondaryContents?.sectionListRenderer?.contents || [];
   for (const section of secondaryContents) {
     const shelf = section?.musicShelfRenderer;
     if (shelf) {
       for (const item of (shelf.contents || [])) {
-        const track = parseTrackItem(item);
+        const track = parseTrackItem(item, albumCover);
         if (track) tracks.push(track);
       }
     }
   }
 
-  // Also check for the tab content directly containing a shelf
-  const tabContent = tabs[0]?.tabRenderer?.content;
+  // Direct shelf in tab content
   if (tabContent?.musicShelfRenderer) {
     for (const item of (tabContent.musicShelfRenderer.contents || [])) {
-      const track = parseTrackItem(item);
+      const track = parseTrackItem(item, albumCover);
       if (track) tracks.push(track);
     }
   }
 
-  return { albumTitle, albumSubtitle, albumCover, tracks };
+  // Deduplicate by videoId
+  const seen = new Set<string>();
+  const uniqueTracks = tracks.filter((t) => {
+    if (seen.has(t.youtubeId)) return false;
+    seen.add(t.youtubeId);
+    return true;
+  });
+
+  return { albumTitle, albumSubtitle, albumCover, tracks: uniqueTracks };
 }
 
-function parseTrackItem(item: any): any | null {
+function parseTrackItem(item: any, fallbackCover: string): any | null {
   const renderer = item?.musicResponsiveListItemRenderer;
   if (!renderer) return null;
 
@@ -136,25 +171,30 @@ function parseTrackItem(item: any): any | null {
   const title = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.text || "";
 
   const secondRuns = flexColumns[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
-  const artist = secondRuns.filter((r: any) => r.text && r.text.trim() !== "•" && r.text.trim() !== " • ").map((r: any) => r.text.trim()).filter((t: string) => !/^\d{1,2}:\d{2}/.test(t)).join(", ") || "";
+  const artistParts = secondRuns
+    .filter((r: any) => r.text && r.text.trim() !== "•" && r.text.trim() !== " • ")
+    .map((r: any) => r.text.trim())
+    .filter((t: string) => !/^\d{1,2}:\d{2}/.test(t) && !["Música", "Song", "Vídeo", "Video"].includes(t));
+  const artist = artistParts.join(", ") || "";
 
+  // Get video ID from multiple sources
   let videoId = "";
   const overlay = renderer?.overlay?.musicItemThumbnailOverlayRenderer?.content?.musicPlayButtonRenderer;
   videoId = overlay?.playNavigationEndpoint?.watchEndpoint?.videoId || "";
   if (!videoId) {
     videoId = flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.watchEndpoint?.videoId || "";
   }
-  // Also try playlistItemData
   if (!videoId) {
     videoId = renderer?.playlistItemData?.videoId || "";
   }
 
+  // Thumbnail
   const thumbnails = renderer?.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
   const sorted = [...thumbnails].sort((a: any, b: any) => (b.width || 0) - (a.width || 0));
-  let cover = sorted[0]?.url || "";
+  let cover = sorted[0]?.url || fallbackCover;
   if (cover.startsWith("//")) cover = `https:${cover}`;
 
-  // Parse duration from fixedColumns or flexColumns
+  // Parse duration from fixedColumns
   let duration = 0;
   const fixedColumns = renderer?.fixedColumns || [];
   for (const fc of fixedColumns) {
@@ -164,7 +204,7 @@ function parseTrackItem(item: any): any | null {
       duration = segs.length === 3 ? segs[0] * 3600 + segs[1] * 60 + segs[2] : segs[0] * 60 + segs[1];
     }
   }
-  // Also check in flex column runs
+  // Fallback to flex column runs
   if (duration === 0) {
     for (const run of secondRuns) {
       const text = run?.text?.trim();

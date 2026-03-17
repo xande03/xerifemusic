@@ -34,5 +34,29 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+music",
+      "url": "/?music=%s"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buscar Música",
+      "short_name": "Buscar",
+      "description": "Pesquisar músicas e artistas",
+      "url": "/?tab=search",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Minha Biblioteca",
+      "short_name": "Biblioteca",
+      "description": "Acessar músicas salvas",
+      "url": "/?tab=library",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "scope_extensions": []
 }
