@@ -231,6 +231,29 @@ const Index = () => {
     seekTo(fraction * (playerState.duration || currentSong.duration));
   }, [seekTo, playerState.duration, currentSong.duration]);
 
+  const handlePlayFromQueue = useCallback((song: Song, index: number) => {
+    // Pop items up to and including the selected index
+    for (let i = 0; i <= index; i++) popNextFromQueue();
+    handleSelect(song);
+  }, [handleSelect]);
+
+  const handleRemoveFromQueue = useCallback((index: number) => {
+    try {
+      const raw = localStorage.getItem("demus_smart_queue");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        parsed.songs.splice(index, 1);
+        localStorage.setItem("demus_smart_queue", JSON.stringify(parsed));
+        setSmartQueueList([...parsed.songs]);
+      }
+    } catch {}
+  }, []);
+
+  const handleClearQueue = useCallback(() => {
+    clearSmartQueue();
+    setSmartQueueList([]);
+  }, []);
+
   const handleSeekAbsolute = useCallback((seconds: number) => {
     seekTo(seconds);
   }, [seekTo]);
