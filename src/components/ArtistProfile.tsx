@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Loader2, Play, MoreHorizontal, Users, Disc3, Music2, ChevronRight, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, Loader2, Play, Pause, SkipForward, SkipBack, MoreHorizontal, Users, Disc3, Music2, ChevronRight, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
@@ -10,7 +10,15 @@ interface ArtistProfileProps {
   artistName: string;
   artistImage?: string;
   onBack: () => void;
-  onPlaySong: (song: Song) => void;
+  onPlaySong: (song: Song, albumQueue?: Song[]) => void;
+  currentPlayingSong?: Song | null;
+  isPlaying?: boolean;
+  currentTime?: number;
+  duration?: number;
+  onTogglePlay?: () => void;
+  onNext?: () => void;
+  onPrev?: () => void;
+  onExpand?: () => void;
 }
 
 interface AlbumItem {
