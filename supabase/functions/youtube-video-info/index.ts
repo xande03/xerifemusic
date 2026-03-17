@@ -100,10 +100,20 @@ async function fetchVideoInfo(videoId: string) {
           }));
       }
 
-      // Only return if we actually got data
-      if (relatedVideos.length > 0 || comments.length > 0) {
-        console.log(`[youtube-video-info] Success from ${base}: ${relatedVideos.length} related, ${comments.length} comments`);
+      // If we got both, return immediately
+      if (relatedVideos.length > 0 && comments.length > 0) {
+        console.log(`[youtube-video-info] Full success from ${base}: ${relatedVideos.length} related, ${comments.length} comments`);
         return { relatedVideos, comments };
+      }
+      // If we got partial data, save it and try to fill the rest
+      if (relatedVideos.length > 0 || comments.length > 0) {
+        console.log(`[youtube-video-info] Partial from ${base}: ${relatedVideos.length} related, ${comments.length} comments — will try innertube for missing`);
+        // Try innertube to fill in missing data
+        const innertube = await fetchFromInnertube(videoId);
+        return {
+          relatedVideos: relatedVideos.length > 0 ? relatedVideos : innertube.relatedVideos,
+          comments: comments.length > 0 ? comments : innertube.comments,
+        };
       }
       console.warn(`[youtube-video-info] ${base} returned empty data`);
     } catch (err) {
