@@ -614,15 +614,15 @@ const Index = () => {
               </section>
 
               {/* Featured mixes */}
-              <section className="px-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+              <section className="px-3 sm:px-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Disc3 size={16} className="text-primary" />
                     Mixes populares
                   </h2>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
                   {[
                     { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
                     { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
@@ -637,9 +637,9 @@ const Index = () => {
                       <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover" />
                       <div className={`absolute inset-0 bg-gradient-to-t ${mix.color}`} />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-sm font-semibold text-foreground text-left">{mix.title}</p>
-                        <p className="text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3">
+                        <p className="text-xs sm:text-sm font-semibold text-foreground text-left">{mix.title}</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
                       </div>
                     </button>
                   ))}
@@ -647,9 +647,9 @@ const Index = () => {
               </section>
 
               {/* Voting queue */}
-              <section className="px-4">
+              <section className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-base font-display font-medium text-foreground flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
                     <Headphones size={16} className="text-primary" />
                     Fila de votação
                   </h2>
