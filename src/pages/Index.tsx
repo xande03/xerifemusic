@@ -152,6 +152,14 @@ const Index = () => {
     });
     setRecentHistory(getHistory());
     loadVideo(song.youtubeId);
+    // Refresh queue list from localStorage
+    try {
+      const raw = localStorage.getItem("demus_smart_queue");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setSmartQueueList(parsed.songs || []);
+      }
+    } catch {}
   }, [loadVideo]);
 
   const handleTogglePlay = useCallback(() => {
