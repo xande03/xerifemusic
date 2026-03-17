@@ -6,6 +6,7 @@ import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
+import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue } from "@/lib/smartQueue";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
 import {
   getDeviceId, getVotedSongs, addVotedSong,
@@ -110,9 +111,24 @@ const Index = () => {
     saveQueueState(votes);
   }, [songs]);
 
+  // Pre-fetch related queue when a song starts playing in music mode
+  useEffect(() => {
+    if (homeMode === "music" && currentSong.youtubeId) {
+      fetchRelatedQueue(currentSong).catch(() => {});
+    }
+  }, [currentSong.id, homeMode]);
+
   useEffect(() => {
     if (playerState.isEnded && !expanded) {
-      // Only auto-next from queue when NowPlayingView is NOT expanded (it handles autoplay via related videos)
+      // In music mode, use smart queue for auto-next
+      if (homeMode === "music") {
+        const next = popNextFromQueue();
+        if (next) {
+          handleSelect(next);
+          return;
+        }
+      }
+      // Fallback: cycle through local songs
       const sorted = sortByVotes(songs);
       const idx = sorted.findIndex((s) => s.id === currentSong.id);
       const next = sorted[(idx + 1) % sorted.length];
@@ -139,13 +155,51 @@ const Index = () => {
     else { play(); }
   }, [playerState, pause, play, loadVideo, currentSong]);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
+    if (homeMode === "music") {
+      // Try smart queue first
+      const next = popNextFromQueue();
+      if (next) {
+        handleSelect(next);
+        return;
+      }
+      // If queue is empty, fetch and pop
+      const queue = await fetchRelatedQueue(currentSong);
+      if (queue.length > 0) {
+        const nextSong = popNextFromQueue();
+        if (nextSong) {
+          handleSelect(nextSong);
+          return;
+        }
+      }
+    }
+    // Fallback: cycle local songs
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx + 1) % sorted.length]);
-  }, [currentSong, songs, handleSelect]);
+  }, [currentSong, songs, handleSelect, homeMode]);
 
   const handlePrev = useCallback(() => {
+    // Go back through history
+    const history = getHistory();
+    const currentIdx = history.findIndex((h) => h.youtubeId === currentSong.youtubeId);
+    if (currentIdx > 0) {
+      const prev = history[currentIdx - 1];
+      const song: Song = {
+        id: prev.songId,
+        youtubeId: prev.youtubeId,
+        title: prev.title,
+        artist: prev.artist,
+        album: prev.album,
+        cover: prev.cover,
+        duration: prev.duration,
+        votes: 0,
+        isDownloaded: false,
+      };
+      handleSelect(song);
+      return;
+    }
+    // Fallback
     const sorted = sortByVotes(songs);
     const idx = sorted.findIndex((s) => s.id === currentSong.id);
     handleSelect(sorted[(idx - 1 + sorted.length) % sorted.length]);
