@@ -509,14 +509,14 @@ const Index = () => {
 
               {/* Listen again — grid layout like YT Music */}
               <section>
-                <div className="flex items-center justify-between px-4 mb-3">
+                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-muted-foreground" />
-                    <h2 className="text-base font-display font-medium text-foreground">Ouvir novamente</h2>
+                    <h2 className="text-sm sm:text-base font-display font-medium text-foreground">Ouvir novamente</h2>
                   </div>
                   <ChevronRight size={20} className="text-muted-foreground" />
                 </div>
-                <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 px-4">
+                <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 px-3 sm:px-4">
                   {(recentHistory.length > 0
                     ? recentHistory.slice(0, 6).map(e => ({
                         id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
@@ -529,16 +529,16 @@ const Index = () => {
                       onClick={() => handleSelect(song)}
                       className="group relative active:scale-95 transition-transform"
                     >
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 relative">
+                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1 sm:mb-1.5 relative">
                         <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 group-active:bg-background/30 transition-colors flex items-center justify-center">
-                          <div className="w-9 h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
-                            <Play size={16} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
+                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
                           </div>
                         </div>
                       </div>
-                      <p className="text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
-                      <p className="text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
+                      <p className="text-[10px] sm:text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
                     </button>
                   ))}
                 </div>
