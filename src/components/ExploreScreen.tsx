@@ -317,253 +317,311 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
         </div>
       )}
 
-      {/* ═══ SECTION: VÍDEOS ═══ */}
-      {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "videos" && (
-        <div className="space-y-4 px-4 pb-4">
-          {results.length === 0 && (
-            <div className="flex items-center gap-2">
-              <TrendingUp size={14} className="text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Em alta agora</h2>
-            </div>
-          )}
-          <div className="space-y-6">
-            {displayVideos.map((video) => (
-              <div key={video.videoId} className="space-y-2">
-                <VideoCard
-                  video={video}
-                  onPlay={onPlayVideo}
-                  onChannelClick={handleChannelClick}
-                  onFullscreen={onFullscreenVideo}
-                />
-                {/* Quick comment button */}
-                <button
-                  onClick={() => handleLoadComments(video)}
-                  className="flex items-center gap-1.5 ml-12 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <MessageSquare size={12} />
-                  Ver comentários
-                  <ChevronRight size={12} />
-                </button>
+      {/* Animated section content */}
+      <AnimatePresence mode="wait">
+        {/* ═══ SECTION: VÍDEOS ═══ */}
+        {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "videos" && (
+          <motion.div
+            key="videos"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="space-y-4 px-4 pb-4"
+          >
+            {results.length === 0 && (
+              <div className="flex items-center gap-2">
+                <TrendingUp size={14} className="text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">Em alta agora</h2>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ═══ SECTION: CANAIS ═══ */}
-      {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "channels" && (
-        <div className="space-y-4 px-4 pb-4">
-          <div className="flex items-center gap-2">
-            <Users size={14} className="text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Canais encontrados</h2>
-          </div>
-          
-          {channelGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-2">
-              <Users size={32} className="text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">Nenhum canal identificado</p>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {channelGroups.map((group) => (
-                <div key={group.channel} className="space-y-3">
-                  {/* Channel header card */}
+            )}
+            <motion.div
+              className="space-y-6"
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06 } } }}
+            >
+              {displayVideos.map((video) => (
+                <motion.div
+                  key={video.videoId}
+                  className="space-y-2"
+                  variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+                >
+                  <VideoCard
+                    video={video}
+                    onPlay={onPlayVideo}
+                    onChannelClick={handleChannelClick}
+                    onFullscreen={onFullscreenVideo}
+                  />
                   <button
-                    onClick={() => handleChannelClick(group.channel, group.thumbnail)}
-                    className="flex items-center gap-3 w-full p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors active:scale-[0.98]"
+                    onClick={() => handleLoadComments(video)}
+                    className="flex items-center gap-1.5 ml-12 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {group.thumbnail ? (
-                      <img src={group.thumbnail} alt={group.channel} className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20" loading="lazy" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary text-lg font-bold">
-                        {group.channel.charAt(0)}
-                      </div>
-                    )}
-                    <div className="text-left flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{group.channel}</p>
-                      <p className="text-[11px] text-muted-foreground">{group.videos.length} vídeo{group.videos.length > 1 ? "s" : ""}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+                    <MessageSquare size={12} />
+                    Ver comentários
+                    <ChevronRight size={12} />
                   </button>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
 
-                  {/* Channel videos horizontal scroll */}
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-                    {group.videos.slice(0, 6).map((video) => (
-                      <button
-                        key={video.videoId}
-                        onClick={() => onPlayVideo(video)}
-                        className="flex-shrink-0 w-[200px] active:scale-[0.98] transition-transform text-left"
-                      >
-                        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-card">
-                          <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
-                          {video.duration && (
-                            <span className="absolute bottom-1 right-1 bg-background/80 text-foreground text-[9px] font-mono px-1 py-0.5 rounded">
-                              {video.duration}
-                            </span>
-                          )}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center">
-                              <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
+        {/* ═══ SECTION: CANAIS ═══ */}
+        {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "channels" && (
+          <motion.div
+            key="channels"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="space-y-4 px-4 pb-4"
+          >
+            <div className="flex items-center gap-2">
+              <Users size={14} className="text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Canais encontrados</h2>
+            </div>
+            
+            {channelGroups.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <Users size={32} className="text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">Nenhum canal identificado</p>
+              </div>
+            ) : (
+              <motion.div
+                className="space-y-5"
+                initial="hidden"
+                animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+              >
+                {channelGroups.map((group) => (
+                  <motion.div
+                    key={group.channel}
+                    className="space-y-3"
+                    variants={{ hidden: { opacity: 0, x: -16 }, visible: { opacity: 1, x: 0, transition: { duration: 0.3 } } }}
+                  >
+                    <button
+                      onClick={() => handleChannelClick(group.channel, group.thumbnail)}
+                      className="flex items-center gap-3 w-full p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors active:scale-[0.98]"
+                    >
+                      {group.thumbnail ? (
+                        <img src={group.thumbnail} alt={group.channel} className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20" loading="lazy" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary text-lg font-bold">
+                          {group.channel.charAt(0)}
+                        </div>
+                      )}
+                      <div className="text-left flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{group.channel}</p>
+                        <p className="text-[11px] text-muted-foreground">{group.videos.length} vídeo{group.videos.length > 1 ? "s" : ""}</p>
+                      </div>
+                      <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+                    </button>
+
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+                      {group.videos.slice(0, 6).map((video) => (
+                        <button
+                          key={video.videoId}
+                          onClick={() => onPlayVideo(video)}
+                          className="flex-shrink-0 w-[200px] active:scale-[0.98] transition-transform text-left"
+                        >
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-card">
+                            <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
+                            {video.duration && (
+                              <span className="absolute bottom-1 right-1 bg-background/80 text-foreground text-[9px] font-mono px-1 py-0.5 rounded">
+                                {video.duration}
+                              </span>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center">
+                                <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <p className="text-xs font-medium text-foreground line-clamp-2 mt-1.5 leading-tight">{video.title}</p>
-                        {video.views && <p className="text-[10px] text-muted-foreground mt-0.5">{video.views}</p>}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Divider */}
-                  <div className="h-px bg-border/50" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ═══ SECTION: PLAYLISTS ═══ */}
-      {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "playlists" && (
-        <div className="space-y-4 px-4 pb-4">
-          <div className="flex items-center gap-2">
-            <ListVideo size={14} className="text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Playlists sugeridas</h2>
-          </div>
-
-          {playlists.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-2">
-              <ListVideo size={32} className="text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">Nenhuma playlist encontrada</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {playlists.map((playlist, pi) => (
-                <div key={pi} className="space-y-3">
-                  {/* Playlist header */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <ListVideo size={16} className="text-primary" />
+                          <p className="text-xs font-medium text-foreground line-clamp-2 mt-1.5 leading-tight">{video.title}</p>
+                          {video.views && <p className="text-[10px] text-muted-foreground mt-0.5">{video.views}</p>}
+                        </button>
+                      ))}
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">{playlist.title}</h3>
-                      <p className="text-[10px] text-muted-foreground">{playlist.videos.length} vídeos</p>
-                    </div>
-                  </div>
 
-                  {/* Playlist videos */}
-                  <div className="space-y-2">
-                    {playlist.videos.map((video, vi) => (
-                      <button
-                        key={video.videoId}
-                        onClick={() => onPlayVideo(video)}
-                        className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-secondary/50 active:scale-[0.98] transition-all"
-                      >
-                        <span className="text-xs text-muted-foreground w-5 text-center flex-shrink-0 font-mono">{vi + 1}</span>
-                        <div className="relative w-16 aspect-video rounded overflow-hidden bg-card flex-shrink-0">
-                          <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
-                          {video.duration && (
-                            <span className="absolute bottom-0.5 right-0.5 bg-background/80 text-foreground text-[8px] font-mono px-1 rounded">
-                              {video.duration}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{video.title}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{video.channel}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Divider */}
-                  {pi < playlists.length - 1 && <div className="h-px bg-border/50" />}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ═══ SECTION: COMENTÁRIOS ═══ */}
-      {!loading && !trendingLoading && activeSection === "comments" && (
-        <div className="space-y-4 px-4 pb-4">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={14} className="text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">Comentários</h2>
-          </div>
-
-          {!selectedVideoForComments ? (
-            <div className="space-y-4">
-              <p className="text-xs text-muted-foreground">Selecione um vídeo para ver os comentários</p>
-              {/* Show videos to select from */}
-              <div className="space-y-2">
-                {displayVideos.slice(0, 8).map((video) => (
-                  <button
-                    key={video.videoId}
-                    onClick={() => handleLoadComments(video)}
-                    className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-secondary/50 active:scale-[0.98] transition-all"
-                  >
-                    <div className="relative w-20 aspect-video rounded overflow-hidden bg-card flex-shrink-0">
-                      <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{video.title}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
-                        <MessageSquare size={10} />
-                        Toque para ver comentários
-                      </p>
-                    </div>
-                    <ChevronRight size={14} className="text-muted-foreground flex-shrink-0" />
-                  </button>
+                    <div className="h-px bg-border/50" />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ═══ SECTION: PLAYLISTS ═══ */}
+        {!loading && !trendingLoading && displayVideos.length > 0 && activeSection === "playlists" && (
+          <motion.div
+            key="playlists"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="space-y-4 px-4 pb-4"
+          >
+            <div className="flex items-center gap-2">
+              <ListVideo size={14} className="text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Playlists sugeridas</h2>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Selected video header */}
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-                <div className="relative w-20 aspect-video rounded-lg overflow-hidden bg-card flex-shrink-0">
-                  <img src={selectedVideoForComments.thumbnail} alt={selectedVideoForComments.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{selectedVideoForComments.title}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{selectedVideoForComments.channel}</p>
-                </div>
-                <button
-                  onClick={() => { setSelectedVideoForComments(null); setComments([]); setRelatedFromComments([]); }}
-                  className="p-1.5 rounded-full hover:bg-accent transition-colors"
+
+            {playlists.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <ListVideo size={32} className="text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">Nenhuma playlist encontrada</p>
+              </div>
+            ) : (
+              <motion.div
+                className="space-y-6"
+                initial="hidden"
+                animate="visible"
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+              >
+                {playlists.map((playlist, pi) => (
+                  <motion.div
+                    key={pi}
+                    className="space-y-3"
+                    variants={{ hidden: { opacity: 0, scale: 0.97 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } } }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <ListVideo size={16} className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">{playlist.title}</h3>
+                        <p className="text-[10px] text-muted-foreground">{playlist.videos.length} vídeos</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {playlist.videos.map((video, vi) => (
+                        <button
+                          key={video.videoId}
+                          onClick={() => onPlayVideo(video)}
+                          className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-secondary/50 active:scale-[0.98] transition-all"
+                        >
+                          <span className="text-xs text-muted-foreground w-5 text-center flex-shrink-0 font-mono">{vi + 1}</span>
+                          <div className="relative w-16 aspect-video rounded overflow-hidden bg-card flex-shrink-0">
+                            <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
+                            {video.duration && (
+                              <span className="absolute bottom-0.5 right-0.5 bg-background/80 text-foreground text-[8px] font-mono px-1 rounded">
+                                {video.duration}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{video.title}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{video.channel}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {pi < playlists.length - 1 && <div className="h-px bg-border/50" />}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ═══ SECTION: COMENTÁRIOS ═══ */}
+        {!loading && !trendingLoading && activeSection === "comments" && (
+          <motion.div
+            key="comments"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="space-y-4 px-4 pb-4"
+          >
+            <div className="flex items-center gap-2">
+              <MessageSquare size={14} className="text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Comentários</h2>
+            </div>
+
+            {!selectedVideoForComments ? (
+              <div className="space-y-4">
+                <p className="text-xs text-muted-foreground">Selecione um vídeo para ver os comentários</p>
+                <motion.div
+                  className="space-y-2"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
                 >
-                  <X size={14} className="text-muted-foreground" />
-                </button>
+                  {displayVideos.slice(0, 8).map((video) => (
+                    <motion.button
+                      key={video.videoId}
+                      onClick={() => handleLoadComments(video)}
+                      className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-secondary/50 active:scale-[0.98] transition-all"
+                      variants={{ hidden: { opacity: 0, x: 12 }, visible: { opacity: 1, x: 0, transition: { duration: 0.25 } } }}
+                    >
+                      <div className="relative w-20 aspect-video rounded overflow-hidden bg-card flex-shrink-0">
+                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{video.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                          <MessageSquare size={10} />
+                          Toque para ver comentários
+                        </p>
+                      </div>
+                      <ChevronRight size={14} className="text-muted-foreground flex-shrink-0" />
+                    </motion.button>
+                  ))}
+                </motion.div>
               </div>
-
-              {/* Comments */}
-              <div>
-                <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                  <MessageSquare size={12} className="text-primary" />
-                  {commentsLoading ? "Carregando..." : `${comments.length} comentários`}
-                </h3>
-                <VideoComments comments={comments} loading={commentsLoading} />
-              </div>
-
-              {/* Related videos from this video */}
-              {relatedFromComments.length > 0 && (
-                <div className="pt-2">
-                  <div className="h-px bg-border/50 mb-4" />
-                  <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                    <PlayCircle size={12} className="text-primary" />
-                    Vídeos relacionados
-                  </h3>
-                  <RelatedVideos
-                    videos={relatedFromComments}
-                    onPlay={(video) => onPlayVideo(video)}
-                  />
+            ) : (
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
+                  <div className="relative w-20 aspect-video rounded-lg overflow-hidden bg-card flex-shrink-0">
+                    <img src={selectedVideoForComments.thumbnail} alt={selectedVideoForComments.title} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight">{selectedVideoForComments.title}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{selectedVideoForComments.channel}</p>
+                  </div>
+                  <button
+                    onClick={() => { setSelectedVideoForComments(null); setComments([]); setRelatedFromComments([]); }}
+                    className="p-1.5 rounded-full hover:bg-accent transition-colors"
+                  >
+                    <X size={14} className="text-muted-foreground" />
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+
+                <div>
+                  <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                    <MessageSquare size={12} className="text-primary" />
+                    {commentsLoading ? "Carregando..." : `${comments.length} comentários`}
+                  </h3>
+                  <VideoComments comments={comments} loading={commentsLoading} />
+                </div>
+
+                {relatedFromComments.length > 0 && (
+                  <div className="pt-2">
+                    <div className="h-px bg-border/50 mb-4" />
+                    <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                      <PlayCircle size={12} className="text-primary" />
+                      Vídeos relacionados
+                    </h3>
+                    <RelatedVideos
+                      videos={relatedFromComments}
+                      onPlay={(video) => onPlayVideo(video)}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Empty state */}
       {!loading && query.length >= 2 && results.length === 0 && (
