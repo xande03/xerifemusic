@@ -27,6 +27,35 @@ export function useMediaSession({
   const callbacksRef = useRef({ onPlay, onPause, onNext, onPrev, onSeek });
   callbacksRef.current = { onPlay, onPause, onNext, onPrev, onSeek };
 
+  // Helper to (re-)register all action handlers — must be called after
+  // every metadata update because the YouTube iframe's own media-session
+  // can override ours whenever its internal player state changes.
+  const setHandlers = useCallback(() => {
+    if (!("mediaSession" in navigator)) return;
+
+    const handlers: [MediaSessionAction, MediaSessionActionHandler | null][] = [
+      ["play", () => callbacksRef.current.onPlay()],
+      ["pause", () => callbacksRef.current.onPause()],
+      ["previoustrack", () => callbacksRef.current.onPrev()],
+      ["nexttrack", () => callbacksRef.current.onNext()],
+      ["seekto", (details) => {
+        if (details.seekTime != null && callbacksRef.current.onSeek) {
+          callbacksRef.current.onSeek(details.seekTime);
+        }
+      }],
+      // Explicitly nullify seek-backward/forward so iOS shows
+      // previoustrack / nexttrack buttons instead of ±10 s skip
+      ["seekbackward", null],
+      ["seekforward", null],
+    ];
+
+    for (const [action, handler] of handlers) {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch { /* unsupported action */ }
+    }
+  }, []);
+
   // Set metadata when song changes
   useEffect(() => {
     if (!("mediaSession" in navigator) || !song) return;
@@ -44,42 +73,35 @@ export function useMediaSession({
         { src: song.cover, sizes: "512x512", type: "image/jpeg" },
       ],
     });
-  }, [song?.id, song?.title, song?.artist, song?.album, song?.cover]);
 
-  // Set action handlers
+    // Re-assert handlers after metadata change
+    setHandlers();
+  }, [song?.id, song?.title, song?.artist, song?.album, song?.cover, setHandlers]);
+
+  // Set action handlers on mount
   useEffect(() => {
-    if (!("mediaSession" in navigator)) return;
-
-    const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
-      ["play", () => callbacksRef.current.onPlay()],
-      ["pause", () => callbacksRef.current.onPause()],
-      ["previoustrack", () => callbacksRef.current.onPrev()],
-      ["nexttrack", () => callbacksRef.current.onNext()],
-      ["seekto", (details) => {
-        if (details.seekTime != null && callbacksRef.current.onSeek) {
-          callbacksRef.current.onSeek(details.seekTime);
-        }
-      }],
-    ];
-
-    for (const [action, handler] of handlers) {
-      try {
-        navigator.mediaSession.setActionHandler(action, handler);
-      } catch { /* unsupported action */ }
-    }
+    setHandlers();
 
     return () => {
-      for (const [action] of handlers) {
+      if (!("mediaSession" in navigator)) return;
+      const actions: MediaSessionAction[] = [
+        "play", "pause", "previoustrack", "nexttrack", "seekto",
+        "seekbackward", "seekforward",
+      ];
+      for (const action of actions) {
         try { navigator.mediaSession.setActionHandler(action, null); } catch {}
       }
     };
-  }, []);
+  }, [setHandlers]);
 
-  // Update playback state
+  // Re-assert handlers whenever playback state changes — this counters
+  // the YouTube iframe overriding our media session controls
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
     navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-  }, [isPlaying]);
+    // Re-register handlers to reclaim control from YouTube iframe
+    setHandlers();
+  }, [isPlaying, setHandlers]);
 
   // Update position state
   useEffect(() => {
