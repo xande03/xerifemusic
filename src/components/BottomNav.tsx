@@ -27,8 +27,8 @@ const BottomNav = ({ active, onChange, homeMode = "music" }: BottomNavProps) => 
   const tabs = homeMode === "video" ? videoTabs : musicTabs;
 
   return (
-    <nav className="px-1 sm:px-2 pt-0.5 sm:pt-1 flex-shrink-0 bg-background/95 backdrop-blur-sm" style={{ paddingBottom: 'calc(0.25rem + env(safe-area-inset-bottom))' }}>
-      <div className="flex items-center justify-around py-0.5 sm:py-1">
+    <nav className="px-1 sm:px-2 flex-shrink-0 bg-background/95 backdrop-blur-sm border-t border-border/10" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="flex items-center justify-around">
         {tabs.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
