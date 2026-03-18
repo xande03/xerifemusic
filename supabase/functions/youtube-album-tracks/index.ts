@@ -130,12 +130,21 @@ function parseAlbumPage(data: any) {
         if (track) tracks.push(track);
       }
     }
+
+    // musicPlaylistShelfRenderer (used for playlists with VL prefix browseIds)
+    const playlistShelf = section?.musicPlaylistShelfRenderer;
+    if (playlistShelf) {
+      for (const item of (playlistShelf.contents || [])) {
+        const track = parseTrackItem(item, albumCover);
+        if (track) tracks.push(track);
+      }
+    }
   }
 
   // Also check secondaryContents
   const secondaryContents = browseRenderer?.secondaryContents?.sectionListRenderer?.contents || [];
   for (const section of secondaryContents) {
-    const shelf = section?.musicShelfRenderer;
+    const shelf = section?.musicShelfRenderer || section?.musicPlaylistShelfRenderer;
     if (shelf) {
       for (const item of (shelf.contents || [])) {
         const track = parseTrackItem(item, albumCover);
@@ -145,8 +154,9 @@ function parseAlbumPage(data: any) {
   }
 
   // Direct shelf in tab content
-  if (tabContent?.musicShelfRenderer) {
-    for (const item of (tabContent.musicShelfRenderer.contents || [])) {
+  const directShelf = tabContent?.musicShelfRenderer || tabContent?.musicPlaylistShelfRenderer;
+  if (directShelf) {
+    for (const item of (directShelf.contents || [])) {
       const track = parseTrackItem(item, albumCover);
       if (track) tracks.push(track);
     }
