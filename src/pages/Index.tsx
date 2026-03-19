@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, MoreHorizontal } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
@@ -30,14 +30,7 @@ import SearchScreen from "@/components/SearchScreen";
 import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 import FullscreenOverlay from "@/components/FullscreenOverlay";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import HeaderMenu from "@/components/HeaderMenu";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -435,53 +428,43 @@ const Index = () => {
               {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : activeTab === "search" ? "Buscar" : "Playlists"}
             </h2>
           </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => isOnline && requestAirPlay(homeMode === "video" ? "video" : "audio")}
-              className={`flex items-center text-xs hover:text-foreground transition-colors ${isOnline ? "text-muted-foreground" : "text-primary cursor-not-allowed"}`}
-              title="Transmitir para TV / Chromecast / AirPlay"
-            >
+          <div className="flex items-center gap-2">
+            <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center outline-none hover:bg-muted focus:ring-2 focus:ring-primary/50 transition-all">
-                  <MoreHorizontal size={16} className="text-muted-foreground" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-lg rounded-xl z-[100] p-1">
-                <DropdownMenuLabel className="font-display font-medium text-xs text-muted-foreground">Alternar Modo</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => setHomeMode("music")}
-                  className={`flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm ${homeMode === "music" ? "bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground" : ""}`}
-                >
-                  <Music size={16} />
-                  <span>Xerife Music</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setHomeMode("video")}
-                  className={`flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm ${homeMode === "video" ? "bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground" : ""}`}
-                >
-                  <MonitorPlay size={16} />
-                  <span>Xerife Video</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="font-display font-medium text-xs text-muted-foreground">Aparência</DropdownMenuLabel>
-                <DropdownMenuItem 
-                  onClick={() => {
-                    const goLight = isDark;
-                    document.documentElement.classList.toggle('light', goLight);
-                    localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
-                    setIsDark(!isDark);
-                  }}
-                  className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm"
-                >
-                  {isDark ? <Sun size={16} /> : <Moon size={16} />}
-                  <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            </span>
+            <HeaderMenu
+              homeMode={homeMode}
+              onHomeModeChange={setHomeMode}
+              isDark={isDark}
+              onToggleTheme={() => {
+                const goLight = isDark;
+                document.documentElement.classList.toggle('light', goLight);
+                localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                setIsDark(!isDark);
+              }}
+              colorTheme={colorTheme}
+              onColorChange={(id) => {
+                document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink');
+                document.documentElement.classList.add(`theme-${id}`);
+                localStorage.setItem('demus-color', id);
+                setColorTheme(id);
+              }}
+              onCast={() => {
+                // Trigger remote playback / cast prompt
+                const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+                if (iframe && 'remote' in iframe) {
+                  (iframe as any).remote.prompt().catch(() => {
+                    console.warn('Cast not available');
+                  });
+                } else {
+                  // Fallback: try the video element remote playback
+                  const video = document.querySelector('video');
+                  if (video && 'remote' in video) {
+                    (video as any).remote.prompt().catch(() => {});
+                  }
+                }
+              }}
+            />
           </div>
         </header>
 
@@ -489,7 +472,6 @@ const Index = () => {
         <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Mode switcher removed to avoid visual clutter, now in header Dropdown */}
 
               {/* Channel Profile View (Video mode) */}
               {channelView ? (
@@ -574,7 +556,7 @@ const Index = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
               </motion.div>
 
-              {/* Quick picks — 2-col compact grid like reference */}
+              {/* Quick picks */}
               <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {quickPicks.map((song) => (
@@ -592,7 +574,7 @@ const Index = () => {
                 </div>
               </motion.section>
 
-              {/* Álbuns em Destaque — large cards like reference */}
+              {/* Álbuns em Destaque */}
               <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
@@ -616,7 +598,7 @@ const Index = () => {
                 </div>
               </motion.section>
 
-              {/* Listen again — grid layout like YT Music */}
+              {/* Listen again */}
               <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
                 <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
@@ -653,7 +635,7 @@ const Index = () => {
                 </div>
               </motion.section>
 
-              {/* Top Charts — numbered list like YT Music Charts */}
+              {/* Top Charts */}
               <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
@@ -816,7 +798,6 @@ const Index = () => {
             )
           )}
 
-
           {activeTab === "library" && (
             <div className="px-4 space-y-3">
               <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Biblioteca</h1>
@@ -871,52 +852,6 @@ const Index = () => {
                 ))}
               </div>
 
-              {/* Theme toggle */}
-              <div className="bg-secondary rounded-lg p-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {isDark ? <Moon size={18} className="text-foreground" /> : <Sun size={18} className="text-foreground" />}
-                  <span className="text-sm font-medium text-foreground">Modo</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const goLight = isDark;
-                    document.documentElement.classList.toggle('light', goLight);
-                    localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
-                    setIsDark(!isDark);
-                  }}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-accent text-accent-foreground hover:bg-muted transition-colors"
-                >
-                  {isDark ? 'Modo Claro' : 'Modo Escuro'}
-                </button>
-              </div>
-
-              {/* Color theme selector */}
-              <div className="bg-secondary rounded-lg p-3 space-y-2">
-                <span className="text-sm font-medium text-foreground">Cor do Tema</span>
-                <div className="flex gap-2 flex-wrap">
-                  {([
-                    { id: 'red', color: 'bg-[hsl(0,100%,50%)]', label: 'Vermelho' },
-                    { id: 'blue', color: 'bg-[hsl(217,91%,60%)]', label: 'Azul' },
-                    { id: 'purple', color: 'bg-[hsl(271,76%,53%)]', label: 'Roxo' },
-                    { id: 'green', color: 'bg-[hsl(142,71%,45%)]', label: 'Verde' },
-                    { id: 'orange', color: 'bg-[hsl(25,95%,53%)]', label: 'Laranja' },
-                    { id: 'pink', color: 'bg-[hsl(330,81%,60%)]', label: 'Rosa' },
-                  ] as const).map((t) => (
-                    <button
-                      key={t.id}
-                      title={t.label}
-                      onClick={() => {
-                        document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink');
-                        document.documentElement.classList.add(`theme-${t.id}`);
-                        localStorage.setItem('demus-color', t.id);
-                        setColorTheme(t.id);
-                      }}
-                      className={`w-8 h-8 rounded-full ${t.color} transition-all ${colorTheme === t.id ? 'ring-2 ring-foreground ring-offset-2 ring-offset-background scale-110' : 'opacity-70 hover:opacity-100'}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
               <div className="bg-secondary rounded-lg p-3 space-y-1.5">
                 <h3 className="text-xs font-medium text-foreground">Sobre</h3>
                 <div className="space-y-1 text-[11px] text-muted-foreground">
@@ -949,7 +884,6 @@ const Index = () => {
               onVolumeChange={setVolumeState}
               isShuffled={isShuffled}
               onShuffle={handleShuffle}
-              onAirPlay={requestAirPlay}
             />
           </>
         )}
@@ -965,7 +899,17 @@ const Index = () => {
               setExpanded(false);
               setShowFloatingPiP(true);
             }
-          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onPlayRelated={(video) => {
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onCast={() => {
+            const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+            if (iframe && 'remote' in iframe) {
+              (iframe as any).remote.prompt().catch(() => {});
+            } else {
+              const video = document.querySelector('video');
+              if (video && 'remote' in video) {
+                (video as any).remote.prompt().catch(() => {});
+              }
+            }
+          }} onPlayRelated={(video) => {
             const song: Song = {
               id: `yt-${video.videoId}`,
               youtubeId: video.videoId,

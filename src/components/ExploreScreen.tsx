@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, TrendingUp, Loader2, X, Music2, Gamepad2, Trophy, GraduationCap, Newspaper, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play } from "lucide-react";
+import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import { fetchVideoInfo, type Comment } from "@/lib/youtubeVideoInfo";
 import VideoCard from "./VideoCard";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
+import VideoCategorySelector, { VIDEO_CATEGORIES, type VideoCategory } from "./VideoCategorySelector";
 
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
@@ -14,14 +15,7 @@ interface ExploreScreenProps {
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
 }
 
-const CATEGORIES = [
-  { id: "all", label: "Tudo", icon: TrendingUp, query: "" },
-  { id: "music", label: "Música", icon: Music2, query: "música" },
-  { id: "gaming", label: "Gaming", icon: Gamepad2, query: "gameplay" },
-  { id: "sports", label: "Esportes", icon: Trophy, query: "esportes highlights" },
-  { id: "education", label: "Educação", icon: GraduationCap, query: "aula tutorial" },
-  { id: "news", label: "Notícias", icon: Newspaper, query: "notícias hoje" },
-];
+// Categories are now imported from VideoCategorySelector
 
 const TRENDING_QUERIES = [
   "receitas fáceis", "rock in rio", "treino em casa",
@@ -150,7 +144,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
     }
   };
 
-  const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
+  const handleCategoryClick = (cat: VideoCategory) => {
     setActiveCategory(cat.id);
     if (cat.query) {
       const combined = query.length >= 2 ? `${query} ${cat.query}` : cat.query;
@@ -165,7 +159,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    const cat = CATEGORIES.find(c => c.id === activeCategory);
+    const cat = VIDEO_CATEGORIES.find(c => c.id === activeCategory);
     const combined = cat?.query && query.length >= 2 ? `${query} ${cat.query}` : query;
     doSearch(combined || query);
   };
@@ -239,26 +233,12 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
         )}
       </form>
 
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
-        {CATEGORIES.map((cat) => {
-          const Icon = cat.icon;
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                isActive
-                  ? "bg-foreground text-background"
-                  : "bg-secondary text-secondary-foreground hover:bg-accent"
-              }`}
-            >
-              <Icon size={14} />
-              {cat.label}
-            </button>
-          );
-        })}
+      {/* Category selector */}
+      <div className="flex gap-2 items-center px-4">
+        <VideoCategorySelector
+          activeCategory={activeCategory}
+          onSelect={handleCategoryClick}
+        />
       </div>
 
       {/* Section tabs — divided navigation */}

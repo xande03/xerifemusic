@@ -1,4 +1,4 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Maximize2, Cast } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Maximize2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 
@@ -16,13 +16,12 @@ interface DesktopPlayerProps {
   onVolumeChange: (vol: number) => void;
   isShuffled?: boolean;
   onShuffle?: () => void;
-  onAirPlay?: (mode: 'audio' | 'video') => void;
 }
 
 const DesktopPlayer = ({
   song, isPlaying, currentTime, duration, volume,
   onTogglePlay, onNext, onPrev, onExpand, onSeek, onVolumeChange,
-  isShuffled, onShuffle, onAirPlay
+  isShuffled, onShuffle,
 }: DesktopPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
 
@@ -90,15 +89,6 @@ const DesktopPlayer = ({
 
       {/* Right controls */}
       <div className="flex items-center gap-2 min-w-[160px] justify-end">
-        {onAirPlay && (
-          <button
-            onClick={() => onAirPlay('audio')}
-            className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            title="Transmitir para TV / Chromecast / AirPlay"
-          >
-            <Cast size={16} />
-          </button>
-        )}
         <button
           onClick={() => onVolumeChange(volume > 0 ? 0 : 70)}
           className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"

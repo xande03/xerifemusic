@@ -31,6 +31,7 @@ interface NowPlayingViewProps {
   isShuffled?: boolean;
   onShuffle?: () => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
+  onCast?: () => void;
   onPlayRelated?: (video: VideoResult) => void;
   onFullscreen?: () => void;
   onExitFullscreen?: () => void;
@@ -43,7 +44,7 @@ interface NowPlayingViewProps {
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onCast, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
   isShuffled, onShuffle,
   context = "music",
   onShowQueue, queueCount = 0,
@@ -247,13 +248,22 @@ const NowPlayingView = ({
                 <ChevronDown size={24} />
               </button>
               <div className="flex items-center gap-1">
+                {onCast && (
+                  <button
+                    onClick={onCast}
+                    className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
+                    title="Chromecast"
+                  >
+                    <Cast size={18} />
+                  </button>
+                )}
                 {onAirPlay && (
                   <button
                     onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
                     className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
-                    title="Transmitir para TV / Chromecast / AirPlay"
+                    title="AirPlay"
                   >
-                    <Cast size={18} />
+                    <Airplay size={18} />
                   </button>
                 )}
                 {onTogglePiP && (
