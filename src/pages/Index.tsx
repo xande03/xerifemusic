@@ -899,7 +899,17 @@ const Index = () => {
               setExpanded(false);
               setShowFloatingPiP(true);
             }
-          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onPlayRelated={(video) => {
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onCast={() => {
+            const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+            if (iframe && 'remote' in iframe) {
+              (iframe as any).remote.prompt().catch(() => {});
+            } else {
+              const video = document.querySelector('video');
+              if (video && 'remote' in video) {
+                (video as any).remote.prompt().catch(() => {});
+              }
+            }
+          }} onPlayRelated={(video) => {
             const song: Song = {
               id: `yt-${video.videoId}`,
               youtubeId: video.videoId,
