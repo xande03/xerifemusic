@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, TrendingUp, Loader2, X, Music2, Gamepad2, Trophy, GraduationCap, Newspaper, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play } from "lucide-react";
+import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import { fetchVideoInfo, type Comment } from "@/lib/youtubeVideoInfo";
 import VideoCard from "./VideoCard";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
+import VideoCategorySelector, { VIDEO_CATEGORIES, type VideoCategory } from "./VideoCategorySelector";
 
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
