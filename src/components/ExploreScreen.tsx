@@ -15,14 +15,7 @@ interface ExploreScreenProps {
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
 }
 
-const CATEGORIES = [
-  { id: "all", label: "Tudo", icon: TrendingUp, query: "" },
-  { id: "music", label: "Música", icon: Music2, query: "música" },
-  { id: "gaming", label: "Gaming", icon: Gamepad2, query: "gameplay" },
-  { id: "sports", label: "Esportes", icon: Trophy, query: "esportes highlights" },
-  { id: "education", label: "Educação", icon: GraduationCap, query: "aula tutorial" },
-  { id: "news", label: "Notícias", icon: Newspaper, query: "notícias hoje" },
-];
+// Categories are now imported from VideoCategorySelector
 
 const TRENDING_QUERIES = [
   "receitas fáceis", "rock in rio", "treino em casa",
