@@ -427,13 +427,43 @@ const Index = () => {
               {activeTab === "home" ? greeting : activeTab === "library" ? "Biblioteca" : activeTab === "offline" ? "Downloads" : activeTab === "search" ? "Buscar" : "Playlists"}
             </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
             </span>
-            <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center">
-              <MoreHorizontal size={16} className="text-muted-foreground" />
-            </button>
+            <HeaderMenu
+              homeMode={homeMode}
+              onHomeModeChange={setHomeMode}
+              isDark={isDark}
+              onToggleTheme={() => {
+                const goLight = isDark;
+                document.documentElement.classList.toggle('light', goLight);
+                localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                setIsDark(!isDark);
+              }}
+              colorTheme={colorTheme}
+              onColorChange={(id) => {
+                document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink');
+                document.documentElement.classList.add(`theme-${id}`);
+                localStorage.setItem('demus-color', id);
+                setColorTheme(id);
+              }}
+              onCast={() => {
+                // Trigger remote playback / cast prompt
+                const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+                if (iframe && 'remote' in iframe) {
+                  (iframe as any).remote.prompt().catch(() => {
+                    console.warn('Cast not available');
+                  });
+                } else {
+                  // Fallback: try the video element remote playback
+                  const video = document.querySelector('video');
+                  if (video && 'remote' in video) {
+                    (video as any).remote.prompt().catch(() => {});
+                  }
+                }
+              }}
+            />
           </div>
         </header>
 
