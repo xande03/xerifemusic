@@ -44,7 +44,7 @@ interface NowPlayingViewProps {
 const NowPlayingView = ({
   song, isPlaying, isEnded, currentTime, duration,
   onTogglePlay, onNext, onPrev,
-  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
+  onCollapse, onSeek, volume, onVolumeChange, onTogglePiP, onModeChange, onAirPlay, onCast, onPlayRelated, onFullscreen, onExitFullscreen, isFullscreen,
   isShuffled, onShuffle,
   context = "music",
   onShowQueue, queueCount = 0,
