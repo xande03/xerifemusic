@@ -30,6 +30,14 @@ import SearchScreen from "@/components/SearchScreen";
 import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 import FullscreenOverlay from "@/components/FullscreenOverlay";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -435,9 +443,45 @@ const Index = () => {
             >
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
             </button>
-            <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center">
-              <MoreHorizontal size={16} className="text-muted-foreground" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center outline-none hover:bg-muted focus:ring-2 focus:ring-primary/50 transition-all">
+                  <MoreHorizontal size={16} className="text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background border border-border shadow-lg rounded-xl z-[100] p-1">
+                <DropdownMenuLabel className="font-display font-medium text-xs text-muted-foreground">Alternar Modo</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => setHomeMode("music")}
+                  className={`flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm ${homeMode === "music" ? "bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground" : ""}`}
+                >
+                  <Music size={16} />
+                  <span>Xerife Music</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setHomeMode("video")}
+                  className={`flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm ${homeMode === "video" ? "bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground" : ""}`}
+                >
+                  <MonitorPlay size={16} />
+                  <span>Xerife Video</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="font-display font-medium text-xs text-muted-foreground">Aparência</DropdownMenuLabel>
+                <DropdownMenuItem 
+                  onClick={() => {
+                    const goLight = isDark;
+                    document.documentElement.classList.toggle('light', goLight);
+                    localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                    setIsDark(!isDark);
+                  }}
+                  className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 text-sm"
+                >
+                  {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                  <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -445,35 +489,7 @@ const Index = () => {
         <main className="flex-1 overflow-y-auto pb-4 overscroll-contain lg:px-2" key={activeTab} style={{ animation: 'fade-in 0.25s ease-out' }}>
           {activeTab === "home" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Mode switcher: Xerife Music / Xerife Video */}
-              {!channelView && !artistView && (
-                <div className="px-3 sm:px-4 pt-1">
-                  <div className="flex gap-1.5 sm:gap-2 p-0.5 sm:p-1 bg-secondary rounded-xl w-fit">
-                    <button
-                      onClick={() => setHomeMode("music")}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                        homeMode === "music"
-                          ? "bg-primary text-primary-foreground shadow-md"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Music size={14} />
-                      Xerife Music
-                    </button>
-                    <button
-                      onClick={() => setHomeMode("video")}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                        homeMode === "video"
-                          ? "bg-primary text-primary-foreground shadow-md"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <MonitorPlay size={14} />
-                      Xerife Video
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* Mode switcher removed to avoid visual clutter, now in header Dropdown */}
 
               {/* Channel Profile View (Video mode) */}
               {channelView ? (
