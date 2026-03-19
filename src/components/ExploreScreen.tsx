@@ -159,7 +159,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    const cat = CATEGORIES.find(c => c.id === activeCategory);
+    const cat = VIDEO_CATEGORIES.find(c => c.id === activeCategory);
     const combined = cat?.query && query.length >= 2 ? `${query} ${cat.query}` : query;
     doSearch(combined || query);
   };
