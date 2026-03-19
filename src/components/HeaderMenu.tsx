@@ -14,10 +14,11 @@ interface HeaderMenuProps {
 }
 
 const COLOR_OPTIONS = [
+  { id: "default", color: "bg-[hsl(142,70%,30%)]", label: "Verde Escuro (Padrão)" },
   { id: "red", color: "bg-[hsl(0,100%,50%)]", label: "Vermelho" },
   { id: "blue", color: "bg-[hsl(217,91%,60%)]", label: "Azul" },
   { id: "purple", color: "bg-[hsl(271,76%,53%)]", label: "Roxo" },
-  { id: "green", color: "bg-[hsl(142,71%,45%)]", label: "Verde" },
+  { id: "green", color: "bg-[hsl(142,71%,45%)]", label: "Verde Claro" },
   { id: "orange", color: "bg-[hsl(25,95%,53%)]", label: "Laranja" },
   { id: "pink", color: "bg-[hsl(330,81%,60%)]", label: "Rosa" },
 ] as const;

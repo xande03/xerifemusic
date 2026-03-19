@@ -62,7 +62,7 @@ const Index = () => {
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDark, setIsDark] = useState(() => !document.documentElement.classList.contains('light'));
-  const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('demus-color') || 'red');
+  const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('demus-color') || 'default');
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState<SearchFilter>("all");
   const [isSearching, setIsSearching] = useState(false);
@@ -443,9 +443,11 @@ const Index = () => {
                 setIsDark(!isDark);
               }}
               colorTheme={colorTheme}
-              onColorChange={(id) => {
-                document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink');
-                document.documentElement.classList.add(`theme-${id}`);
+              onColorChange={(id: string) => {
+                document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink','theme-default');
+                if (id !== 'default') {
+                  document.documentElement.classList.add(`theme-${id}`);
+                }
                 localStorage.setItem('demus-color', id);
                 setColorTheme(id);
               }}
