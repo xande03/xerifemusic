@@ -233,26 +233,12 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
         )}
       </form>
 
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto px-4 scrollbar-hide">
-        {CATEGORIES.map((cat) => {
-          const Icon = cat.icon;
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => handleCategoryClick(cat)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                isActive
-                  ? "bg-foreground text-background"
-                  : "bg-secondary text-secondary-foreground hover:bg-accent"
-              }`}
-            >
-              <Icon size={14} />
-              {cat.label}
-            </button>
-          );
-        })}
+      {/* Category selector */}
+      <div className="flex gap-2 items-center px-4">
+        <VideoCategorySelector
+          activeCategory={activeCategory}
+          onSelect={handleCategoryClick}
+        />
       </div>
 
       {/* Section tabs — divided navigation */}
