@@ -248,6 +248,15 @@ const NowPlayingView = ({
                 <ChevronDown size={24} />
               </button>
               <div className="flex items-center gap-1">
+                {onCast && (
+                  <button
+                    onClick={onCast}
+                    className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
+                    title="Chromecast"
+                  >
+                    <Cast size={18} />
+                  </button>
+                )}
                 {onAirPlay && (
                   <button
                     onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
