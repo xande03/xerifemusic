@@ -144,7 +144,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
     }
   };
 
-  const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
+  const handleCategoryClick = (cat: VideoCategory) => {
     setActiveCategory(cat.id);
     if (cat.query) {
       const combined = query.length >= 2 ? `${query} ${cat.query}` : cat.query;
