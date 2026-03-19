@@ -30,6 +30,7 @@ import SearchScreen from "@/components/SearchScreen";
 import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 import FullscreenOverlay from "@/components/FullscreenOverlay";
+import HeaderMenu from "@/components/HeaderMenu";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
