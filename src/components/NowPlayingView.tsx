@@ -251,9 +251,9 @@ const NowPlayingView = ({
                   <button
                     onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
                     className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
-                    title="AirPlay"
+                    title="Transmitir para TV / Chromecast / AirPlay"
                   >
-                    <Airplay size={18} />
+                    <Cast size={18} />
                   </button>
                 )}
                 {onTogglePiP && (

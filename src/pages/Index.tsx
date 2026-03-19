@@ -428,9 +428,13 @@ const Index = () => {
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
+            <button 
+              onClick={() => isOnline && requestAirPlay(homeMode === "video" ? "video" : "audio")}
+              className={`flex items-center text-xs hover:text-foreground transition-colors ${isOnline ? "text-muted-foreground" : "text-primary cursor-not-allowed"}`}
+              title="Transmitir para TV / Chromecast / AirPlay"
+            >
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
-            </span>
+            </button>
             <button className="w-8 h-8 rounded-full bg-secondary overflow-hidden flex items-center justify-center">
               <MoreHorizontal size={16} className="text-muted-foreground" />
             </button>
@@ -929,6 +933,7 @@ const Index = () => {
               onVolumeChange={setVolumeState}
               isShuffled={isShuffled}
               onShuffle={handleShuffle}
+              onAirPlay={requestAirPlay}
             />
           </>
         )}
