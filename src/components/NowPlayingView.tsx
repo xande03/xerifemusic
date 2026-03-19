@@ -31,6 +31,7 @@ interface NowPlayingViewProps {
   isShuffled?: boolean;
   onShuffle?: () => void;
   onAirPlay?: (mode: 'audio' | 'video') => void;
+  onCast?: () => void;
   onPlayRelated?: (video: VideoResult) => void;
   onFullscreen?: () => void;
   onExitFullscreen?: () => void;
