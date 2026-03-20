@@ -16,6 +16,7 @@ import {
   saveVolume, getVolume, addToHistory, getHistory, clearHistory,
   type HistoryEntry,
 } from "@/lib/localStorage";
+import { hdThumbnail } from "@/lib/utils";
 import SongCard from "@/components/SongCard";
 import MiniPlayer from "@/components/MiniPlayer";
 import NowPlayingView, { type PlayerMode } from "@/components/NowPlayingView";
@@ -577,7 +578,7 @@ const Index = () => {
                         song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
                       }`}
                     >
-                      <img src={song.cover} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
+                      <img src={hdThumbnail(song.cover)} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
                       <span className="text-[11px] sm:text-xs font-medium text-foreground truncate pr-2 leading-tight">{song.title}</span>
                     </button>
                   ))}
@@ -598,7 +599,7 @@ const Index = () => {
                       className="group active:scale-[0.97] transition-transform text-left"
                     >
                       <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 sm:mb-2 relative">
-                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
                       </div>
                       <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
@@ -631,7 +632,7 @@ const Index = () => {
                       className="group relative active:scale-95 transition-transform"
                     >
                       <div className="w-full aspect-square rounded-lg overflow-hidden mb-1 sm:mb-1.5 relative">
-                        <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 group-active:bg-background/30 transition-colors flex items-center justify-center">
                           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
                             <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
@@ -666,7 +667,7 @@ const Index = () => {
                         {i + 1}
                       </span>
                       <button onClick={() => handleSelect(song)} className="flex-shrink-0">
-                        <img src={song.cover} alt={song.album} className="w-10 h-10 sm:w-11 sm:h-11 rounded-md object-cover" />
+                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-10 h-10 sm:w-11 sm:h-11 rounded-md object-cover" />
                       </button>
                       <div className="flex-1 min-w-0 text-left">
                         <button onClick={() => handleSelect(song)} className="w-full text-left">
@@ -699,7 +700,7 @@ const Index = () => {
                     <div key={song.id} className="flex-shrink-0 w-[120px] sm:w-[140px] group snap-start">
                       <button onClick={() => handleSelect(song)} className="w-full">
                         <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 relative">
-                          <img src={song.cover} alt={song.album} className="w-full h-full object-cover" />
+                          <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
                           <div className="absolute bottom-1.5 right-1.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
                             <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
                           </div>
