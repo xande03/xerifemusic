@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic } from "lucide-react";
+import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
@@ -39,6 +39,8 @@ interface NowPlayingViewProps {
   context?: "music" | "video";
   onShowQueue?: () => void;
   queueCount?: number;
+  onShare?: () => void;
+  onDownload?: () => void;
 }
 
 const NowPlayingView = ({
@@ -48,6 +50,7 @@ const NowPlayingView = ({
   isShuffled, onShuffle,
   context = "music",
   onShowQueue, queueCount = 0,
+  onShare, onDownload
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -308,7 +311,16 @@ const NowPlayingView = ({
               </div>
               <div className="flex gap-0.5">
                 <button className="p-2.5 text-muted-foreground hover:text-primary active:scale-95 transition-all"><Heart size={22} /></button>
-                <button className="p-2.5 text-muted-foreground hover:text-foreground active:scale-95 transition-all"><Share2 size={20} /></button>
+                {onDownload && (
+                  <button onClick={onDownload} className="p-2.5 text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+                    <Download size={20} />
+                  </button>
+                )}
+                {onShare && (
+                  <button onClick={onShare} className="p-2.5 text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+                    <Share2 size={20} />
+                  </button>
+                )}
               </div>
             </div>
 

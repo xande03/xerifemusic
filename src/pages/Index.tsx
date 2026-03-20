@@ -31,6 +31,8 @@ import DesktopPlayer from "@/components/DesktopPlayer";
 import SplashScreen from "@/components/SplashScreen";
 import FullscreenOverlay from "@/components/FullscreenOverlay";
 import HeaderMenu from "@/components/HeaderMenu";
+import { DownloadModal } from "@/components/DownloadModal";
+import { ShareModal } from "@/components/ShareModal";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -55,6 +57,8 @@ const Index = () => {
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
@@ -386,6 +390,10 @@ const Index = () => {
   return (
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      <DownloadModal open={showDownloadModal} onOpenChange={setShowDownloadModal} song={currentSong} isVideo={homeMode === "video"} onSuccess={() => {
+        handleDownload(currentSong);
+      }} />
+      <ShareModal open={showShareModal} onOpenChange={setShowShareModal} song={currentSong} isVideo={homeMode === "video"} />
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}
@@ -925,7 +933,7 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} onShowQueue={() => setShowQueue(true)} queueCount={smartQueueList.length} />
+          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} onShowQueue={() => setShowQueue(true)} queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)} onShare={() => setShowShareModal(true)} onDownload={() => setShowDownloadModal(true)} />
         )}
 
         <AnimatePresence>
