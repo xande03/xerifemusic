@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play } from "lucide-react";
+import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play, LayoutGrid, List } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import { fetchVideoInfo, type Comment } from "@/lib/youtubeVideoInfo";
@@ -78,6 +78,13 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionTab>("videos");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => (localStorage.getItem('demus-view-mode') as 'grid' | 'list') || 'grid');
+  
+  const toggleViewMode = () => {
+    const next = viewMode === 'grid' ? 'list' : 'grid';
+    setViewMode(next);
+    localStorage.setItem('demus-view-mode', next);
+  };
   
   // Comments state
   const [selectedVideoForComments, setSelectedVideoForComments] = useState<VideoResult | null>(null);
@@ -192,46 +199,56 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
 
   return (
     <div className="space-y-3">
-      {/* Search bar */}
-      <form onSubmit={handleSubmit} className="px-4 pt-1">
-        <div className="relative">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => handleInput(e.target.value)}
-            onFocus={() => query.length >= 2 && setShowSuggestions(true)}
-            placeholder="Pesquisar vídeos, canais, playlists..."
-            className="w-full pl-10 pr-9 py-2.5 rounded-full bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => { setQuery(""); setResults([]); setSuggestions([]); setActiveCategory("all"); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="mt-1 bg-card rounded-xl border border-border shadow-lg overflow-hidden z-10 relative">
-            {suggestions.map((s, i) => (
+      {/* Search bar + View Toggle */}
+      <div className="flex items-center gap-2 px-4 pt-1">
+        <form onSubmit={handleSubmit} className="flex-1">
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => handleInput(e.target.value)}
+              onFocus={() => query.length >= 2 && setShowSuggestions(true)}
+              placeholder="Pesquisar vídeos, canais..."
+              className="w-full pl-10 pr-9 py-2.5 rounded-full bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            {query && (
               <button
-                key={i}
                 type="button"
-                onClick={() => handleSuggestionClick(s)}
-                className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+                onClick={() => { setQuery(""); setResults([]); setSuggestions([]); setActiveCategory("all"); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
-                <Search size={14} className="text-muted-foreground flex-shrink-0" />
-                <span className="truncate">{s}</span>
+                <X size={16} />
               </button>
-            ))}
+            )}
           </div>
-        )}
-      </form>
+        </form>
+
+        <button
+          onClick={toggleViewMode}
+          className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-primary transition-colors"
+          title={viewMode === 'grid' ? 'Mudar para Lista' : 'Mudar para Grade'}
+        >
+          {viewMode === 'grid' ? <List size={20} /> : <LayoutGrid size={20} />}
+        </button>
+      </div>
+
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="mx-4 mt-[-8px] bg-card rounded-xl border border-border shadow-lg overflow-hidden z-20 relative">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => handleSuggestionClick(s)}
+              className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
+            >
+              <Search size={14} className="text-muted-foreground flex-shrink-0" />
+              <span className="truncate">{s}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Category selector */}
       <div className="flex gap-2 items-center px-4">
@@ -316,31 +333,36 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
               </div>
             )}
             <motion.div
-              className="space-y-6"
+              className={viewMode === 'grid' 
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" 
+                : "flex flex-col gap-3"}
               initial="hidden"
               animate="visible"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06 } } }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
             >
               {displayVideos.map((video) => (
                 <motion.div
                   key={video.videoId}
                   className="space-y-2"
-                  variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+                  variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.25 } } }}
                 >
                   <VideoCard
                     video={video}
                     onPlay={onPlayVideo}
                     onChannelClick={handleChannelClick}
                     onFullscreen={onFullscreenVideo}
+                    viewMode={viewMode}
                   />
-                  <button
-                    onClick={() => handleLoadComments(video)}
-                    className="flex items-center gap-1.5 ml-12 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <MessageSquare size={12} />
-                    Ver comentários
-                    <ChevronRight size={12} />
-                  </button>
+                  {viewMode === 'grid' && (
+                    <button
+                      onClick={() => handleLoadComments(video)}
+                      className="flex items-center gap-1.5 ml-12 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <MessageSquare size={12} />
+                      Ver comentários
+                      <ChevronRight size={12} />
+                    </button>
+                  )}
                 </motion.div>
               ))}
             </motion.div>
@@ -369,7 +391,9 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
               </div>
             ) : (
               <motion.div
-                className="space-y-5"
+                className={viewMode === 'grid' 
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                  : "space-y-5"}
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
@@ -398,12 +422,12 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
                       <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
                     </button>
 
-                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-                      {group.videos.slice(0, 6).map((video) => (
+                    <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-2" : "flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4"}>
+                      {group.videos.slice(0, viewMode === 'grid' ? 4 : 6).map((video) => (
                         <button
                           key={video.videoId}
                           onClick={() => onPlayVideo(video)}
-                          className="flex-shrink-0 w-[200px] active:scale-[0.98] transition-transform text-left"
+                          className={viewMode === 'grid' ? "w-full text-left" : "flex-shrink-0 w-[200px] active:scale-[0.98] transition-transform text-left"}
                         >
                           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-card">
                             <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
@@ -412,14 +436,8 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
                                 {video.duration}
                               </span>
                             )}
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                              <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center">
-                                <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
-                              </div>
-                            </div>
                           </div>
-                          <p className="text-xs font-medium text-foreground line-clamp-2 mt-1.5 leading-tight">{video.title}</p>
-                          {video.views && <p className="text-[10px] text-muted-foreground mt-0.5">{video.views}</p>}
+                          <p className={`font-medium text-foreground line-clamp-2 mt-1.5 leading-tight ${viewMode === 'grid' ? 'text-[10px]' : 'text-xs'}`}>{video.title}</p>
                         </button>
                       ))}
                     </div>
@@ -454,7 +472,9 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
               </div>
             ) : (
               <motion.div
-                className="space-y-6"
+                className={viewMode === 'grid' 
+                  ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" 
+                  : "space-y-6"}
                 initial="hidden"
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
@@ -476,7 +496,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
                     </div>
 
                     <div className="space-y-2">
-                      {playlist.videos.map((video, vi) => (
+                      {playlist.videos.slice(0, viewMode === 'grid' ? 3 : 8).map((video, vi) => (
                         <button
                           key={video.videoId}
                           onClick={() => onPlayVideo(video)}
@@ -499,7 +519,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
                       ))}
                     </div>
 
-                    {pi < playlists.length - 1 && <div className="h-px bg-border/50" />}
+                    {pi < playlists.length - 1 && <div className={viewMode === 'grid' ? 'hidden' : "h-px bg-border/50"} />}
                   </motion.div>
                 ))}
               </motion.div>
