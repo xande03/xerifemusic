@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Share2, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download } from "lucide-react";
+import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
@@ -343,15 +343,6 @@ const NowPlayingView = ({
                       title="Download"
                     >
                       <Download size={20} />
-                    </button>
-                  )}
-                  {onShare && (
-                    <button
-                      onClick={onShare}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="Compartilhar"
-                    >
-                      <Share2 size={20} />
                     </button>
                   )}
                 </div>

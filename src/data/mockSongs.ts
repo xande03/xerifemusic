@@ -13,6 +13,7 @@ export interface Song {
   duration: number; // seconds
   votes: number;
   isDownloaded: boolean;
+  type?: 'music' | 'video';
 }
 
 // Mock songs with real YouTube video IDs for playback

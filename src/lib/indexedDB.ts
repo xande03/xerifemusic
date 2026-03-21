@@ -12,6 +12,7 @@ export interface StoredSong {
   cover: string;
   duration: number;
   savedAt: number;
+  blob?: Blob;
 }
 
 function openDB(): Promise<IDBDatabase> {

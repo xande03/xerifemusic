@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
-import { saveSong, getAllSavedSongs, StoredSong } from "@/lib/indexedDB";
+import { saveSong, getAllSavedSongs, StoredSong, getSong } from "@/lib/indexedDB";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
@@ -59,10 +59,12 @@ const Index = () => {
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
+  const [offlineIsPlaying, setOfflineIsPlaying] = useState(false);
+  const [offlineCurrentTime, setOfflineCurrentTime] = useState(0);
+  const [offlineDuration, setOfflineDuration] = useState(0);
   const [albumQueue, setAlbumQueue] = useState<Song[] | null>(null);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -73,6 +75,7 @@ const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Song[]>([]);
   const [volume, setVolumeState] = useState(getVolume);
+  const [savedSongs, setSavedSongs] = useState<Song[]>([]);
   const [savedSongIds, setSavedSongIds] = useState<Set<string>>(new Set());
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [votedSongs, setVotedSongs] = useState<Set<string>>(() => new Set(getVotedSongs()));
@@ -101,6 +104,10 @@ const Index = () => {
 
   useEffect(() => {
     getAllSavedSongs().then((saved) => {
+      const converted = saved.map(s => ({
+        ...s, votes: 0, isDownloaded: true
+      }));
+      setSavedSongs(converted);
       const ids = new Set(saved.map((s) => s.id));
       setSavedSongIds(ids);
       setSongs((prev) => prev.map((s) => ({ ...s, isDownloaded: ids.has(s.id) })));
@@ -168,7 +175,27 @@ const Index = () => {
       artist: song.artist, album: song.album, cover: song.cover, duration: song.duration,
     });
     setRecentHistory(getHistory());
-    loadVideo(song.youtubeId);
+    
+    // Offline playback check
+    const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
+    if (offlineVideo) {
+      offlineVideo.pause();
+      offlineVideo.src = "";
+    }
+
+    getSong(song.id).then((stored) => {
+      if (stored?.blob) {
+        const url = URL.createObjectURL(stored.blob);
+        if (offlineVideo) {
+          offlineVideo.src = url;
+          offlineVideo.play().catch(() => {});
+          pause(); // Stop YouTube
+        }
+      } else {
+        loadVideo(song.youtubeId);
+      }
+    });
+
     // Refresh queue list from localStorage
     try {
       const raw = localStorage.getItem("demus_smart_queue");
@@ -180,10 +207,19 @@ const Index = () => {
   }, [loadVideo]);
 
   const handleTogglePlay = useCallback(() => {
+    const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
+    const isOffline = savedSongIds.has(currentSong.id);
+
+    if (isOffline && offlineVideo) {
+      if (offlineVideo.paused) offlineVideo.play().catch(() => {});
+      else offlineVideo.pause();
+      return;
+    }
+
     if (playerState.isPlaying) { pause(); }
     else if (!playerState.videoId) { loadVideo(currentSong.youtubeId); }
     else { play(); }
-  }, [playerState, pause, play, loadVideo, currentSong]);
+  }, [playerState, pause, play, loadVideo, currentSong, savedSongIds]);
 
   const handleNext = useCallback(async () => {
     // If playing from album, go to next album track
@@ -263,8 +299,13 @@ const Index = () => {
   }, []);
 
   const handleSeek = useCallback((fraction: number) => {
+    const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
+    if (savedSongIds.has(currentSong.id) && offlineVideo) {
+      offlineVideo.currentTime = fraction * (offlineVideo.duration || currentSong.duration);
+      return;
+    }
     seekTo(fraction * (playerState.duration || currentSong.duration));
-  }, [seekTo, playerState.duration, currentSong.duration]);
+  }, [seekTo, playerState.duration, currentSong.duration, currentSong.id, savedSongIds]);
 
   const handlePlayFromQueue = useCallback((song: Song, index: number) => {
     // Pop items up to and including the selected index
@@ -302,14 +343,33 @@ const Index = () => {
   }, []);
 
   const handleSeekAbsolute = useCallback((seconds: number) => {
+    const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
+    if (savedSongIds.has(currentSong.id) && offlineVideo) {
+      offlineVideo.currentTime = seconds;
+      return;
+    }
     seekTo(seconds);
-  }, [seekTo]);
+  }, [seekTo, currentSong.id, savedSongIds]);
+  const isOffline = savedSongIds.has(currentSong.id);
+  const ct = isOffline ? offlineCurrentTime : (playerState.currentTime || 0);
+  const dur = isOffline ? (offlineDuration || currentSong.duration) : (playerState.duration || currentSong.duration);
+  const isPlaying = isOffline ? offlineIsPlaying : playerState.isPlaying;
 
   useMediaSession({
-    song: currentSong, isPlaying: playerState.isPlaying,
-    currentTime: playerState.currentTime || 0,
-    duration: playerState.duration || currentSong.duration,
-    onPlay: play, onPause: pause, onNext: handleNext, onPrev: handlePrev, onSeek: handleSeekAbsolute,
+    song: currentSong, isPlaying: isPlaying,
+    currentTime: ct,
+    duration: dur,
+    onPlay: () => {
+      const v = document.getElementById("offline-player") as HTMLVideoElement | null;
+      if (isOffline && v) v.play().catch(() => {});
+      else play();
+    },
+    onPause: () => {
+      const v = document.getElementById("offline-player") as HTMLVideoElement | null;
+      if (isOffline && v) v.pause();
+      else pause();
+    }, 
+    onNext: handleNext, onPrev: handlePrev, onSeek: handleSeekAbsolute,
   });
 
   const handleVote = useCallback((song: Song) => {
@@ -319,10 +379,21 @@ const Index = () => {
     setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s)));
   }, [votedSongs]);
 
-  const handleDownload = useCallback(async (song: Song) => {
+  const handleDownload = useCallback(async (song: Song, blob?: Blob) => {
     if (savedSongIds.has(song.id)) return;
-    await saveSong({ id: song.id, youtubeId: song.youtubeId, title: song.title, artist: song.artist, album: song.album, cover: song.cover, duration: song.duration, savedAt: Date.now() });
+    await saveSong({ 
+      id: song.id, 
+      youtubeId: song.youtubeId, 
+      title: song.title, 
+      artist: song.artist, 
+      album: song.album, 
+      cover: song.cover, 
+      duration: song.duration, 
+      savedAt: Date.now(),
+      blob: blob
+    });
     setSavedSongIds((prev) => new Set([...prev, song.id]));
+    setSavedSongs((prev) => [...prev, { ...song, isDownloaded: true, votes: 0 }]);
     setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, isDownloaded: true } : s)));
   }, [savedSongIds]);
 
@@ -374,7 +445,7 @@ const Index = () => {
     ? [...new Set(searchResults.map((s) => `${s.album}|||${s.artist}|||${s.cover}`).filter(a => !a.startsWith("|||")))]
     : [];
 
-  const offlineSongs = songs.filter((s) => s.isDownloaded);
+  const offlineSongs = savedSongs;
   const queueSongs = sortByVotes(songs);
 
   // Trending data: use real YouTube trending if available, fallback to mock
@@ -382,8 +453,6 @@ const Index = () => {
   const quickPicks = trendingSongs.length > 0 ? trendingSongs.slice(1, 7) : songs.slice(0, 6);
   const topCharts = trendingSongs.length > 0 ? trendingSongs.slice(0, 10) : queueSongs.slice(0, 5);
   const forYouSongs = trendingSongs.length > 0 ? trendingSongs.slice(5, 15) : songs.slice(0, 6);
-  const ct = playerState.currentTime || 0;
-  const dur = playerState.duration || currentSong.duration;
 
   const greetingHour = new Date().getHours();
   const greeting = greetingHour < 12 ? "Bom dia" : greetingHour < 18 ? "Boa tarde" : "Boa noite";
@@ -391,10 +460,9 @@ const Index = () => {
   return (
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-      <DownloadModal open={showDownloadModal} onOpenChange={setShowDownloadModal} song={currentSong} isVideo={homeMode === "video"} onSuccess={() => {
-        handleDownload(currentSong);
+      <DownloadModal open={showDownloadModal} onOpenChange={setShowDownloadModal} song={currentSong} isVideo={homeMode === "video"} onSuccess={(blob) => {
+        handleDownload(currentSong, blob);
       }} />
-      <ShareModal open={showShareModal} onOpenChange={setShowShareModal} song={currentSong} isVideo={homeMode === "video"} />
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}
@@ -409,6 +477,25 @@ const Index = () => {
           style={(expanded && playerMode === "video") ? { top: "90px", left: "16px", right: "16px", height: "calc(56.25vw - 18px)", maxHeight: "300px", maxWidth: "calc(100% - 32px)" } : {}}
         >
           <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden relative z-0" />
+          <video 
+            id="offline-player" 
+            className={`absolute inset-0 w-full h-full bg-black z-10 rounded-xl ${isOffline ? "block" : "hidden"}`}
+            playsInline
+            controls={false}
+            onPlay={() => setOfflineIsPlaying(true)}
+            onPause={() => setOfflineIsPlaying(false)}
+            onEnded={() => {
+              setOfflineIsPlaying(false);
+              handleNext();
+            }}
+            onTimeUpdate={(e) => {
+              setOfflineCurrentTime(e.currentTarget.currentTime);
+              setOfflineDuration(e.currentTarget.duration);
+            }}
+            onLoadedMetadata={(e) => {
+              setOfflineDuration(e.currentTarget.duration);
+            }}
+          />
           {/* Fullscreen overlay controls rendered here */}
           {playerState.isFullscreen && (
             <FullscreenOverlay
@@ -562,6 +649,30 @@ const Index = () => {
                 animate="visible"
                 variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
               >
+              {/* Centered Logo Hero */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="flex flex-col items-center justify-center pt-8 pb-4"
+              >
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/40 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+                  <img 
+                    src={xerifeHubLogo} 
+                    alt="Xerife Hub" 
+                    className="relative w-32 h-32 sm:w-44 sm:h-44 rounded-3xl shadow-2xl transition-transform duration-500 hover:scale-105" 
+                    style={{ transform: 'rotate(-2deg)' }}
+                  />
+                </div>
+                <h1 className="mt-6 text-3xl sm:text-4xl font-display font-black text-foreground tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70 drop-shadow-md">
+                  Xerife Hub
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-1 uppercase tracking-[.25em] opacity-60">
+                  Premium Experience
+                </p>
+              </motion.div>
+
               {/* Greeting */}
               <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-4">
                 <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
@@ -811,15 +922,47 @@ const Index = () => {
 
           {activeTab === "library" && (
             <div className="px-4 space-y-3">
-              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Biblioteca</h1>
+              <h1 className="text-xl font-display font-bold text-foreground lg:hidden">Favoritos</h1>
               <div className="flex gap-2 mb-2 overflow-x-auto scrollbar-hide">
-                <span className="chip chip-active flex-shrink-0">Músicas</span>
-                <span className="chip chip-inactive flex-shrink-0">Álbuns</span>
-                <span className="chip chip-inactive flex-shrink-0">Artistas</span>
+                <span className="chip chip-active flex-shrink-0">
+                  {homeMode === "music" ? "Músicas" : "Vídeos"} Curtidos
+                </span>
               </div>
-              {songs.map((song) => (
-                <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} />
-              ))}
+              
+              {(() => {
+                const historyAsSongs = recentHistory.map(e => ({
+                  id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
+                  album: e.album, cover: e.cover, duration: e.duration, votes: 1, isDownloaded: savedSongIds.has(e.songId),
+                  type: e.songId.startsWith('yt-') ? 'video' as const : 'music' as const
+                }));
+                
+                // Combine and de-duplicate by ID
+                const allRecentItems = [...songs, ...historyAsSongs];
+                const uniqueItems = Array.from(new Map(allRecentItems.map(item => [item.id, item])).values());
+                
+                const favorites = uniqueItems.filter(s => {
+                  const isFavorited = votedSongs.has(s.id);
+                  if (!isFavorited) return false;
+                  
+                  // Filter by current homeMode
+                  if (homeMode === "music") {
+                    return !s.id.startsWith('yt-'); // Mock songs are music, yt- are videos
+                  } else {
+                    return s.id.startsWith('yt-');
+                  }
+                });
+                
+                return favorites.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-muted-foreground opacity-30">
+                    <Heart size={64} strokeWidth={1} />
+                    <p className="mt-4 text-sm font-medium">Nenhum favorito ainda</p>
+                  </div>
+                ) : (
+                  favorites.map((song) => (
+                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} />
+                  ))
+                );
+              })()}
             </div>
           )}
 
@@ -879,11 +1022,11 @@ const Index = () => {
         {!expanded && (
           <>
             <div className="lg:hidden">
-              <MiniPlayer song={currentSong} isPlaying={playerState.isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onExpand={() => setExpanded(true)} />
+              <MiniPlayer song={currentSong} isPlaying={isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onExpand={() => setExpanded(true)} />
             </div>
             <DesktopPlayer
               song={currentSong}
-              isPlaying={playerState.isPlaying}
+              isPlaying={isPlaying}
               currentTime={ct}
               duration={dur}
               volume={volume}
@@ -904,7 +1047,7 @@ const Index = () => {
         </div>
 
         {expanded && (
-          <NowPlayingView song={currentSong} isPlaying={playerState.isPlaying} isEnded={playerState.isEnded} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
+          <NowPlayingView song={currentSong} isPlaying={isPlaying} isEnded={isOffline ? false : playerState.isEnded} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onCollapse={() => setExpanded(false)} onSeek={handleSeek} volume={volume} onVolumeChange={setVolumeState} onTogglePiP={async () => {
             const result = await togglePiP();
             if (result === 'fallback') {
               setExpanded(false);
@@ -942,7 +1085,6 @@ const Index = () => {
             context={homeMode}
             onShowQueue={() => setShowQueue(true)}
             queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)}
-            onShare={() => setShowShareModal(true)}
             onDownload={() => setShowDownloadModal(true)}
             isLiked={votedSongs.has(currentSong.id)}
             onLike={() => handleVote(currentSong)}

@@ -10,7 +10,7 @@ interface DownloadModalProps {
   onOpenChange: (open: boolean) => void;
   song: Song | null;
   isVideo: boolean;
-  onSuccess: () => void;
+  onSuccess: (blob: Blob) => void;
 }
 
 export const DownloadModal = ({ open, onOpenChange, song, isVideo, onSuccess }: DownloadModalProps) => {
@@ -43,18 +43,9 @@ export const DownloadModal = ({ open, onOpenChange, song, isVideo, onSuccess }: 
         (p) => setProgress(Math.max(5, p)) // Map from 5% to 100%
       );
 
-      // Create a local blob URL and trigger download
-      const tempUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = tempUrl;
-      a.download = `${song.artist} - ${song.title}.${isVideo ? "mp4" : "mp3"}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(tempUrl);
 
       setStatus("success");
-      onSuccess();
+      onSuccess(blob);
     } catch (err: any) {
       console.error("Download failed:", err);
       setStatus("error");
