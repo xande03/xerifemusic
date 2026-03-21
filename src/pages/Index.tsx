@@ -58,7 +58,6 @@ const Index = () => {
   const [expanded, setExpanded] = useState(false);
   const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const [smartQueueList, setSmartQueueList] = useState<Song[]>([]);
@@ -379,23 +378,11 @@ const Index = () => {
     setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s)));
   }, [votedSongs]);
 
-  const handleDownload = useCallback(async (song: Song, blob?: Blob) => {
-    if (savedSongIds.has(song.id)) return;
-    await saveSong({ 
-      id: song.id, 
-      youtubeId: song.youtubeId, 
-      title: song.title, 
-      artist: song.artist, 
-      album: song.album, 
-      cover: song.cover, 
-      duration: song.duration, 
-      savedAt: Date.now(),
-      blob: blob
-    });
-    setSavedSongIds((prev) => new Set([...prev, song.id]));
-    setSavedSongs((prev) => [...prev, { ...song, isDownloaded: true, votes: 0 }]);
-    setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, isDownloaded: true } : s)));
-  }, [savedSongIds]);
+  const handleDownload = useCallback((song: Song) => {
+    // Redireciona para o yout.com para download externo
+    const youtUrl = `https://yout.com/video/${song.youtubeId}`;
+    window.open(youtUrl, '_blank');
+  }, []);
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -460,9 +447,6 @@ const Index = () => {
   return (
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-      <DownloadModal open={showDownloadModal} onOpenChange={setShowDownloadModal} song={currentSong} isVideo={homeMode === "video"} onSuccess={(blob) => {
-        handleDownload(currentSong, blob);
-      }} />
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}
@@ -1085,7 +1069,7 @@ const Index = () => {
             context={homeMode}
             onShowQueue={() => setShowQueue(true)}
             queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)}
-            onDownload={() => setShowDownloadModal(true)}
+            onDownload={() => handleDownload(currentSong)}
             isLiked={votedSongs.has(currentSong.id)}
             onLike={() => handleVote(currentSong)}
           />
