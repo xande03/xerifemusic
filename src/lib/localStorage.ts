@@ -45,6 +45,30 @@ export function hasVotedForSong(songId: string): boolean {
   return getVotedSongs().includes(songId);
 }
 
+// Full metadata for favorites
+const FAVORITES_METADATA_KEY = "demus_favorites_metadata";
+
+export function getFavoritesMetadata(): any[] {
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_METADATA_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function saveFavoriteMetadata(song: any): void {
+  const favorites = getFavoritesMetadata();
+  if (!favorites.some(f => f.id === song.id)) {
+    favorites.push(song);
+    localStorage.setItem(FAVORITES_METADATA_KEY, JSON.stringify(favorites));
+  }
+}
+
+export function removeFavoriteMetadata(songId: string): void {
+  const favorites = getFavoritesMetadata().filter(f => f.id !== songId);
+  localStorage.setItem(FAVORITES_METADATA_KEY, JSON.stringify(favorites));
+}
+
 // Queue state (vote counts)
 export function saveQueueState(votes: Record<string, number>): void {
   localStorage.setItem(QUEUE_KEY, JSON.stringify(votes));
@@ -90,6 +114,7 @@ export interface HistoryEntry {
   cover: string;
   duration: number;
   playedAt: number;
+  type?: "music" | "video";
 }
 
 export function getHistory(): HistoryEntry[] {

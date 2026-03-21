@@ -49,7 +49,8 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
     setLoading(true);
     setShowSuggestions(false);
     const res = await searchYouTubeMusic(q, "all");
-    setResults(res);
+    const tagged = res.map(s => ({ ...s, type: 'music' as const }));
+    setResults(tagged);
     setLoading(false);
   };
 

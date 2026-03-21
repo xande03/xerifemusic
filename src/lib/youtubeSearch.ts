@@ -90,6 +90,7 @@ function videoToSong(v: InvidiousVideo): Song {
     duration: v.lengthSeconds || 0,
     votes: 0,
     isDownloaded: false,
+    type: "video" as const,
   };
 }
 
@@ -138,6 +139,7 @@ async function searchViaEdgeFunction(query: string, filter: string): Promise<Son
       duration: item.duration || 0,
       votes: 0,
       isDownloaded: false,
+      type: (item.type === "music" ? "music" : "video") as "music" | "video",
     }));
   } catch (err) {
     console.warn("Edge function search failed:", err);
