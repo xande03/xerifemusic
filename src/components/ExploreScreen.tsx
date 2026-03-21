@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play, LayoutGrid, List } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
+import { hdThumbnail } from "@/lib/utils";
 import { fetchVideoInfo, type Comment } from "@/lib/youtubeVideoInfo";
 import VideoCard from "./VideoCard";
 import RelatedVideos from "./RelatedVideos";
@@ -251,12 +252,42 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
       )}
 
       {/* Category selector */}
-      <div className="flex gap-2 items-center px-4">
+      <div className="flex gap-2 items-center px-4 sticky top-0 bg-background/80 backdrop-blur-xl z-30 py-2 border-b border-white/5">
         <VideoCategorySelector
           activeCategory={activeCategory}
           onSelect={handleCategoryClick}
         />
       </div>
+
+      {/* Desktop Hero Section (only shown when not searching) */}
+      {results.length === 0 && !loading && !trendingLoading && activeSection === "videos" && (
+        <div className="px-4 hidden lg:block">
+          <div className="relative h-[300px] rounded-3xl overflow-hidden group cursor-pointer" onClick={() => trendingResults[0] && onPlayVideo(trendingResults[0])}>
+            {trendingResults[0] && (
+              <img src={hdThumbnail(trendingResults[0].thumbnail)} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">Em Alta</span>
+                <span className="text-white/60 text-xs">{trendingResults[0]?.channel}</span>
+              </div>
+              <h1 className="text-3xl font-bold text-white max-w-2xl line-clamp-2 leading-tight mb-4 group-hover:text-primary transition-colors">
+                {trendingResults[0]?.title}
+              </h1>
+              <div className="flex items-center gap-4">
+                <button className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-bold flex items-center gap-2 hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-primary/20">
+                  <Play size={18} fill="currentColor" /> Assistir Agora
+                </button>
+              </div>
+            </div>
+            {/* Xerife Hub Watermark */}
+            <div className="absolute top-6 right-8 opacity-20 group-hover:opacity-40 transition-opacity">
+               <h2 className="text-2xl font-black text-white italic tracking-tighter">XERIFE <span className="text-primary">HUB</span></h2>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Section tabs — divided navigation */}
       {!loading && !trendingLoading && displayVideos.length > 0 && (
@@ -285,19 +316,19 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
         </div>
       )}
 
-      {/* Trending chips (when no search) */}
+      {/* Trending chips (when no search) — cleaner mobile layout */}
       {results.length === 0 && !loading && activeSection === "videos" && (
-        <div className="px-4">
+        <div className="px-4 lg:hidden">
           <div className="flex items-center gap-2 mb-3 mt-2">
             <TrendingUp size={16} className="text-primary" />
-            <h2 className="text-sm font-medium text-foreground">Pesquisas populares</h2>
+            <h2 className="text-sm font-medium text-foreground">Bombando no Xerife</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {TRENDING_QUERIES.map((t) => (
               <button
                 key={t}
                 onClick={() => handleSuggestionClick(t)}
-                className="chip chip-inactive rounded-full text-xs"
+                className="px-3 py-1.5 rounded-full text-xs bg-secondary/80 text-muted-foreground hover:text-foreground transition-all active:scale-95 border border-white/5"
               >
                 {t}
               </button>
@@ -327,15 +358,20 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
             className="space-y-4 px-4 pb-4"
           >
             {results.length === 0 && (
-              <div className="flex items-center gap-2">
-                <TrendingUp size={14} className="text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Em alta agora</h2>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={14} className="text-primary" />
+                  <h2 className="text-sm font-semibold text-foreground">Bombando agora</h2>
+                </div>
+                <div className="hidden lg:flex items-center gap-1 opacity-40 hover:opacity-100 transition-opacity cursor-default">
+                   <h2 className="text-lg font-black text-foreground italic tracking-tighter">XERIFE <span className="text-primary">VIDEOS</span></h2>
+                </div>
               </div>
             )}
             <motion.div
               className={viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4 sm:gap-6" 
-                : "flex flex-col gap-4"}
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:gap-8 lg:gap-10" 
+                : "flex flex-col gap-5 sm:gap-6"}
               initial="hidden"
               animate="visible"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
