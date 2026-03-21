@@ -309,10 +309,25 @@ const NowPlayingView = ({
                        { icon: Download, label: 'Download', onClick: onDownload },
                        {
                          icon: Music2,
-                         label: 'Cifra',
+                         label: 'Buscar Cifra',
                          onClick: () => {
-                           const q = encodeURIComponent(`${song.artist} ${song.title}`);
-                           window.open(`https://www.cifraclub.com.br/busca/?q=${q}`, '_blank', 'noopener');
+                           // Gera slug no formato do Cifra Club: /artista/musica/
+                           const toSlug = (s: string) =>
+                             s.toLowerCase()
+                               .normalize('NFD')
+                               .replace(/[\u0300-\u036f]/g, '') // remove acentos
+                               .replace(/[^a-z0-9\s-]/g, '')   // remove chars especiais
+                               .trim()
+                               .replace(/\s+/g, '-');           // espaços → hífens
+
+                           // Pega apenas o primeiro artista (antes de vírgula ou feat.)
+                           const mainArtist = song.artist.split(/[,&]/)[0].trim();
+                           const artistSlug = toSlug(mainArtist);
+                           const titleSlug = toSlug(song.title);
+
+                           // Tenta a URL direta primeiro; se não existir, cai na busca
+                           const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
+                           window.open(directUrl, '_blank', 'noopener');
                          }
                        },
                     ].map((btn, i) => btn.onClick && (
