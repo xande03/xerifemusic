@@ -45,6 +45,11 @@ export function hasVotedForSong(songId: string): boolean {
   return getVotedSongs().includes(songId);
 }
 
+export function removeVotedSong(songId: string): void {
+  const voted = getVotedSongs().filter(id => id !== songId);
+  localStorage.setItem(VOTES_KEY, JSON.stringify(voted));
+}
+
 // Full metadata for favorites
 const FAVORITES_METADATA_KEY = "demus_favorites_metadata";
 

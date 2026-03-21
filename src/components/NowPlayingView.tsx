@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
 import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
+import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
@@ -43,6 +44,7 @@ interface NowPlayingViewProps {
   onDownload?: () => void;
   isLiked?: boolean;
   onLike?: () => void;
+  onArtistClick?: (artist: { name: string; image: string }) => void;
 }
 
 const NowPlayingView = ({
@@ -53,7 +55,8 @@ const NowPlayingView = ({
   context = "music",
   onShowQueue, queueCount = 0,
   onShare, onDownload,
-  isLiked, onLike
+  isLiked, onLike,
+  onArtistClick
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -167,98 +170,92 @@ const NowPlayingView = ({
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col min-h-full max-w-lg mx-auto w-full">
+      {/* Desktop/Tablet Split Header (Optional but clean) */}
+      <div className="hidden lg:flex items-center justify-between px-12 py-6 z-30">
+        <button onClick={onCollapse} className="p-2 rounded-full bg-secondary/80 hover:bg-primary transition-all text-foreground hover:text-primary-foreground shadow-lg">
+          <ChevronDown size={28} />
+        </button>
+        <div className="flex items-center gap-3">
+           <img src={xerifeHubLogo} className="w-10 h-10 rounded-xl" alt="" />
+           <span className="font-display font-black text-xl italic tracking-tighter">XERIFE <span className="text-primary">HUB</span></span>
+        </div>
+        <div className="w-12 h-12" /> {/* spacer */}
+      </div>
 
-          {/* Hero artwork area with gradient overlay */}
-          <div className={`relative w-full flex-shrink-0 transition-all duration-300`} style={{ aspectRatio: mode === "lyrics" ? '3/4' : undefined, height: mode !== "lyrics" ? 'clamp(240px, 45vh, 420px)' : undefined }}>
-            {/* Background artwork */}
-            {mode === "video" ? (
-              <div className="w-full h-full bg-card relative group">
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                  Player do YouTube
-                </div>
-                {/* Optional Video Icon or Indicator */}
-                <div className="absolute top-3 right-3 flex items-center gap-2">
-                  <div className="bg-primary/20 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-primary border border-primary/30 uppercase tracking-widest">
-                    Live Video
+      {/* Main Layout Container */}
+      <div className="flex-1 overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-full w-full max-w-[1600px] mx-auto lg:px-12 lg:pb-12 lg:gap-16">
+          
+          {/* Left Column: Artwork / Lyrics / Video */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center items-center relative gap-6">
+            <div className="relative w-full aspect-square max-w-[500px] group">
+              {/* Phone Artwork Container (Maintains existing logic) */}
+              <div className="w-full h-full relative z-0">
+                {mode === "video" ? (
+                  <div className="w-full h-full bg-black rounded-3xl overflow-hidden shadow-2xl relative">
+                     <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-mono">
+                        YouTube Stream Layer
+                     </div>
+                     <div className="absolute top-4 right-4 bg-primary/20 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-black text-primary border border-primary/30 uppercase tracking-widest">
+                       FHD Stream
+                     </div>
                   </div>
-                </div>
-              </div>
-            ) : mode === "lyrics" ? (
-              <div className="w-full h-full relative">
-                <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
-                <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-md" />
-                <div ref={lyricsContainerRef} className="absolute inset-0 z-20 overflow-y-auto px-6 py-10">
-                  {lyricsLoading ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-3">
-                      <Loader2 size={24} className="text-primary animate-spin" />
-                      <p className="text-sm text-muted-foreground">Buscando letra...</p>
+                ) : mode === "lyrics" ? (
+                  <div className="w-full h-full relative rounded-3xl overflow-hidden shadow-2xl">
+                    <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
+                    <div className="absolute inset-0 z-20 bg-background/90 backdrop-blur-xl" />
+                    <div ref={lyricsContainerRef} className="absolute inset-0 z-20 overflow-y-auto px-8 py-10 scrollbar-hide">
+                      {lyricsLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full gap-4">
+                          <Loader2 size={32} className="text-primary animate-spin" />
+                          <p className="text-sm font-medium text-muted-foreground">Buscando letra...</p>
+                        </div>
+                      ) : lyricsResult && lyricsResult.lines.length > 0 ? (
+                        <div className="space-y-6 py-6">
+                          {lyricsResult.lines.map((line, i) => {
+                            const isActive = lyricsResult.synced && i === activeLineIndex;
+                            return (
+                              <p
+                                key={i}
+                                ref={isActive ? activeLineRef : undefined}
+                                onClick={() => { if (lyricsResult.synced && line.time >= 0) onSeek(line.time / (duration || 1)); }}
+                                className={`text-center transition-all duration-700 cursor-pointer ${
+                                  isActive ? "text-2xl sm:text-3xl font-black text-primary scale-110 drop-shadow-glow" : "text-base sm:text-xl text-foreground font-medium opacity-30 hover:opacity-100"
+                                }`}
+                              >
+                                {line.text}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                          <Mic2 size={48} className="text-muted-foreground/20" />
+                          <p className="text-foreground font-bold">{song.title}</p>
+                          <p className="text-sm text-muted-foreground">Letra não sincronizada disponível para este título.</p>
+                        </div>
+                      )}
                     </div>
-                  ) : lyricsResult && lyricsResult.lines.length > 0 ? (
-                    <div className="space-y-4 py-4">
-                      {lyricsResult.lines.map((line, i) => {
-                        const isActive = lyricsResult.synced && i === activeLineIndex;
-                        const isPast = lyricsResult.synced && activeLineIndex >= 0 && i < activeLineIndex;
-                        const isFuture = lyricsResult.synced && activeLineIndex >= 0 && i > activeLineIndex;
-                        return (
-                          <p
-                            key={i}
-                            ref={isActive ? activeLineRef : undefined}
-                            onClick={() => {
-                              if (lyricsResult.synced && line.time >= 0) {
-                                onSeek(line.time / (duration || 1));
-                              }
-                            }}
-                            className={`text-center transition-all duration-500 cursor-pointer ${
-                              lyricsResult.synced
-                                ? isActive
-                                  ? "text-xl font-bold text-primary scale-105 drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
-                                  : isPast
-                                    ? "text-sm text-muted-foreground/40"
-                                    : isFuture
-                                      ? "text-base text-foreground/50"
-                                      : "text-sm text-foreground/60"
-                                : "text-sm sm:text-base text-foreground/90 leading-relaxed"
-                            }`}
-                          >
-                            {line.text}
-                          </p>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <Mic2 size={32} className="text-muted-foreground/40" />
-                      <p className="text-sm text-muted-foreground">Letra não disponível</p>
-                      <p className="text-xs text-muted-foreground/60">{song.title} — {song.artist}</p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full relative rounded-3xl overflow-hidden shadow-2xl-glow group/art">
+                    <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full transition-transform duration-700 group-hover/art:scale-105" />
+                    <AudioVisualizer isPlaying={isPlaying} barCount={64} className="absolute bottom-6 left-6 right-6 h-12" />
+                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover/art:opacity-100 transition-opacity" />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="w-full h-full relative">
-                <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full" />
-                <AudioVisualizer isPlaying={isPlaying} barCount={48} className="absolute bottom-4 left-4 right-4 h-10" />
-              </div>
-            )}
 
-            {/* Gradient overlay at bottom of artwork */}
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-
-            {/* Top bar over artwork */}
-            <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-2 z-10">
-              <button onClick={onCollapse} className="p-1.5 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95">
-                <ChevronDown size={24} />
-              </button>
+              {/* Navigation overlays for mobile inside Artwork area */}
+              <div className="lg:hidden absolute top-4 left-4 z-20">
+                <button onClick={onCollapse} className="p-2 rounded-full bg-black/40 backdrop-blur-md text-white">
+                  <ChevronDown size={24} />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Controls section below artwork */}
-          <div className="px-4 sm:px-5 mt-1 sm:mt-2 relative z-10 flex flex-col gap-3 sm:gap-5 pb-4">
-
-            {/* Mode tabs — centered */}
-            <div className="flex justify-center">
-              <div className="flex items-center gap-1 bg-secondary/60 backdrop-blur-sm rounded-full p-1">
+            {/* Mode Selector - Responsive Positioning */}
+            <div className="flex items-center gap-1.5 bg-secondary/40 backdrop-blur-xl rounded-2xl p-1.5 border border-white/5">
                 {([
                   { id: "video" as PlayerMode, icon: Video, label: "Vídeo" },
                   { id: "audio" as PlayerMode, icon: Music2, label: "Áudio" },
@@ -267,246 +264,135 @@ const NowPlayingView = ({
                   <button
                     key={id}
                     onClick={() => handleModeChange(id)}
-                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      mode === id ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                    className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                      mode === id ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                     }`}
                   >
-                    <Icon size={14} />
+                    <Icon size={16} />
                     <span>{label}</span>
                   </button>
                 ))}
-              </div>
             </div>
+          </div>
 
-            {/* Song info + Main Actions */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate select-text">{song.title}</h2>
-                  <p className="text-sm sm:text-base text-muted-foreground mt-0.5 select-text">{song.artist}</p>
+          {/* Right Column: Title, Progress, Controls, Tabs */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 mt-6 lg:mt-0 relative">
+            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-6 sm:gap-8">
+              
+              {/* Info + Like */}
+              <div className="flex items-center justify-between gap-6">
+                <div className="min-w-0">
+                  <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight line-clamp-2 leading-none mb-2">{song.title}</h1>
+                  <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="group">
+                    <p className="text-lg sm:text-2xl text-muted-foreground group-hover:text-primary transition-colors font-medium">{song.artist}</p>
+                  </button>
                 </div>
                 <button 
                   onClick={onLike}
-                  className={`p-3 transition-all active:scale-90 ${isLiked ? 'text-primary scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]' : 'text-muted-foreground hover:text-foreground'}`}
-                  title={isLiked ? "Remover dos curtidos" : "Adicionar aos curtidos"}
+                  className={`p-4 rounded-3xl transition-all active:scale-90 ${isLiked ? 'bg-primary/10 text-primary shadow-glow-red' : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground'}`}
                 >
-                  <Heart size={26} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2} />
+                  <Heart size={32} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2} />
                 </button>
               </div>
 
-              {/* Action Bar (Cast, Share, AirPlay, Fullscreen) */}
-              <div className="flex items-center justify-between bg-secondary/30 backdrop-blur-sm rounded-2xl p-1 border border-border/50">
-                <div className="flex items-center gap-0.5">
-                  {onCast && (
-                    <button
-                      onClick={onCast}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="Chromecast"
-                    >
-                      <Cast size={20} />
-                    </button>
-                  )}
-                  {onAirPlay && (
-                    <button
-                      onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="AirPlay"
-                    >
-                      <Airplay size={20} />
-                    </button>
-                  )}
-                  {onFullscreen && (
-                    <button
-                      onClick={onFullscreen}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="Tela Cheia (Horizontal)"
-                    >
-                      <Maximize2 size={20} />
-                    </button>
-                  )}
-                  {onTogglePiP && (
-                    <button
-                      onClick={onTogglePiP}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="Mini Player"
-                    >
-                      <PictureInPicture2 size={20} />
-                    </button>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-0.5">
-                  {onDownload && (
-                    <button
-                      onClick={onDownload}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
-                      title="Download"
-                    >
-                      <Download size={20} />
-                    </button>
-                  )}
-                </div>
+              {/* Toolbar */}
+              <div className="flex items-center justify-between bg-card/40 border border-white/10 rounded-2xl p-2 sm:p-3 overflow-x-auto scrollbar-hide gap-4">
+                 <div className="flex items-center gap-2">
+                    {[
+                       { icon: Cast, label: 'Cast', onClick: onCast },
+                       { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
+                       { icon: Maximize2, label: 'Fullscreen', onClick: onFullscreen },
+                       { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
+                       { icon: Download, label: 'Download', onClick: onDownload }
+                    ].map((btn, i) => btn.onClick && (
+                      <button key={i} onClick={btn.onClick} className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary/50 hover:bg-primary hover:text-primary-foreground transition-all active:scale-90 text-muted-foreground shadow-sm">
+                        <btn.icon size={22} />
+                      </button>
+                    ))}
+                 </div>
               </div>
-            </div>
 
-            {/* Progress bar */}
-            <div className="space-y-1">
-              <div className="relative">
-                {isSeeking && (
-                  <div
-                    className="absolute -top-8 px-2 py-0.5 rounded bg-primary text-primary-foreground text-[11px] font-mono pointer-events-none transition-all z-20"
-                    style={{ left: `calc(${seekValue}% - 18px)` }}
-                  >
-                    {formatDuration((seekValue / 100) * duration)}
+              {/* Main Player logic (Slider & Transport) */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Slider
+                    value={[isSeeking ? seekValue : progress * 100]}
+                    max={100}
+                    step={0.1}
+                    onValueChange={([v]) => { setIsSeeking(true); setSeekValue(v); }}
+                    onValueCommit={([v]) => { onSeek(v / 100); setIsSeeking(false); }}
+                    className="w-full py-2"
+                    trackClassName="h-[6px] bg-muted/60"
+                    thumbClassName="w-5 h-5 shadow-2xl border-white"
+                  />
+                  <div className="flex justify-between text-xs sm:text-sm font-black italic tracking-widest text-muted-foreground opacity-60">
+                    <span>{formatDuration(isSeeking ? (seekValue / 100) * duration : currentTime)}</span>
+                    <span>{formatDuration(duration)}</span>
                   </div>
-                )}
-                <Slider
-                  value={[isSeeking ? seekValue : progress * 100]}
-                  max={100}
-                  step={0.1}
-                  onValueChange={([v]) => {
-                    setIsSeeking(true);
-                    setSeekValue(v);
-                  }}
-                  onValueCommit={([v]) => {
-                    onSeek(v / 100);
-                    setIsSeeking(false);
-                  }}
-                  className="w-full"
-                  trackClassName="h-[5px] bg-muted"
-                  thumbClassName="w-4 h-4"
-                />
-              </div>
-              <div className="flex justify-between text-[11px] font-mono">
-                <span className="text-primary">{formatDuration(isSeeking ? (seekValue / 100) * duration : currentTime)}</span>
-                <span className="text-muted-foreground">{formatDuration(duration)}</span>
-              </div>
-            </div>
-
-            {/* Transport controls — centered */}
-            <div className="flex items-center justify-center gap-3 sm:gap-5">
-              <button
-                onClick={onShuffle}
-                className={`p-2 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-90 transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              >
-                <Shuffle size={20} />
-              </button>
-              <button onClick={onPrev} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipBack size={24} fill="currentColor" />
-              </button>
-              <button
-                onClick={onTogglePlay}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/30"
-              >
-                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
-              </button>
-              <button onClick={onNext} className="p-2.5 sm:p-3 min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-foreground hover:text-primary active:scale-90 transition-all">
-                <SkipForward size={24} fill="currentColor" />
-              </button>
-              <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all">
-                <Repeat size={20} />
-              </button>
-            </div>
-
-            {/* Queue button */}
-            {onShowQueue && (
-              <div className="flex justify-center">
-                <button
-                  onClick={onShowQueue}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/60 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all active:scale-95"
-                >
-                  <ListMusic size={16} />
-                  <span>Fila</span>
-                  {queueCount > 0 && (
-                    <span className="text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-medium">
-                      {queueCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Volume + Autoplay row — centered */}
-            <div className="flex items-center gap-3 justify-center">
-              <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
-                {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-              </button>
-              <Slider
-                value={[volume]}
-                max={100}
-                step={1}
-                onValueChange={([v]) => onVolumeChange(v)}
-                className="flex-1 max-w-[200px]"
-                trackClassName="h-1 bg-muted"
-                thumbClassName="w-3.5 h-3.5"
-              />
-              <div className="flex items-center gap-2 ml-2">
-                <span className="text-[10px] text-muted-foreground">Auto</span>
-                <button
-                  onClick={() => {
-                    const next = !autoplay;
-                    setAutoplay(next);
-                    localStorage.setItem('demus-autoplay', String(next));
-                  }}
-                  className={`w-9 h-5 rounded-full transition-colors relative ${autoplay ? 'bg-primary' : 'bg-muted'}`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-foreground transition-transform ${autoplay ? 'left-[18px]' : 'left-0.5'}`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Video info (video context only) */}
-            {context === "video" && !videoInfoLoading && videoInfo && (
-              <div className="bg-secondary/40 rounded-xl p-3 mt-1">
-                <p className="text-xs text-foreground font-medium line-clamp-2">{song.title}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">{song.artist}</p>
-              </div>
-            )}
-
-            {/* Related / Comments tabs — video context only */}
-            {context === "video" && (
-              <div className="mt-1">
-                <div className="flex items-center justify-center gap-1 mb-3">
-                  <button
-                    onClick={() => setBottomTab("related")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      bottomTab === "related" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <ListVideo size={14} />
-                    A seguir
-                  </button>
-                  <button
-                    onClick={() => setBottomTab("comments")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      bottomTab === "comments" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <MessageSquare size={14} />
-                    Comentários
-                    {videoInfo && videoInfo.comments.length > 0 && (
-                      <span className="text-[10px] opacity-60">({videoInfo.comments.length})</span>
-                    )}
-                  </button>
                 </div>
 
-                {bottomTab === "related" && (
-                  <RelatedVideos
-                    videos={videoInfo?.relatedVideos || []}
-                    loading={videoInfoLoading}
-                    onPlay={(video) => onPlayRelated?.(video)}
-                  />
-                )}
-                {bottomTab === "comments" && (
-                  <VideoComments
-                    comments={videoInfo?.comments || []}
-                    loading={videoInfoLoading}
-                  />
-                )}
+                <div className="flex items-center justify-between lg:justify-center lg:gap-10">
+                   <button onClick={onShuffle} className={`p-4 rounded-2xl transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                      <Shuffle size={24} />
+                   </button>
+                   <div className="flex items-center gap-4 sm:gap-8">
+                     <button onClick={onPrev} className="p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90">
+                       <SkipBack size={32} fill="currentColor" />
+                     </button>
+                     <button onClick={onTogglePlay} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform">
+                       {isPlaying ? <Pause size={36} fill="currentColor" /> : <Play size={36} fill="currentColor" className="ml-1.5" />}
+                     </button>
+                     <button onClick={onNext} className="p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90">
+                       <SkipForward size={32} fill="currentColor" />
+                     </button>
+                   </div>
+                   <button className="p-4 rounded-2xl text-muted-foreground hover:text-foreground transition-all">
+                      <Repeat size={24} />
+                   </button>
+                </div>
               </div>
-            )}
+
+              {/* Volume + Queue Tab Trigger */}
+              <div className="flex items-center gap-6">
+                 <div className="flex items-center gap-3 flex-1 bg-secondary/30 rounded-2xl px-4 py-3">
+                    <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-primary">
+                       {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                    </button>
+                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1" trackClassName="h-1 bg-muted/40" thumbClassName="w-3.5 h-3.5" />
+                 </div>
+                 {onShowQueue && (
+                   <button onClick={onShowQueue} className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                      <ListMusic size={20} />
+                      <span className="hidden sm:inline">Fila</span>
+                      {queueCount > 0 && <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">{queueCount}</span>}
+                   </button>
+                 )}
+              </div>
+
+              {/* Bottom Context Section (Comments/Related) - Desktop specific variant */}
+              {context === "video" && (
+                <div className="mt-4 border-t border-white/5 pt-6 pb-20 lg:pb-0">
+                  <div className="flex gap-4 mb-6">
+                     <button onClick={() => setBottomTab("related")} className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${bottomTab === 'related' ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-secondary'}`}>
+                        <ListVideo size={18} /> Recomendados
+                     </button>
+                     <button onClick={() => setBottomTab("comments")} className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${bottomTab === 'comments' ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-secondary'}`}>
+                        <MessageSquare size={18} /> Discussão
+                     </button>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto scrollbar-hide pr-2">
+                     {bottomTab === 'related' ? (
+                       <RelatedVideos videos={videoInfo?.relatedVideos || []} loading={videoInfoLoading} onPlay={(v) => onPlayRelated?.(v)} />
+                     ) : (
+                       <VideoComments comments={videoInfo?.comments || []} loading={videoInfoLoading} />
+                     )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

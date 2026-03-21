@@ -3,7 +3,7 @@ import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clo
 import { motion, AnimatePresence } from "framer-motion";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong, getSong } from "@/lib/indexedDB";
-import { getDeviceId, getVotedSongs, addVotedSong, saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId, saveVolume, getVolume, addToHistory, getHistory, clearHistory, type HistoryEntry, getFavoritesMetadata, saveFavoriteMetadata, removeFavoriteMetadata } from "@/lib/localStorage";
+import { getDeviceId, getVotedSongs, addVotedSong, removeVotedSong, saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId, saveVolume, getVolume, addToHistory, getHistory, clearHistory, type HistoryEntry, getFavoritesMetadata, saveFavoriteMetadata, removeFavoriteMetadata } from "@/lib/localStorage";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
@@ -378,23 +378,24 @@ const Index = () => {
 
   const handleVote = useCallback((song: Song) => {
     if (votedSongs.has(song.id)) {
-      // Un-favorite if already exists? (Toggles usually expected)
-      // I will only implement adding for now as per "aparecendo" request,
-      // but toggle is safer for "pleno funcionamento".
-      const updated = new Set(votedSongs);
-      updated.delete(song.id);
-      setVotedSongs(updated);
+      // Un-favorite
+      removeVotedSong(song.id);
       removeFavoriteMetadata(song.id);
-      // Wait, voted songs storage doesn't have a direct "remove" in localStorage.ts
-      // But I can update it by overriding the entire list if I wanted.
-      // For now, let's focus on ADDING properly.
-      return; 
+      setVotedSongs((prev) => {
+        const next = new Set(prev);
+        next.delete(song.id);
+        return next;
+      });
+      setFavoritesMetadata((prev) => prev.filter(f => f.id !== song.id));
+      setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, votes: Math.max(0, s.votes - 1) } : s)));
+    } else {
+      // Favorite
+      addVotedSong(song.id);
+      saveFavoriteMetadata(song);
+      setVotedSongs((prev) => new Set([...prev, song.id]));
+      setFavoritesMetadata((prev) => [...prev, song]);
+      setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s)));
     }
-    addVotedSong(song.id);
-    saveFavoriteMetadata(song);
-    setVotedSongs((prev) => new Set([...prev, song.id]));
-    setFavoritesMetadata((prev) => [...prev, song]);
-    setSongs((prev) => prev.map((s) => (s.id === song.id ? { ...s, votes: s.votes + 1 } : s)));
   }, [votedSongs]);
 
   const handleDownload = useCallback(async (song: Song) => {
@@ -663,237 +664,256 @@ const Index = () => {
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
                 />
               ) : (
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
-              >
-              {/* Centered Logo Hero */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="flex flex-col items-center justify-center pt-8 pb-4"
-              >
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/40 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
-                  <img 
-                    src={xerifeHubLogo} 
-                    alt="Xerife Hub" 
-                    className="relative w-32 h-32 sm:w-44 sm:h-44 rounded-3xl shadow-2xl transition-transform duration-500 hover:scale-105" 
-                    style={{ transform: 'rotate(-2deg)' }}
-                  />
-                </div>
-                <h1 className="mt-6 text-3xl sm:text-4xl font-display font-black text-foreground tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70 drop-shadow-md">
-                  Xerife Hub
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-1 uppercase tracking-[.25em] opacity-60">
-                  Premium Experience
-                </p>
-              </motion.div>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+                >
+                  {/* Centered Logo Hero with 3D visible angle */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="flex flex-col items-center justify-center pt-10 sm:pt-16 pb-8 sm:pb-12 px-4 text-center overflow-hidden"
+                  >
+                    <div className="relative group [perspective:1000px]">
+                      <motion.div 
+                        initial={{ rotateY: 30, rotateX: 10 }}
+                        animate={{ rotateY: 15, rotateX: 5 }}
+                        whileHover={{ rotateY: 0, rotateX: 0, scale: 1.05 }}
+                        transition={{ duration: 0.8 }}
+                        className="relative z-10"
+                      >
+                        <img 
+                          src={xerifeHubLogo} 
+                          alt="Xerife Hub" 
+                          className="w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] rounded-3xl"
+                        />
+                      </motion.div>
+                      <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
+                    </div>
+                    <div className="mt-8 sm:mt-10 space-y-3 relative z-10">
+                      <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tighter text-foreground italic">
+                        XERIFE <span className="text-primary drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]">HUB</span>
+                      </h1>
+                      <p className="text-sm sm:text-lg text-muted-foreground font-medium tracking-[0.4em] uppercase opacity-60">Premium Experience</p>
+                    </div>
+                  </motion.div>
 
-              {/* Greeting */}
-              <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-4">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground lg:hidden">{greeting}</h1>
-              </motion.div>
+                  {/* Greeting (Mobile only now as desktop has its own) */}
+                  <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-4 lg:hidden">
+                    <h1 className="text-xl sm:text-2xl font-bold text-foreground">{greeting}</h1>
+                  </motion.div>
 
-              {/* Quick picks */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
-                  {quickPicks.map((song) => (
-                    <button
-                      key={song.id}
-                      onClick={() => handleSelect(song)}
-                      className={`flex items-center gap-2 rounded-lg overflow-hidden transition-all active:scale-[0.98] ${
-                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/30" : "bg-secondary hover:bg-accent"
-                      }`}
-                    >
-                      <img src={hdThumbnail(song.cover)} alt={song.album} className="w-12 h-12 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
-                      <span className="text-[11px] sm:text-xs font-medium text-foreground truncate pr-2 leading-tight">{song.title}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.section>
+                  {/* Quick picks */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                      {quickPicks.map((song) => (
+                        <button
+                          key={song.id}
+                          onClick={() => handleSelect(song)}
+                          className={`flex items-center gap-2.5 sm:gap-3 rounded-2xl overflow-hidden transition-all active:scale-[0.98] p-1 ${
+                            song.id === currentSong.id ? "bg-primary/10 ring-1 ring-primary/30" : "bg-card hover:bg-accent/40 shadow-sm"
+                          }`}
+                        >
+                          <img src={hdThumbnail(song.cover)} alt={song.album} className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover flex-shrink-0" />
+                          <span className="text-xs sm:text-sm font-bold text-foreground truncate pr-2 leading-tight text-left">{song.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.section>
 
-              {/* Álbuns em Destaque */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
-                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
-                  <h2 className="text-base sm:text-lg font-bold text-foreground">Álbuns em Destaque</h2>
-                  <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">Ver tudo &gt;</button>
-                </div>
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 px-3 sm:px-4">
-                  {forYouSongs.slice(0, 4).map((song) => (
-                    <button
-                      key={song.id}
-                      onClick={() => handleSelect(song)}
-                      className="group active:scale-[0.97] transition-transform text-left"
-                    >
-                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 sm:mb-2 relative">
-                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/20 transition-colors" />
+                  {/* Featured Albums */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
+                    <div className="flex items-center justify-between px-3 sm:px-4 mb-3 sm:mb-4">
+                      <h2 className="text-base sm:text-xl font-black text-foreground uppercase tracking-widest italic">Destaques</h2>
+                      <button className="text-xs font-bold text-primary hover:underline">VER MAIS</button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 px-3 sm:px-4">
+                      {forYouSongs.slice(0, 5).map((song) => (
+                        <button
+                          key={song.id}
+                          onClick={() => handleSelect(song)}
+                          className="group active:scale-[0.97] transition-transform text-left"
+                        >
+                          <div className="w-full aspect-square rounded-2xl overflow-hidden mb-2 relative shadow-lg">
+                            <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                               <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center text-white scale-75 group-hover:scale-100 transition-transform">
+                                  <Play size={24} fill="currentColor" className="ml-1" />
+                               </div>
+                            </div>
+                          </div>
+                          <p className="text-sm font-bold text-foreground truncate">{song.title}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{song.artist}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.section>
+
+                  {/* Listen again */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
+                    <div className="flex items-center justify-between px-3 sm:px-4 mb-3 sm:mb-4 pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-2">
+                        <Clock size={18} className="text-primary" />
+                        <h2 className="text-base sm:text-lg font-black text-foreground italic">Ouvir novamente</h2>
                       </div>
-                      <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.artist}</p>
-                    </button>
-                  ))}
-                </div>
-              </motion.section>
+                      <ChevronRight size={20} className="text-muted-foreground" />
+                    </div>
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4 px-3 sm:px-4">
+                      {(recentHistory.length > 0
+                        ? recentHistory.slice(0, 8).map(e => ({
+                            id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
+                            album: e.album, cover: e.cover, duration: e.duration, votes: 0, isDownloaded: false,
+                          }))
+                        : songs.slice(0, 8)
+                      ).map((song) => (
+                        <button
+                          key={song.id}
+                          onClick={() => handleSelect(song)}
+                          className="group relative active:scale-95 transition-transform"
+                        >
+                          <div className="w-full aspect-square rounded-2xl overflow-hidden mb-2 relative shadow-md">
+                            <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-full bg-primary/95 flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-2xl">
+                                <Play size={18} className="text-white ml-0.5" fill="currentColor" />
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs font-bold text-foreground truncate text-left">{song.title}</p>
+                          <p className="text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.section>
 
-              {/* Listen again */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
-                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-muted-foreground" />
-                    <h2 className="text-sm sm:text-base font-display font-medium text-foreground">Ouvir novamente</h2>
-                  </div>
-                  <ChevronRight size={20} className="text-muted-foreground" />
-                </div>
-                <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 px-3 sm:px-4">
-                  {(recentHistory.length > 0
-                    ? recentHistory.slice(0, 6).map(e => ({
-                        id: e.songId, youtubeId: e.youtubeId, title: e.title, artist: e.artist,
-                        album: e.album, cover: e.cover, duration: e.duration, votes: 0, isDownloaded: false,
-                      }))
-                    : songs.slice(0, 6)
-                  ).map((song) => (
-                    <button
-                      key={song.id}
-                      onClick={() => handleSelect(song)}
-                      className="group relative active:scale-95 transition-transform"
-                    >
-                      <div className="w-full aspect-square rounded-lg overflow-hidden mb-1 sm:mb-1.5 relative">
-                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 group-active:bg-background/30 transition-colors flex items-center justify-center">
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity shadow-lg">
-                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
+                  {/* Top Charts */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2 italic">
+                        <TrendingUp size={20} className="text-primary" />
+                        Top Charts
+                      </h2>
+                      <ChevronRight size={18} className="text-muted-foreground" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                      {topCharts.map((song, i) => (
+                        <div
+                          key={song.id}
+                          className={`w-full flex items-center gap-4 p-2 sm:p-3 rounded-2xl transition-all ${
+                            song.id === currentSong.id ? "bg-primary/10 ring-1 ring-primary/20" : "hover:bg-secondary/60"
+                          }`}
+                        >
+                          <span className={`text-base sm:text-2xl font-black w-8 text-center ${i < 3 ? "text-primary italic" : "text-muted-foreground/30"}`}>
+                            {i + 1}
+                          </span>
+                          <button onClick={() => handleSelect(song)} className="flex-shrink-0 relative group">
+                            <img src={hdThumbnail(song.cover)} alt={song.album} className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover shadow-lg" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl flex items-center justify-center">
+                               <Play size={20} className="text-white opacity-0 group-hover:opacity-100 fill-white" />
+                            </div>
+                          </button>
+                          <div className="flex-1 min-w-0 text-left">
+                            <button onClick={() => handleSelect(song)} className="w-full text-left">
+                              <p className="text-sm sm:text-base font-bold text-foreground truncate leading-tight">{song.title}</p>
+                            </button>
+                            <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
+                              <p className="text-[11px] sm:text-xs text-muted-foreground truncate hover:text-primary mt-1">{song.artist}</p>
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs font-black italic text-primary bg-primary/5 px-2 py-1 rounded-lg">
+                            <Flame size={14} />
+                            <span>{song.votes}</span>
                           </div>
                         </div>
-                      </div>
-                      <p className="text-[10px] sm:text-[11px] font-medium text-foreground truncate text-left">{song.title}</p>
-                      <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{song.artist}</p>
-                    </button>
-                  ))}
-                </div>
-              </motion.section>
-
-              {/* Top Charts */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <TrendingUp size={16} className="text-primary" />
-                    Top Charts
-                  </h2>
-                  <ChevronRight size={18} className="text-muted-foreground" />
-                </div>
-                <div className="space-y-0.5 sm:space-y-1">
-                  {topCharts.map((song, i) => (
-                    <div
-                      key={song.id}
-                      className={`w-full flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 rounded-lg transition-all ${
-                        song.id === currentSong.id ? "bg-accent ring-1 ring-primary/20" : "hover:bg-secondary"
-                      }`}
-                    >
-                      <span className={`text-base sm:text-lg font-bold w-5 sm:w-6 text-center ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
-                        {i + 1}
-                      </span>
-                      <button onClick={() => handleSelect(song)} className="flex-shrink-0">
-                        <img src={hdThumbnail(song.cover)} alt={song.album} className="w-10 h-10 sm:w-11 sm:h-11 rounded-md object-cover" />
-                      </button>
-                      <div className="flex-1 min-w-0 text-left">
-                        <button onClick={() => handleSelect(song)} className="w-full text-left">
-                          <p className="text-xs sm:text-sm font-medium text-foreground truncate">{song.title}</p>
-                        </button>
-                        <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left">
-                          <p className="text-[10px] sm:text-xs text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
-                        <TrendingUp size={12} />
-                        <span>{song.votes}</span>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </motion.section>
+                  </motion.section>
 
-              {/* For you carousel */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }}>
-                <div className="flex items-center justify-between px-3 sm:px-4 mb-2 sm:mb-3">
-                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Sparkles size={16} className="text-primary" />
-                    Para você
-                  </h2>
-                  <ChevronRight size={18} className="text-muted-foreground" />
-                </div>
-                <div className="flex gap-2.5 sm:gap-3 overflow-x-auto px-3 sm:px-4 pb-2 snap-x snap-mandatory scrollbar-hide">
-                  {forYouSongs.map((song) => (
-                    <div key={song.id} className="flex-shrink-0 w-[120px] sm:w-[140px] group snap-start">
-                      <button onClick={() => handleSelect(song)} className="w-full">
-                        <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 sm:mb-2 relative">
-                          <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
-                          <div className="absolute bottom-1.5 right-1.5 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-all shadow-lg">
-                            <Play size={14} className="text-primary-foreground ml-0.5" fill="currentColor" />
-                          </div>
+                  {/* For you carousel */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="pt-6">
+                    <div className="flex items-center justify-between px-3 sm:px-4 mb-4">
+                      <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2 italic uppercase tracking-tighter">
+                        <Sparkles size={18} className="text-primary animate-pulse" />
+                        Recomendados para você
+                      </h2>
+                    </div>
+                    <div className="flex gap-4 sm:gap-6 overflow-x-auto px-3 sm:px-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+                      {forYouSongs.map((song) => (
+                        <div key={song.id} className="flex-shrink-0 w-[140px] sm:w-[180px] md:w-[220px] lg:w-[260px] group snap-start">
+                          <button onClick={() => handleSelect(song)} className="w-full text-left">
+                            <div className="w-full aspect-square rounded-[32px] overflow-hidden mb-3 relative shadow-2xl-glow">
+                              <img src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                              <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <div className="absolute bottom-4 right-4 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-2xl scale-75 group-hover:scale-100 transition-all">
+                                <Play size={24} className="ml-1" fill="currentColor" />
+                              </div>
+                            </div>
+                            <p className="text-sm sm:text-base font-black text-foreground truncate mt-1">{song.title}</p>
+                          </button>
+                          <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
+                            <p className="text-[11px] sm:text-xs text-muted-foreground truncate hover:text-primary transition-colors">{song.artist}</p>
+                          </button>
                         </div>
-                        <p className="text-[11px] sm:text-xs font-medium text-foreground truncate text-left">{song.title}</p>
-                      </button>
-                      <button onClick={() => setArtistView({ name: song.artist, image: song.cover })} className="text-left w-full">
-                        <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate hover:text-foreground hover:underline transition-colors">{song.artist}</p>
-                      </button>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </motion.section>
+                  </motion.section>
 
-              {/* Featured mixes */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Disc3 size={16} className="text-primary" />
-                    Mixes populares
-                  </h2>
-                  <ChevronRight size={18} className="text-muted-foreground" />
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-                  {[
-                    { title: "Mix Rock Clássico", subtitle: "Queen, Nirvana, Led Zeppelin", color: "from-red-900/40 to-transparent" },
-                    { title: "Mix Pop Hits", subtitle: "Ed Sheeran, Adele, Katy Perry", color: "from-blue-900/40 to-transparent" },
-                    { title: "Mix Latino", subtitle: "Luis Fonsi, Shakira, Bad Bunny", color: "from-yellow-900/40 to-transparent" },
-                    { title: "Mix Chill", subtitle: "Lo-fi, Ambient, Acoustic", color: "from-green-900/40 to-transparent" },
-                  ].map((mix, i) => (
-                    <button
-                      key={mix.title}
-                      onClick={() => handleSelect(songs[i % songs.length])}
-                      className="relative rounded-xl overflow-hidden aspect-[4/3] group active:scale-[0.98] transition-transform"
-                    >
-                      <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover" />
-                      <div className={`absolute inset-0 bg-gradient-to-t ${mix.color}`} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3">
-                        <p className="text-xs sm:text-sm font-semibold text-foreground text-left">{mix.title}</p>
-                        <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate text-left">{mix.subtitle}</p>
+                  {/* Featured mixes */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4 pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-base sm:text-lg font-black italic text-foreground flex items-center gap-2">
+                        <Disc3 size={20} className="text-primary" />
+                        Sua Vibe
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {[
+                        { title: "Rock Clássico", subtitle: "Queen, Led Zeppelin", color: "from-red-600/20" },
+                        { title: "Pop Hits", subtitle: "Ed Sheeran, Adele", color: "from-blue-600/20" },
+                        { title: "Mix Latino", subtitle: "Shakira, Bad Bunny", color: "from-orange-600/20" },
+                        { title: "Chill & Relax", subtitle: "Lofi Beats, Acoustic", color: "from-emerald-600/20" },
+                      ].map((mix, i) => (
+                        <button
+                          key={mix.title}
+                          onClick={() => handleSelect(songs[i % songs.length])}
+                          className="relative rounded-[28px] overflow-hidden aspect-[4/3] group active:scale-[0.98] transition-transform shadow-xl"
+                        >
+                          <img src={albumCovers[i]} alt={mix.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                          <div className={`absolute inset-0 bg-gradient-to-tr ${mix.color} to-transparent`} />
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                          <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <p className="text-xs sm:text-base font-black text-white text-left italic tracking-tighter">{mix.title}</p>
+                            <p className="text-[9px] sm:text-[11px] text-white/70 font-medium truncate text-left">{mix.subtitle}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.section>
+
+                  {/* Voting queue */}
+                  <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4 py-8">
+                    <div className="flex items-center justify-between mb-4 bg-secondary/30 p-4 rounded-2xl border border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
+                           <Headphones size={20} />
+                        </div>
+                        <div>
+                           <h2 className="text-base sm:text-lg font-black text-foreground italic">Comunidade</h2>
+                           <p className="text-[10px] sm:text-xs text-muted-foreground uppercase font-bold tracking-widest">{songs.reduce((a, s) => a + s.votes, 0)} Votos Ativos</p>
+                        </div>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              </motion.section>
-
-              {/* Voting queue */}
-              <motion.section variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35 } } }} className="px-3 sm:px-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm sm:text-base font-display font-medium text-foreground flex items-center gap-2">
-                    <Headphones size={16} className="text-primary" />
-                    Fila de votação
-                  </h2>
-                  <span className="text-xs text-primary font-medium">{songs.reduce((a, s) => a + s.votes, 0)} votos</span>
-                </div>
-                <div>
-                  {queueSongs.map((song) => (
-                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
-                  ))}
-                </div>
-              </motion.section>
-              </motion.div>
+                      <Plus className="text-muted-foreground" size={24} />
+                    </div>
+                    <div className="space-y-1">
+                      {queueSongs.map((song) => (
+                        <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
+                      ))}
+                    </div>
+                  </motion.section>
+                </motion.div>
               )}
             </div>
           )}
@@ -1045,28 +1065,30 @@ const Index = () => {
 
         {!expanded && (
           <>
-            <div className="lg:hidden">
+            <div className="md:hidden">
               <MiniPlayer song={currentSong} isPlaying={isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onExpand={() => setExpanded(true)} />
             </div>
-            <DesktopPlayer
-              song={currentSong}
-              isPlaying={isPlaying}
-              currentTime={ct}
-              duration={dur}
-              volume={volume}
-              onTogglePlay={handleTogglePlay}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              onExpand={() => setExpanded(true)}
-              onSeek={handleSeek}
-              onVolumeChange={setVolumeState}
-              isShuffled={isShuffled}
-              onShuffle={handleShuffle}
-            />
+            <div className="hidden md:block">
+              <DesktopPlayer
+                song={currentSong}
+                isPlaying={isPlaying}
+                currentTime={ct}
+                duration={dur}
+                volume={volume}
+                onTogglePlay={handleTogglePlay}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                onExpand={() => setExpanded(true)}
+                onSeek={handleSeek}
+                onVolumeChange={setVolumeState}
+                isShuffled={isShuffled}
+                onShuffle={handleShuffle}
+              />
+            </div>
           </>
         )}
 
-        <div className="lg:hidden">
+        <div className="md:hidden">
           <BottomNav active={activeTab} onChange={setActiveTab} homeMode={homeMode} />
         </div>
 
@@ -1108,6 +1130,7 @@ const Index = () => {
             onShuffle={handleShuffle}
             context={homeMode}
             onShowQueue={() => setShowQueue(true)}
+            onArtistClick={(artist) => setArtistView(artist)}
             queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)}
             onDownload={() => handleDownload(currentSong)}
             isLiked={votedSongs.has(currentSong.id)}
