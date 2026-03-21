@@ -81,6 +81,7 @@ const Index = () => {
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [songToAddToPlaylist, setSongToAddToPlaylist] = useState<Song | null>(null);
   const [playlistModalMode, setPlaylistModalMode] = useState<"manage" | "add">("manage");
+  const [appZoom, setAppZoom] = useState(() => parseFloat(localStorage.getItem('xerife-zoom') || '1'));
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
@@ -94,6 +95,12 @@ const Index = () => {
   useNativeCapabilities(playerState.isPlaying);
 
 
+
+  useEffect(() => {
+    // Apply zoom to document root for global scaling
+    (document.documentElement.style as any).zoom = appZoom.toString();
+    localStorage.setItem('xerife-zoom', appZoom.toString());
+  }, [appZoom]);
 
   useEffect(() => {
     const savedId = getCurrentSongId();
@@ -589,6 +596,8 @@ const Index = () => {
               }}
               onOpenHistory={() => setActiveTab("history")}
               onOpenPlaylists={() => setActiveTab("playlists")}
+              onZoomChange={setAppZoom}
+              currentZoom={appZoom}
             />
           </div>
         </header>

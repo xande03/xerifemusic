@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic } from "lucide-react";
+import { MoreVertical, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, ZoomOut, Plus, Minus } from "lucide-react";
 
 type HomeMode = "music" | "video";
 
@@ -13,6 +13,8 @@ interface HeaderMenuProps {
   onCast?: () => void;
   onOpenHistory?: () => void;
   onOpenPlaylists?: () => void;
+  onZoomChange?: (newZoom: number) => void;
+  currentZoom?: number;
 }
 
 const COLOR_OPTIONS = [
@@ -35,6 +37,8 @@ const HeaderMenu = ({
   onCast,
   onOpenHistory,
   onOpenPlaylists,
+  onZoomChange,
+  currentZoom = 1,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -121,23 +125,61 @@ const HeaderMenu = ({
             </div>
           </div>
 
-          {/* History */}
-          <button
-            onClick={() => { onOpenHistory?.(); setOpen(false); }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
-          >
-            <Clock size={16} className="text-muted-foreground" />
-            <span>Histórico</span>
-          </button>
+          {/* History (mobile only) */}
+          <div className="md:hidden">
+            <button
+              onClick={() => { onOpenHistory?.(); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+            >
+              <Clock size={16} className="text-muted-foreground" />
+              <span>Histórico</span>
+            </button>
+          </div>
 
-          {/* Playlists */}
-          <button
-            onClick={() => { onOpenPlaylists?.(); setOpen(false); }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
-          >
-            <ListMusic size={16} className="text-muted-foreground" />
-            <span>Playlists</span>
-          </button>
+          {/* Playlists (mobile only) */}
+          <div className="md:hidden">
+            <button
+              onClick={() => { onOpenPlaylists?.(); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+            >
+              <ListMusic size={16} className="text-muted-foreground" />
+              <span>Playlists</span>
+            </button>
+          </div>
+
+          {/* Zoom Controls */}
+          <div className="px-3 py-2.5 border-t border-border space-y-2">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <ZoomIn size={16} className="text-muted-foreground" />
+              <span>Zoom</span>
+              <span className="ml-auto text-[10px] bg-secondary px-1.5 py-0.5 rounded font-mono">
+                {Math.round(currentZoom * 100)}%
+              </span>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => onZoomChange?.(Math.max(0.5, currentZoom - 0.1))}
+                className="flex-1 flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-accent hover:text-primary transition-colors border border-border"
+                title="Reduzir Zoom"
+              >
+                <Minus size={14} />
+              </button>
+              <button
+                onClick={() => onZoomChange?.(1)}
+                className="px-3 py-2 rounded-lg bg-secondary hover:bg-accent text-[10px] font-bold border border-border"
+                title="Resetar Zoom"
+              >
+                100%
+              </button>
+              <button
+                onClick={() => onZoomChange?.(Math.min(2, currentZoom + 0.1))}
+                className="flex-1 flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-accent hover:text-primary transition-colors border border-border"
+                title="Ampliar Zoom"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
 
           {/* Chromecast */}
           {onCast && (

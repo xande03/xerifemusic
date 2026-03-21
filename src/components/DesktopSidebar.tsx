@@ -1,4 +1,4 @@
-import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Music } from "lucide-react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Music, Clock, ListMusic } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
@@ -15,6 +15,8 @@ const musicTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "search", icon: Search, label: "Buscar" },
   { id: "library", icon: Heart, label: "Favoritas" },
   { id: "offline", icon: Download, label: "Downloads" },
+  { id: "history", icon: Clock, label: "Histórico" },
+  { id: "playlists", icon: ListMusic, label: "Playlists" },
 ];
 
 const videoTabs: { id: Tab; icon: typeof Home; label: string }[] = [
@@ -22,6 +24,8 @@ const videoTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "search", icon: Compass, label: "Explorar" },
   { id: "library", icon: MonitorPlay, label: "Inscrições" },
   { id: "offline", icon: Download, label: "Downloads" },
+  { id: "history", icon: Clock, label: "Histórico" },
+  { id: "playlists", icon: ListMusic, label: "Playlists" },
 ];
 
 const DesktopSidebar = ({ active, onChange, homeMode = "music" }: DesktopSidebarProps) => {
