@@ -1,4 +1,4 @@
-import { Play, Maximize } from "lucide-react";
+import { Play, Maximize, Plus } from "lucide-react";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 import { hdThumbnail } from "@/lib/utils";
 import BlurImage from "@/components/BlurImage";
@@ -8,10 +8,11 @@ interface VideoCardProps {
   onPlay: (video: VideoResult) => void;
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
   onFullscreen?: (video: VideoResult) => void;
+  onAddToPlaylist?: (video: any) => void;
   viewMode?: 'grid' | 'list';
 }
 
-const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen, viewMode = 'grid' }: VideoCardProps) => (
+const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen, onAddToPlaylist, viewMode = 'grid' }: VideoCardProps) => (
   <div className={`group/card w-full rounded-2xl transition-all duration-300 ${
     viewMode === 'list' 
       ? 'flex flex-row gap-4 items-center bg-card/40 hover:bg-card/80 p-2.5 sm:p-3 border border-border/40 hover:shadow-xl hover:shadow-primary/5 active:scale-[0.99]' 
@@ -46,6 +47,17 @@ const VideoCard = ({ video, onPlay, onChannelClick, onFullscreen, viewMode = 'gr
         >
           <Maximize size={14} />
         </button>
+      )}
+
+      {/* Playlist Trigger */}
+      {onAddToPlaylist && (
+         <button
+           onClick={(e) => { e.stopPropagation(); onAddToPlaylist?.({ id: `yt-${video.videoId}`, ...video }); }}
+           className="absolute top-12 right-2 w-8 h-8 rounded-lg bg-black/40 backdrop-blur-md text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 hover:bg-primary transition-all z-10"
+           title="Adicionar à playlist"
+         >
+           <Plus size={16} />
+         </button>
       )}
     </div>
 

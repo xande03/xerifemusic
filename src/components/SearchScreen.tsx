@@ -10,6 +10,7 @@ interface SearchScreenProps {
   currentSongId: string;
   onSelect: (song: Song) => void;
   onArtistClick?: (name: string, image?: string) => void;
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 const GENRES = [
@@ -34,7 +35,7 @@ const FILTERS: { id: MusicFilter; label: string }[] = [
   { id: "albums", label: "Álbuns" },
 ];
 
-const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenProps) => {
+const SearchScreen = ({ currentSongId, onSelect, onArtistClick, onAddToPlaylist }: SearchScreenProps) => {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<MusicFilter>("all");
   const [results, setResults] = useState<Song[]>([]);
@@ -255,6 +256,7 @@ const SearchScreen = ({ currentSongId, onSelect, onArtistClick }: SearchScreenPr
                   song={song}
                   isActive={song.id === currentSongId}
                   onSelect={onSelect}
+                  onAddToPlaylist={onAddToPlaylist}
                 />
               ))}
             </div>

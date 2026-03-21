@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Music, MonitorPlay, Sun, Moon, Palette, Cast, X } from "lucide-react";
+import { MoreVertical, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic } from "lucide-react";
 
 type HomeMode = "music" | "video";
 
@@ -11,6 +11,8 @@ interface HeaderMenuProps {
   colorTheme: string;
   onColorChange: (color: string) => void;
   onCast?: () => void;
+  onOpenHistory?: () => void;
+  onOpenPlaylists?: () => void;
 }
 
 const COLOR_OPTIONS = [
@@ -31,6 +33,8 @@ const HeaderMenu = ({
   colorTheme,
   onColorChange,
   onCast,
+  onOpenHistory,
+  onOpenPlaylists,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -116,6 +120,24 @@ const HeaderMenu = ({
               ))}
             </div>
           </div>
+
+          {/* History */}
+          <button
+            onClick={() => { onOpenHistory?.(); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+          >
+            <Clock size={16} className="text-muted-foreground" />
+            <span>Histórico</span>
+          </button>
+
+          {/* Playlists */}
+          <button
+            onClick={() => { onOpenPlaylists?.(); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+          >
+            <ListMusic size={16} className="text-muted-foreground" />
+            <span>Playlists</span>
+          </button>
 
           {/* Chromecast */}
           {onCast && (

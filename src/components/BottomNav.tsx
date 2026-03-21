@@ -1,6 +1,6 @@
 import { Home, Search, Heart, Download, Compass, User, MonitorPlay, Music } from "lucide-react";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile";
+type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
 type HomeMode = "music" | "video";
 
 interface BottomNavProps {

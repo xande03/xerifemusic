@@ -14,6 +14,7 @@ interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
   onFullscreenVideo?: (video: VideoResult) => void;
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
+  onAddToPlaylist?: (video: any) => void;
 }
 
 // Categories are now imported from VideoCategorySelector
@@ -69,7 +70,7 @@ const groupPlaylists = (videos: VideoResult[]) => {
   return playlists.slice(0, 5);
 };
 
-const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddToPlaylist }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
@@ -387,6 +388,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick }: Explo
                     onPlay={onPlayVideo}
                     onChannelClick={handleChannelClick}
                     onFullscreen={onFullscreenVideo}
+                    onAddToPlaylist={onAddToPlaylist}
                     viewMode={viewMode}
                   />
                   {viewMode === 'grid' && (

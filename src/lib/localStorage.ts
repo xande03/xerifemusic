@@ -159,3 +159,48 @@ export function getPrefs(): UserPrefs {
     return { displayName: "Convidado", isHost: false, theme: "dark" };
   }
 }
+
+// Playlists
+export interface Playlist {
+  id: string;
+  name: string;
+  songs: any[];
+  createdAt: number;
+}
+
+const PLAYLISTS_KEY = "demus_playlists";
+
+export function getPlaylists(): Playlist[] {
+  try {
+    return JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+export function savePlaylist(playlist: Playlist): void {
+  const playlists = getPlaylists();
+  const index = playlists.findIndex(p => p.id === playlist.id);
+  if (index >= 0) {
+    playlists[index] = playlist;
+  } else {
+    playlists.push(playlist);
+  }
+  localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+}
+
+export function deletePlaylist(id: string): void {
+  const playlists = getPlaylists().filter(p => p.id !== id);
+  localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+}
+
+export function addSongToPlaylist(playlistId: string, song: any): void {
+  const playlists = getPlaylists();
+  const playlist = playlists.find(p => p.id === playlistId);
+  if (playlist) {
+    if (!playlist.songs.some(s => s.id === song.id)) {
+      playlist.songs.push(song);
+      savePlaylist(playlist);
+    }
+  }
+}

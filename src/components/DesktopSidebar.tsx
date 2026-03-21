@@ -1,7 +1,7 @@
 import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Music } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile";
+type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
 type HomeMode = "music" | "video";
 
 interface DesktopSidebarProps {

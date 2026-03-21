@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, Heart } from "lucide-react";
+import { Search, Wifi, WifiOff, ChevronRight, Music, TrendingUp, Play, User, Clock, Sparkles, Plus, Cast, Sun, Moon, Flame, Headphones, Disc3, Zap, MonitorPlay, Heart, ListMusic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { mockSongs, Song, sortByVotes } from "@/data/mockSongs";
 import { saveSong, getAllSavedSongs, StoredSong, getSong } from "@/lib/indexedDB";
-import { getDeviceId, getVotedSongs, addVotedSong, removeVotedSong, saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId, saveVolume, getVolume, addToHistory, getHistory, clearHistory, type HistoryEntry, getFavoritesMetadata, saveFavoriteMetadata, removeFavoriteMetadata } from "@/lib/localStorage";
+import { getDeviceId, getVotedSongs, addVotedSong, removeVotedSong, saveQueueState, getQueueState, saveCurrentSong, getCurrentSongId, saveVolume, getVolume, addToHistory, getHistory, clearHistory, type HistoryEntry, getFavoritesMetadata, saveFavoriteMetadata, removeFavoriteMetadata, getPlaylists, savePlaylist, deletePlaylist, addSongToPlaylist, Playlist } from "@/lib/localStorage";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
@@ -29,6 +29,7 @@ import FullscreenOverlay from "@/components/FullscreenOverlay";
 import HeaderMenu from "@/components/HeaderMenu";
 import { DownloadModal } from "@/components/DownloadModal";
 import { ShareModal } from "@/components/ShareModal";
+import { PlaylistModal } from "@/components/PlaylistModal";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -36,7 +37,7 @@ import album3 from "@/assets/album-3.jpg";
 import album4 from "@/assets/album-4.jpg";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
-type Tab = "home" | "search" | "library" | "offline" | "profile";
+type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
 type SearchFilter = "all" | "songs" | "artists" | "albums";
 type HomeMode = "music" | "video";
 
@@ -76,6 +77,10 @@ const Index = () => {
   const [votedSongs, setVotedSongs] = useState<Set<string>>(() => new Set(getVotedSongs()));
   const [favoritesMetadata, setFavoritesMetadata] = useState<Song[]>(() => getFavoritesMetadata());
   const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>(() => getHistory());
+  const [playlists, setPlaylists] = useState<Playlist[]>(() => getPlaylists());
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [songToAddToPlaylist, setSongToAddToPlaylist] = useState<Song | null>(null);
+  const [playlistModalMode, setPlaylistModalMode] = useState<"manage" | "add">("manage");
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
@@ -582,6 +587,8 @@ const Index = () => {
                   }
                 }
               }}
+              onOpenHistory={() => setActiveTab("history")}
+              onOpenPlaylists={() => setActiveTab("playlists")}
             />
           </div>
         </header>
@@ -909,7 +916,7 @@ const Index = () => {
                     </div>
                     <div className="space-y-1">
                       {queueSongs.map((song) => (
-                        <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} showVotes hasVoted={votedSongs.has(song.id)} />
+                        <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onVote={handleVote} onDownload={handleDownload} onAddToPlaylist={(s) => { setSongToAddToPlaylist(s); setPlaylistModalMode("add"); setShowPlaylistModal(true); }} showVotes hasVoted={votedSongs.has(song.id)} />
                       ))}
                     </div>
                   </motion.section>
@@ -948,6 +955,17 @@ const Index = () => {
                   setActiveTab("home");
                   setChannelView({ name, thumbnail: thumb });
                 }}
+                onAddToPlaylist={(v) => {
+                  const song: Song = {
+                    id: `yt-${v.videoId}`, youtubeId: v.videoId,
+                    title: v.title, artist: v.channel, album: v.title,
+                    cover: v.thumbnail, duration: v.lengthSeconds || 0, votes: 0, isDownloaded: false,
+                    type: "video" as const,
+                  };
+                  setSongToAddToPlaylist(song);
+                  setPlaylistModalMode("add");
+                  setShowPlaylistModal(true);
+                }}
               />
             ) : (
               <SearchScreen
@@ -956,6 +974,11 @@ const Index = () => {
                 onArtistClick={(name, image) => {
                   setActiveTab("home");
                   setArtistView({ name, image });
+                }}
+                onAddToPlaylist={(s) => {
+                  setSongToAddToPlaylist(s);
+                  setPlaylistModalMode("add");
+                  setShowPlaylistModal(true);
                 }}
               />
             )
@@ -1003,7 +1026,7 @@ const Index = () => {
                   </div>
                 ) : (
                   favorites.map((song) => (
-                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} />
+                    <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onDownload={handleDownload} onAddToPlaylist={(s) => { setSongToAddToPlaylist(s); setPlaylistModalMode("add"); setShowPlaylistModal(true); }} />
                   ))
                 );
               })()}
@@ -1022,7 +1045,7 @@ const Index = () => {
                 </div>
               ) : (
                 offlineSongs.map((song) => (
-                  <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} />
+                  <SongCard key={song.id} song={song} isActive={song.id === currentSong.id} onSelect={handleSelect} onAddToPlaylist={(s) => { setSongToAddToPlaylist(s); setPlaylistModalMode("add"); setShowPlaylistModal(true); }} />
                 ))
               )}
             </div>
@@ -1059,6 +1082,92 @@ const Index = () => {
                   <p>PWA: Standalone</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === "history" && (
+            <div className="px-4 space-y-4 pb-24">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-display font-bold text-foreground">Histórico</h1>
+                <button 
+                  onClick={() => { if(confirm("Limpar histórico?")) { clearHistory(); setRecentHistory([]); } }}
+                  className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full bg-secondary"
+                >
+                  Limpar Tudo
+                </button>
+              </div>
+              
+              {recentHistory.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                  <Clock size={64} />
+                  <p className="mt-4 text-sm font-medium">Histórico vazio</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {recentHistory.map((item) => {
+                    const song: Song = {
+                      id: item.songId, youtubeId: item.youtubeId, title: item.title, artist: item.artist,
+                      album: item.album, cover: item.cover, duration: item.duration, votes: 0, isDownloaded: savedSongIds.has(item.songId),
+                      type: item.type as any || (item.songId.startsWith('yt-') ? 'video' : 'music')
+                    };
+                    return (
+                      <SongCard 
+                        key={`${item.songId}-${item.playedAt}`} 
+                        song={song} 
+                        isActive={song.id === currentSong.id} 
+                        onSelect={handleSelect} 
+                        onDownload={handleDownload}
+                        onAddToPlaylist={(s) => { setSongToAddToPlaylist(s); setPlaylistModalMode("add"); setShowPlaylistModal(true); }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "playlists" && (
+            <div className="px-4 space-y-4 pb-24">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-display font-bold text-foreground">Minhas Playlists</h1>
+                <button 
+                  onClick={() => { setPlaylistModalMode("manage"); setShowPlaylistModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full font-bold text-xs"
+                >
+                  <Plus size={14} /> Criar Playlist
+                </button>
+              </div>
+
+              {playlists.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                  <ListMusic size={64} />
+                  <p className="mt-4 text-sm font-medium">Nenhuma playlist personalizada</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {playlists.map(playlist => (
+                    <button 
+                      key={playlist.id}
+                      onClick={() => { 
+                         // Logic to play playlist songs
+                         if (playlist.songs.length > 0) {
+                           handleSelect(playlist.songs[0]);
+                           setAlbumQueue(playlist.songs.slice(1));
+                         }
+                      }}
+                      className="flex items-center gap-4 p-4 bg-secondary/40 hover:bg-secondary rounded-2xl transition-all text-left group"
+                    >
+                      <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                        <ListMusic size={32} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-foreground truncate">{playlist.name}</p>
+                        <p className="text-xs text-muted-foreground">{playlist.songs.length} itens</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </main>
@@ -1166,6 +1275,19 @@ const Index = () => {
             onClose={() => setShowFloatingPiP(false)}
           />
         )}
+
+        <PlaylistModal 
+           isOpen={showPlaylistModal}
+           onClose={() => setShowPlaylistModal(false)}
+           playlists={playlists}
+           onUpdate={() => setPlaylists(getPlaylists())}
+           mode={playlistModalMode}
+           songToAdd={songToAddToPlaylist}
+           onSongAdded={() => {
+             setShowPlaylistModal(false);
+             setSongToAddToPlaylist(null);
+           }}
+         />
         </div>{/* end main column */}
       </div>
     </>

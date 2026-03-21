@@ -1,4 +1,4 @@
-import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical } from "lucide-react";
+import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical, Plus } from "lucide-react";
 import BlurImage from "@/components/BlurImage";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { motion } from "framer-motion";
@@ -10,11 +10,12 @@ interface SongCardProps {
   onSelect: (song: Song) => void;
   onVote?: (song: Song) => void;
   onDownload?: (song: Song) => void;
+  onAddToPlaylist?: (song: Song) => void;
   showVotes?: boolean;
   hasVoted?: boolean;
 }
 
-const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = false, hasVoted = false }: SongCardProps) => (
+const SongCard = ({ song, isActive, onSelect, onVote, onDownload, onAddToPlaylist, showVotes = false, hasVoted = false }: SongCardProps) => (
   <motion.div
     layout
     transition={{ type: "spring", stiffness: 400, damping: 35 }}
@@ -65,6 +66,14 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, showVotes = fa
           }`}
         >
           {song.isDownloaded ? <Download size={16} /> : <DownloadCloud size={16} />}
+        </button>
+      )}
+      {onAddToPlaylist && (
+        <button
+          onClick={() => onAddToPlaylist(song)}
+          className="p-1.5 rounded-full text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Plus size={16} />
         </button>
       )}
       <button className="p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">

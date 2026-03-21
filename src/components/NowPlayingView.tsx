@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download } from "lucide-react";
+import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download, Plus } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
@@ -45,6 +45,7 @@ interface NowPlayingViewProps {
   isLiked?: boolean;
   onLike?: () => void;
   onArtistClick?: (artist: { name: string; image: string }) => void;
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 const NowPlayingView = ({
@@ -56,7 +57,8 @@ const NowPlayingView = ({
   onShowQueue, queueCount = 0,
   onShare, onDownload,
   isLiked, onLike,
-  onArtistClick
+  onArtistClick,
+  onAddToPlaylist
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
