@@ -250,31 +250,6 @@ const NowPlayingView = ({
               <button onClick={onCollapse} className="p-1.5 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95">
                 <ChevronDown size={24} />
               </button>
-              <div className="flex items-center gap-1">
-                {onCast && (
-                  <button
-                    onClick={onCast}
-                    className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
-                    title="Chromecast"
-                  >
-                    <Cast size={18} />
-                  </button>
-                )}
-                {onAirPlay && (
-                  <button
-                    onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
-                    className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95"
-                    title="AirPlay"
-                  >
-                    <Airplay size={18} />
-                  </button>
-                )}
-                {onTogglePiP && (
-                  <button onClick={onTogglePiP} className="p-2 rounded-full bg-background/30 backdrop-blur-sm text-foreground hover:bg-background/50 transition-colors active:scale-95" title="Picture-in-Picture">
-                    <PictureInPicture2 size={18} />
-                  </button>
-                )}
-              </div>
             </div>
           </div>
 
@@ -303,24 +278,70 @@ const NowPlayingView = ({
               </div>
             </div>
 
-            {/* Song info — centered */}
-            <div className="flex items-center justify-between">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">{song.title}</h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{song.artist}</p>
+            {/* Song info + Main Actions */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate select-text">{song.title}</h2>
+                  <p className="text-sm sm:text-base text-muted-foreground mt-0.5 select-text">{song.artist}</p>
+                </div>
+                <button className="p-3 text-muted-foreground hover:text-primary active:scale-90 transition-all">
+                  <Heart size={26} />
+                </button>
               </div>
-              <div className="flex gap-0.5">
-                <button className="p-2.5 text-muted-foreground hover:text-primary active:scale-95 transition-all"><Heart size={22} /></button>
-                {onDownload && (
-                  <button onClick={onDownload} className="p-2.5 text-muted-foreground hover:text-foreground active:scale-95 transition-all">
-                    <Download size={20} />
-                  </button>
-                )}
-                {onShare && (
-                  <button onClick={onShare} className="p-2.5 text-muted-foreground hover:text-foreground active:scale-95 transition-all">
-                    <Share2 size={20} />
-                  </button>
-                )}
+
+              {/* Action Bar (Cast, Share, AirPlay, etc) */}
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-1">
+                  {onCast && (
+                    <button
+                      onClick={onCast}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      title="Chromecast"
+                    >
+                      <Cast size={20} />
+                    </button>
+                  )}
+                  {onAirPlay && (
+                    <button
+                      onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      title="AirPlay"
+                    >
+                      <Airplay size={20} />
+                    </button>
+                  )}
+                  {onTogglePiP && (
+                    <button
+                      onClick={onTogglePiP}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      title="Mini Player"
+                    >
+                      <PictureInPicture2 size={20} />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {onDownload && (
+                    <button
+                      onClick={onDownload}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      title="Download"
+                    >
+                      <Download size={20} />
+                    </button>
+                  )}
+                  {onShare && (
+                    <button
+                      onClick={onShare}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      title="Compartilhar"
+                    >
+                      <Share2 size={20} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

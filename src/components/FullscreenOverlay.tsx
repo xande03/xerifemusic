@@ -30,7 +30,29 @@ const FullscreenOverlay = ({
 
   useEffect(() => {
     resetTimer();
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    
+    // Lock orientation to landscape on mount
+    const lockOrientation = async () => {
+      try {
+        if (screen.orientation && (screen.orientation as any).lock) {
+          await (screen.orientation as any).lock("landscape");
+        }
+      } catch (err) {
+        console.warn("Could not lock orientation:", err);
+      }
+    };
+    
+    lockOrientation();
+
+    return () => { 
+      if (timerRef.current) clearTimeout(timerRef.current);
+      // Unlock orientation on unmount
+      try {
+        if (screen.orientation && (screen.orientation as any).unlock) {
+          (screen.orientation as any).unlock();
+        }
+      } catch {}
+    };
   }, [resetTimer]);
 
   return (
