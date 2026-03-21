@@ -103,7 +103,7 @@ export function useMediaSession({
     setHandlers();
   }, [isPlaying, setHandlers]);
 
-  // Update position state
+  // Update position state and re-assert handlers every tick (counteracts YouTube iframe hijacking)
   useEffect(() => {
     if (!("mediaSession" in navigator) || !duration) return;
     try {
@@ -113,5 +113,9 @@ export function useMediaSession({
         position: Math.min(currentTime, duration),
       });
     } catch { /* ignore */ }
-  }, [currentTime, duration]);
+    // Re-register every ~5 s to prevent YT iframe from stealing session
+    if (Math.round(currentTime) % 5 === 0) {
+      setHandlers();
+    }
+  }, [currentTime, duration, setHandlers]);
 }

@@ -305,9 +305,23 @@ const NowPlayingView = ({
                        { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
                        { icon: Maximize2, label: 'Fullscreen', onClick: onFullscreen },
                        { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
-                       { icon: Download, label: 'Download', onClick: onDownload }
+                       { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
+                       { icon: Download, label: 'Download', onClick: onDownload },
+                       {
+                         icon: Music2,
+                         label: 'Cifra',
+                         onClick: () => {
+                           const q = encodeURIComponent(`${song.artist} ${song.title}`);
+                           window.open(`https://www.cifraclub.com.br/busca/?q=${q}`, '_blank', 'noopener');
+                         }
+                       },
                     ].map((btn, i) => btn.onClick && (
-                      <button key={i} onClick={btn.onClick} className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary/50 hover:bg-primary hover:text-primary-foreground transition-all active:scale-90 text-muted-foreground shadow-sm">
+                      <button
+                        key={i}
+                        onClick={btn.onClick}
+                        title={btn.label}
+                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary/50 hover:bg-primary hover:text-primary-foreground transition-all active:scale-90 text-muted-foreground shadow-sm"
+                      >
                         <btn.icon size={22} />
                       </button>
                     ))}

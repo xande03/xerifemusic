@@ -1,4 +1,5 @@
-import { Play, Pause, SkipForward, SkipBack } from "lucide-react";
+import { useState } from "react";
+import { Play, Pause, SkipForward, SkipBack, X } from "lucide-react";
 import { Song } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import BlurImage from "@/components/BlurImage";
@@ -12,20 +13,40 @@ interface MiniPlayerProps {
   onNext: () => void;
   onPrev?: () => void;
   onExpand: () => void;
+  onDismiss?: () => void;
 }
 
-const MiniPlayer = ({ song, isPlaying, currentTime, duration, onTogglePlay, onNext, onPrev, onExpand }: MiniPlayerProps) => {
+const MiniPlayer = ({ song, isPlaying, currentTime, duration, onTogglePlay, onNext, onPrev, onExpand, onDismiss }: MiniPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
+  const [showDismiss, setShowDismiss] = useState(false);
 
   return (
-    <div className="mx-3 mb-1 rounded-xl overflow-hidden bg-card/95 backdrop-blur-md animate-slide-up shadow-lg flex-shrink-0 border border-border/20">
+    // z-[60] garante que fica acima do overlay do álbum (z-50) e do menu de 3 pontinhos
+    <div className="relative mx-3 mb-1 rounded-xl overflow-hidden bg-card/95 backdrop-blur-md animate-slide-up shadow-lg flex-shrink-0 border border-border/20 z-[60]">
       {/* Progress */}
       <div className="h-[2px] bg-muted">
         <div className="h-full bg-primary transition-all duration-200" style={{ width: `${progress * 100}%` }} />
       </div>
       <div className="flex items-center gap-3 p-2 pr-3">
+        {/* Thumbnail — toque para mostrar/esconder botão X */}
+        <button
+          onClick={() => setShowDismiss((v) => !v)}
+          className="relative flex-shrink-0 w-11 h-11 rounded-lg overflow-hidden group"
+          aria-label="Minimizar player"
+        >
+          <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-full h-full object-cover" />
+          {/* Botão X sobreposto na foto */}
+          {showDismiss && onDismiss && (
+            <div
+              className="absolute inset-0 bg-black/60 flex items-center justify-center"
+              onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+            >
+              <X size={20} className="text-white" />
+            </div>
+          )}
+        </button>
+
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0">
-          <BlurImage src={hdThumbnail(song.cover)} alt={song.album} className="w-11 h-11 rounded-lg" />
           <div className="min-w-0">
             <p className="text-sm font-medium truncate text-foreground">{song.title}</p>
             <p className="text-xs text-muted-foreground truncate">{song.artist}</p>

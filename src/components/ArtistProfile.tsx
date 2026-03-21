@@ -230,40 +230,7 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
                 )}
               </div>
 
-              {/* Mini player at bottom of album overlay */}
-              {currentPlayingSong && (
-                <div className="sticky bottom-0 z-20 bg-card/95 backdrop-blur-md border-t border-border/30">
-                  <div className="h-[2px] bg-muted">
-                    <div className="h-full bg-primary transition-all duration-200" style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }} />
-                  </div>
-                  <div className="flex items-center gap-3 p-2 pr-3">
-                    <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src={hdThumbnail(currentPlayingSong.cover)} alt={currentPlayingSong.album} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate text-foreground">{currentPlayingSong.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">{currentPlayingSong.artist}</p>
-                      </div>
-                    </button>
-                    <div className="flex items-center gap-0.5">
-                      {onPrev && (
-                        <button onClick={onPrev} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
-                          <SkipBack size={18} />
-                        </button>
-                      )}
-                      <button onClick={onTogglePlay} className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background hover:scale-105 active:scale-95 transition-transform">
-                        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
-                      </button>
-                      {onNext && (
-                        <button onClick={onNext} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
-                          <SkipForward size={18} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Mini player space — deixa o MiniPlayer global aparecer sobre este overlay via pb-28 abaixo */}
             </motion.div>
           </motion.div>
         )}

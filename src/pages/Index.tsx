@@ -82,6 +82,7 @@ const Index = () => {
   const [songToAddToPlaylist, setSongToAddToPlaylist] = useState<Song | null>(null);
   const [playlistModalMode, setPlaylistModalMode] = useState<"manage" | "add">("manage");
   const [appZoom, setAppZoom] = useState(() => parseFloat(localStorage.getItem('xerife-zoom') || '1'));
+  const [miniPlayerVisible, setMiniPlayerVisible] = useState(true);
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
@@ -189,6 +190,7 @@ const Index = () => {
       type: song.type
     });
     setRecentHistory(getHistory());
+    setMiniPlayerVisible(true); // Reexibe o mini player ao trocar de música
     
     // Offline playback check
     const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
@@ -1184,7 +1186,19 @@ const Index = () => {
         {!expanded && (
           <>
             <div className="md:hidden">
-              <MiniPlayer song={currentSong} isPlaying={isPlaying} currentTime={ct} duration={dur} onTogglePlay={handleTogglePlay} onNext={handleNext} onPrev={handlePrev} onExpand={() => setExpanded(true)} />
+              {miniPlayerVisible && (
+                <MiniPlayer
+                  song={currentSong}
+                  isPlaying={isPlaying}
+                  currentTime={ct}
+                  duration={dur}
+                  onTogglePlay={handleTogglePlay}
+                  onNext={handleNext}
+                  onPrev={handlePrev}
+                  onExpand={() => setExpanded(true)}
+                  onDismiss={() => setMiniPlayerVisible(false)}
+                />
+              )}
             </div>
             <div className="hidden md:block">
               <DesktopPlayer
