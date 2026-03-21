@@ -174,15 +174,12 @@ const NowPlayingView = ({
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                   Player do YouTube
                 </div>
-                {onFullscreen && (
-                  <button
-                    onClick={onFullscreen}
-                    className="absolute bottom-3 right-3 w-9 h-9 rounded-lg bg-background/70 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-background/90 z-10"
-                    title="Tela cheia"
-                  >
-                    <Maximize2 size={16} className="text-foreground" />
-                  </button>
-                )}
+                {/* Optional Video Icon or Indicator */}
+                <div className="absolute top-3 right-3 flex items-center gap-2">
+                  <div className="bg-primary/20 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-primary border border-primary/30 uppercase tracking-widest">
+                    Live Video
+                  </div>
+                </div>
               </div>
             ) : mode === "lyrics" ? (
               <div className="w-full h-full relative">
@@ -290,13 +287,13 @@ const NowPlayingView = ({
                 </button>
               </div>
 
-              {/* Action Bar (Cast, Share, AirPlay, etc) */}
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-1">
+              {/* Action Bar (Cast, Share, AirPlay, Fullscreen) */}
+              <div className="flex items-center justify-between bg-secondary/30 backdrop-blur-sm rounded-2xl p-1 border border-border/50">
+                <div className="flex items-center gap-0.5">
                   {onCast && (
                     <button
                       onClick={onCast}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
                       title="Chromecast"
                     >
                       <Cast size={20} />
@@ -305,16 +302,25 @@ const NowPlayingView = ({
                   {onAirPlay && (
                     <button
                       onClick={() => onAirPlay(mode === "video" ? "video" : "audio")}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
                       title="AirPlay"
                     >
                       <Airplay size={20} />
                     </button>
                   )}
+                  {onFullscreen && (
+                    <button
+                      onClick={onFullscreen}
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
+                      title="Tela Cheia (Horizontal)"
+                    >
+                      <Maximize2 size={20} />
+                    </button>
+                  )}
                   {onTogglePiP && (
                     <button
                       onClick={onTogglePiP}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
                       title="Mini Player"
                     >
                       <PictureInPicture2 size={20} />
@@ -322,11 +328,11 @@ const NowPlayingView = ({
                   )}
                 </div>
                 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   {onDownload && (
                     <button
                       onClick={onDownload}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
                       title="Download"
                     >
                       <Download size={20} />
@@ -335,7 +341,7 @@ const NowPlayingView = ({
                   {onShare && (
                     <button
                       onClick={onShare}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-all active:scale-90"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-background/50 text-muted-foreground hover:text-primary transition-all active:scale-90"
                       title="Compartilhar"
                     >
                       <Share2 size={20} />

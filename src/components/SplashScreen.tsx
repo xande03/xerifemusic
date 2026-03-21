@@ -23,8 +23,13 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
       </div>
 
       {/* Logo */}
-      <div className="relative flex flex-col items-center gap-6 animate-splash-logo">
-        <img src={xerifeHubLogo} alt="Xerife Hub" className="w-52 h-52 drop-shadow-[0_0_35px_rgba(0,0,0,0.5)] transform hover:scale-105 transition-transform duration-700" />
+      <div className="relative flex flex-col items-center gap-8 animate-splash-logo">
+        <img 
+          src={xerifeHubLogo} 
+          alt="Xerife Hub" 
+          className="w-72 h-72 drop-shadow-[0_0_50px_rgba(0,0,0,0.6)] transform transition-all duration-1000"
+          style={{ transform: 'rotateY(15deg) rotateX(5deg)' }}
+        />
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-4xl font-display font-bold text-foreground tracking-tight text-glow">Xerife Hub</h1>
           <p className="text-sm text-muted-foreground tracking-[0.3em] uppercase opacity-80">Music Streaming</p>
