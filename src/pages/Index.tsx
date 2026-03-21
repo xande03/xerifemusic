@@ -934,7 +934,19 @@ const Index = () => {
             };
             handleSelect(song);
             setPlayerMode("video");
-          }} onFullscreen={requestFullscreen} onExitFullscreen={exitFullscreen} isFullscreen={playerState.isFullscreen} isShuffled={isShuffled} onShuffle={handleShuffle} context={homeMode} onShowQueue={() => setShowQueue(true)} queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)} onShare={() => setShowShareModal(true)} onDownload={() => setShowDownloadModal(true)} />
+          }}             onFullscreen={requestFullscreen}
+            onExitFullscreen={exitFullscreen}
+            isFullscreen={playerState.isFullscreen}
+            isShuffled={isShuffled}
+            onShuffle={handleShuffle}
+            context={homeMode}
+            onShowQueue={() => setShowQueue(true)}
+            queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)}
+            onShare={() => setShowShareModal(true)}
+            onDownload={() => setShowDownloadModal(true)}
+            isLiked={votedSongs.has(currentSong.id)}
+            onLike={() => handleVote(currentSong)}
+          />
         )}
 
         <AnimatePresence>

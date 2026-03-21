@@ -41,6 +41,8 @@ interface NowPlayingViewProps {
   queueCount?: number;
   onShare?: () => void;
   onDownload?: () => void;
+  isLiked?: boolean;
+  onLike?: () => void;
 }
 
 const NowPlayingView = ({
@@ -50,7 +52,8 @@ const NowPlayingView = ({
   isShuffled, onShuffle,
   context = "music",
   onShowQueue, queueCount = 0,
-  onShare, onDownload
+  onShare, onDownload,
+  isLiked, onLike
 }: NowPlayingViewProps) => {
   const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
@@ -282,8 +285,12 @@ const NowPlayingView = ({
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate select-text">{song.title}</h2>
                   <p className="text-sm sm:text-base text-muted-foreground mt-0.5 select-text">{song.artist}</p>
                 </div>
-                <button className="p-3 text-muted-foreground hover:text-primary active:scale-90 transition-all">
-                  <Heart size={26} />
+                <button 
+                  onClick={onLike}
+                  className={`p-3 transition-all active:scale-90 ${isLiked ? 'text-primary scale-110 drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]' : 'text-muted-foreground hover:text-foreground'}`}
+                  title={isLiked ? "Remover dos curtidos" : "Adicionar aos curtidos"}
+                >
+                  <Heart size={26} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2} />
                 </button>
               </div>
 
