@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus } from "lucide-react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus, Sparkles } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
@@ -29,6 +29,7 @@ interface DesktopSidebarProps {
   onOpenHistory?: () => void;
   onOpenPlaylists?: () => void;
   onZoomChange?: (zoom: number) => void;
+  onOpenChat?: () => void;
   currentZoom?: number;
 }
 
@@ -63,6 +64,7 @@ const DesktopSidebar = ({
   onOpenHistory,
   onOpenPlaylists,
   onZoomChange,
+  onOpenChat,
   currentZoom = 1,
 }: DesktopSidebarProps) => {
   const mainTabs = homeMode === "video" ? videoTabs : musicTabs;
@@ -110,6 +112,21 @@ const DesktopSidebar = ({
             )}
           </button>
         ))}
+        
+        {/* AI Chat Button in Sidebar */}
+        <button
+          onClick={onOpenChat}
+          className="w-full flex flex-col lg:flex-row items-center gap-1.5 lg:gap-3 px-2 lg:px-3 py-3 lg:py-2.5 rounded-2xl lg:rounded-xl text-[10px] lg:text-sm font-semibold transition-all group text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 mt-2"
+        >
+          <Sparkles
+            size={22}
+            className="flex-shrink-0 transition-all text-primary animate-pulse group-hover:scale-110"
+          />
+          <span className="lg:block transition-all">Xerife AI</span>
+          <div className="hidden lg:block ml-auto">
+            <div className="bg-primary/20 text-primary text-[8px] px-1.5 py-0.5 rounded-full uppercase font-bold tracking-tighter">AI</div>
+          </div>
+        </button>
       </nav>
 
       {/* Bottom section — Settings/Tools button */}

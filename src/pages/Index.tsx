@@ -543,6 +543,7 @@ const Index = () => {
           onOpenHistory={() => setActiveTab("history")}
           onOpenPlaylists={() => setActiveTab("playlists")}
           onZoomChange={setAppZoom}
+          onOpenChat={() => setIsAIChatOpen(true)}
           currentZoom={appZoom}
         />
 
@@ -643,6 +644,7 @@ const Index = () => {
                 onOpenHistory={() => setActiveTab("history")}
                 onOpenPlaylists={() => setActiveTab("playlists")}
                 onZoomChange={setAppZoom}
+                onOpenChat={() => setIsAIChatOpen(true)}
                 currentZoom={appZoom}
               />
             </div>
@@ -1367,28 +1369,6 @@ const Index = () => {
            }}
          />
         </div>{/* end main column */}
-
-        {/* AI Chat Floating Button (Desktop) */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsAIChatOpen(true)}
-          className="fixed bottom-10 right-10 z-[45] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl items-center justify-center transition-shadow hover:shadow-primary/40 hidden md:flex"
-        >
-          <Sparkles size={24} className="animate-pulse" />
-        </motion.button>
-
-        {/* Mobile AI Chat Button (Positioned above MiniPlayer and BottomNav) */}
-        {!expanded && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            onClick={() => setIsAIChatOpen(true)}
-            className="fixed bottom-[145px] right-4 z-[45] w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center md:hidden"
-          >
-            <Sparkles size={20} />
-          </motion.button>
-        )}
 
         <AIChat 
           isOpen={isAIChatOpen} 

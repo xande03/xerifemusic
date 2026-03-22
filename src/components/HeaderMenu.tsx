@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus } from "lucide-react";
+import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles } from "lucide-react";
 
 type HomeMode = "music" | "video";
 
@@ -14,6 +14,7 @@ interface HeaderMenuProps {
   onOpenHistory?: () => void;
   onOpenPlaylists?: () => void;
   onZoomChange?: (newZoom: number) => void;
+  onOpenChat?: () => void;
   currentZoom?: number;
 }
 
@@ -38,6 +39,7 @@ const HeaderMenu = ({
   onOpenHistory,
   onOpenPlaylists,
   onZoomChange,
+  onOpenChat,
   currentZoom = 1,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -93,6 +95,15 @@ const HeaderMenu = ({
               </button>
             </div>
           </div>
+
+          {/* AI Chat (mobile tools menu) */}
+          <button
+            onClick={() => { onOpenChat?.(); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-primary font-bold hover:bg-primary/10 transition-colors border-b border-border"
+          >
+            <Sparkles size={16} className="animate-pulse" />
+            <span>Xerife AI</span>
+          </button>
 
           {/* Theme toggle */}
           <button
