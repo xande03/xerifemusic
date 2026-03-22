@@ -1,13 +1,35 @@
-import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Music, Clock, ListMusic } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus } from "lucide-react";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
 type HomeMode = "music" | "video";
 
+const COLOR_OPTIONS = [
+  { id: "default", color: "bg-[hsl(142,70%,30%)]", label: "Verde Escuro (Padrão)" },
+  { id: "red", color: "bg-[hsl(0,100%,50%)]", label: "Vermelho" },
+  { id: "blue", color: "bg-[hsl(217,91%,60%)]", label: "Azul" },
+  { id: "purple", color: "bg-[hsl(271,76%,53%)]", label: "Roxo" },
+  { id: "green", color: "bg-[hsl(142,71%,45%)]", label: "Verde Claro" },
+  { id: "orange", color: "bg-[hsl(25,95%,53%)]", label: "Laranja" },
+  { id: "pink", color: "bg-[hsl(330,81%,60%)]", label: "Rosa" },
+] as const;
+
 interface DesktopSidebarProps {
   active: Tab;
   onChange: (tab: Tab) => void;
   homeMode?: HomeMode;
+  // Tools menu props (desktop)
+  isDark?: boolean;
+  onToggleTheme?: () => void;
+  colorTheme?: string;
+  onColorChange?: (color: string) => void;
+  onHomeModeChange?: (mode: HomeMode) => void;
+  onCast?: () => void;
+  onOpenHistory?: () => void;
+  onOpenPlaylists?: () => void;
+  onZoomChange?: (zoom: number) => void;
+  currentZoom?: number;
 }
 
 const musicTabs: { id: Tab; icon: typeof Home; label: string }[] = [
@@ -28,8 +50,34 @@ const videoTabs: { id: Tab; icon: typeof Home; label: string }[] = [
   { id: "playlists", icon: ListMusic, label: "Playlists" },
 ];
 
-const DesktopSidebar = ({ active, onChange, homeMode = "music" }: DesktopSidebarProps) => {
+const DesktopSidebar = ({
+  active,
+  onChange,
+  homeMode = "music",
+  isDark = false,
+  onToggleTheme,
+  colorTheme = "default",
+  onColorChange,
+  onHomeModeChange,
+  onCast,
+  onOpenHistory,
+  onOpenPlaylists,
+  onZoomChange,
+  currentZoom = 1,
+}: DesktopSidebarProps) => {
   const mainTabs = homeMode === "video" ? videoTabs : musicTabs;
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (toolsRef.current && !toolsRef.current.contains(e.target as Node)) {
+        setToolsOpen(false);
+      }
+    };
+    if (toolsOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [toolsOpen]);
 
   return (
     <aside className="hidden md:flex flex-col w-20 lg:w-[240px] h-full bg-sidebar border-r border-sidebar-border flex-shrink-0 transition-all duration-300">
@@ -64,13 +112,164 @@ const DesktopSidebar = ({ active, onChange, homeMode = "music" }: DesktopSidebar
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="px-3 pb-6 lg:pb-4 space-y-2 lg:space-y-1">
+      {/* Bottom section — Settings/Tools button */}
+      <div className="px-3 pb-6 lg:pb-4 space-y-2 lg:space-y-1 relative" ref={toolsRef}>
         <div className="h-px bg-sidebar-border mx-2 mb-2 opacity-50" />
-        <button className="w-full flex flex-col lg:flex-row items-center gap-1.5 lg:gap-3 px-2 lg:px-3 py-3 lg:py-2.5 rounded-2xl lg:rounded-xl text-[10px] lg:text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all group">
+        <button
+          onClick={() => setToolsOpen((v) => !v)}
+          className="w-full flex flex-col lg:flex-row items-center gap-1.5 lg:gap-3 px-2 lg:px-3 py-3 lg:py-2.5 rounded-2xl lg:rounded-xl text-[10px] lg:text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all group"
+        >
           <Settings size={20} strokeWidth={1.5} className="group-hover:rotate-45 transition-transform" />
-          <span className="lg:block">Ajustes</span>
+          <span className="lg:block">Ferramentas</span>
         </button>
+
+        {/* Tools dropdown — opens upward */}
+        {toolsOpen && (
+          <div className="absolute bottom-full left-2 right-2 mb-2 bg-card border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Ferramentas</span>
+              <button onClick={() => setToolsOpen(false)} className="p-1 rounded-lg hover:bg-accent transition-colors">
+                <X size={14} className="text-muted-foreground" />
+              </button>
+            </div>
+
+            {/* Module switcher */}
+            {onHomeModeChange && (
+              <div className="p-3 space-y-2 border-b border-border">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Módulo</span>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => { onHomeModeChange("music"); }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      homeMode === "music"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Music size={14} />
+                    Music
+                  </button>
+                  <button
+                    onClick={() => { onHomeModeChange("video"); }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      homeMode === "video"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <MonitorPlay size={14} />
+                    Video
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Theme toggle */}
+            {onToggleTheme && (
+              <button
+                onClick={onToggleTheme}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors"
+              >
+                {isDark ? <Moon size={16} /> : <Sun size={16} />}
+                <span>{isDark ? "Modo Claro" : "Modo Escuro"}</span>
+              </button>
+            )}
+
+            {/* Color theme */}
+            {onColorChange && (
+              <div className="px-3 py-2.5 border-t border-border space-y-2">
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <Palette size={16} />
+                  <span>Cor do tema</span>
+                </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  {COLOR_OPTIONS.map((t) => (
+                    <button
+                      key={t.id}
+                      title={t.label}
+                      onClick={() => onColorChange(t.id)}
+                      className={`w-7 h-7 rounded-full ${t.color} transition-all ${
+                        colorTheme === t.id
+                          ? "ring-2 ring-foreground ring-offset-2 ring-offset-card scale-110"
+                          : "opacity-70 hover:opacity-100"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* History */}
+            {onOpenHistory && (
+              <button
+                onClick={() => { onOpenHistory(); setToolsOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+              >
+                <Clock size={16} className="text-muted-foreground" />
+                <span>Histórico</span>
+              </button>
+            )}
+
+            {/* Playlists */}
+            {onOpenPlaylists && (
+              <button
+                onClick={() => { onOpenPlaylists(); setToolsOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+              >
+                <ListMusic size={16} className="text-muted-foreground" />
+                <span>Playlists</span>
+              </button>
+            )}
+
+            {/* Zoom Controls */}
+            {onZoomChange && (
+              <div className="px-3 py-2.5 border-t border-border space-y-2">
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <ZoomIn size={16} className="text-muted-foreground" />
+                  <span>Zoom</span>
+                  <span className="ml-auto text-[10px] bg-secondary px-1.5 py-0.5 rounded font-mono">
+                    {Math.round(currentZoom * 100)}%
+                  </span>
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => onZoomChange(Math.max(0.5, currentZoom - 0.1))}
+                    className="flex-1 flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-accent hover:text-primary transition-colors border border-border"
+                    title="Reduzir Zoom"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <button
+                    onClick={() => onZoomChange(1)}
+                    className="px-3 py-2 rounded-lg bg-secondary hover:bg-accent text-[10px] font-bold border border-border"
+                    title="Resetar Zoom"
+                  >
+                    100%
+                  </button>
+                  <button
+                    onClick={() => onZoomChange(Math.min(2, currentZoom + 0.1))}
+                    className="flex-1 flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-accent hover:text-primary transition-colors border border-border"
+                    title="Ampliar Zoom"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Chromecast */}
+            {onCast && (
+              <button
+                onClick={() => { onCast(); setToolsOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+              >
+                <Cast size={16} />
+                <span>Transmitir (Cast)</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </aside>
   );

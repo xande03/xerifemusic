@@ -500,7 +500,49 @@ const Index = () => {
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}
-        <DesktopSidebar active={activeTab} onChange={setActiveTab} homeMode={homeMode} />
+        <DesktopSidebar
+          active={activeTab}
+          onChange={(tab) => {
+            if (tab === "home" && activeTab === "home") {
+              setChannelView(null);
+              setArtistView(null);
+            }
+            setActiveTab(tab);
+          }}
+          homeMode={homeMode}
+          isDark={isDark}
+          onToggleTheme={() => {
+            const goLight = isDark;
+            document.documentElement.classList.toggle('light', goLight);
+            localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+            setIsDark(!isDark);
+          }}
+          colorTheme={colorTheme}
+          onColorChange={(id: string) => {
+            document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink','theme-default');
+            if (id !== 'default') {
+              document.documentElement.classList.add(`theme-${id}`);
+            }
+            localStorage.setItem('demus-color', id);
+            setColorTheme(id);
+          }}
+          onHomeModeChange={setHomeMode}
+          onCast={() => {
+            const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+            if (iframe && 'remote' in iframe) {
+              (iframe as any).remote.prompt().catch(() => {});
+            } else {
+              const video = document.querySelector('video');
+              if (video && 'remote' in video) {
+                (video as any).remote.prompt().catch(() => {});
+              }
+            }
+          }}
+          onOpenHistory={() => setActiveTab("history")}
+          onOpenPlaylists={() => setActiveTab("playlists")}
+          onZoomChange={setAppZoom}
+          currentZoom={appZoom}
+        />
 
         {/* Main column */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -562,45 +604,46 @@ const Index = () => {
             <span className={`flex items-center text-xs ${isOnline ? "text-muted-foreground" : "text-primary"}`}>
               {isOnline ? <Cast size={18} /> : <WifiOff size={18} />}
             </span>
-            <HeaderMenu
-              homeMode={homeMode}
-              onHomeModeChange={setHomeMode}
-              isDark={isDark}
-              onToggleTheme={() => {
-                const goLight = isDark;
-                document.documentElement.classList.toggle('light', goLight);
-                localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
-                setIsDark(!isDark);
-              }}
-              colorTheme={colorTheme}
-              onColorChange={(id: string) => {
-                document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink','theme-default');
-                if (id !== 'default') {
-                  document.documentElement.classList.add(`theme-${id}`);
-                }
-                localStorage.setItem('demus-color', id);
-                setColorTheme(id);
-              }}
-              onCast={() => {
-                // Trigger remote playback / cast prompt
-                const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
-                if (iframe && 'remote' in iframe) {
-                  (iframe as any).remote.prompt().catch(() => {
-                    console.warn('Cast not available');
-                  });
-                } else {
-                  // Fallback: try the video element remote playback
-                  const video = document.querySelector('video');
-                  if (video && 'remote' in video) {
-                    (video as any).remote.prompt().catch(() => {});
+            {/* Mobile-only: Tools button (replaces 3-dots submenu) */}
+            <div className="md:hidden">
+              <HeaderMenu
+                homeMode={homeMode}
+                onHomeModeChange={setHomeMode}
+                isDark={isDark}
+                onToggleTheme={() => {
+                  const goLight = isDark;
+                  document.documentElement.classList.toggle('light', goLight);
+                  localStorage.setItem('demus-theme', goLight ? 'light' : 'dark');
+                  setIsDark(!isDark);
+                }}
+                colorTheme={colorTheme}
+                onColorChange={(id: string) => {
+                  document.documentElement.classList.remove('theme-red','theme-blue','theme-purple','theme-green','theme-orange','theme-pink','theme-default');
+                  if (id !== 'default') {
+                    document.documentElement.classList.add(`theme-${id}`);
                   }
-                }
-              }}
-              onOpenHistory={() => setActiveTab("history")}
-              onOpenPlaylists={() => setActiveTab("playlists")}
-              onZoomChange={setAppZoom}
-              currentZoom={appZoom}
-            />
+                  localStorage.setItem('demus-color', id);
+                  setColorTheme(id);
+                }}
+                onCast={() => {
+                  const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
+                  if (iframe && 'remote' in iframe) {
+                    (iframe as any).remote.prompt().catch(() => {
+                      console.warn('Cast not available');
+                    });
+                  } else {
+                    const video = document.querySelector('video');
+                    if (video && 'remote' in video) {
+                      (video as any).remote.prompt().catch(() => {});
+                    }
+                  }
+                }}
+                onOpenHistory={() => setActiveTab("history")}
+                onOpenPlaylists={() => setActiveTab("playlists")}
+                onZoomChange={setAppZoom}
+                currentZoom={appZoom}
+              />
+            </div>
           </div>
         </header>
 
@@ -692,7 +735,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="flex flex-col items-center justify-center pt-10 sm:pt-16 pb-8 sm:pb-12 px-4 text-center overflow-hidden"
+                    className="flex flex-col items-center justify-center pt-6 sm:pt-10 pb-4 sm:pb-6 px-4 text-center overflow-hidden"
                   >
                     <div className="relative group [perspective:1000px]">
                       <motion.div 
@@ -710,7 +753,7 @@ const Index = () => {
                       </motion.div>
                       <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
                     </div>
-                    <div className="mt-8 sm:mt-10 space-y-3 relative z-10">
+                    <div className="mt-3 sm:mt-5 space-y-2 relative z-10">
                       <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tighter text-foreground italic">
                         XERIFE <span className="text-primary drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]">HUB</span>
                       </h1>
@@ -1221,7 +1264,17 @@ const Index = () => {
         )}
 
         <div className="md:hidden">
-          <BottomNav active={activeTab} onChange={setActiveTab} homeMode={homeMode} />
+          <BottomNav
+            active={activeTab}
+            onChange={(tab) => {
+              if (tab === "home" && activeTab === "home") {
+                setChannelView(null);
+                setArtistView(null);
+              }
+              setActiveTab(tab);
+            }}
+            homeMode={homeMode}
+          />
         </div>
 
         {expanded && (

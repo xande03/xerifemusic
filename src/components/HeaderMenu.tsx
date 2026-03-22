@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, ZoomOut, Plus, Minus } from "lucide-react";
+import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus } from "lucide-react";
 
 type HomeMode = "music" | "video";
 
@@ -60,7 +60,7 @@ const HeaderMenu = ({
         className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent transition-colors active:scale-95"
         aria-label="Menu"
       >
-        {open ? <X size={16} className="text-foreground" /> : <MoreVertical size={16} className="text-muted-foreground" />}
+        {open ? <X size={16} className="text-foreground" /> : <Settings size={16} className="text-muted-foreground" />}
       </button>
 
       {open && (
