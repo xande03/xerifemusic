@@ -739,7 +739,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="flex flex-col items-center justify-center pt-6 sm:pt-10 pb-4 sm:pb-6 px-4 text-center overflow-hidden"
+                    className="flex flex-col items-center justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 text-center overflow-hidden"
                   >
                     <div className="relative group [perspective:1000px]">
                       <motion.div 
@@ -757,7 +757,7 @@ const Index = () => {
                       </motion.div>
                       <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
                     </div>
-                    <div className="mt-3 sm:mt-5 space-y-2 relative z-10">
+                    <div className="relative z-10">
                       <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tighter text-foreground italic">
                         XERIFE <span className="text-primary drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]">HUB</span>
                       </h1>
