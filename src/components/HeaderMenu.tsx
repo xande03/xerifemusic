@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles } from "lucide-react";
+import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles, User, LogIn, LogOut } from "lucide-react";
 
 type HomeMode = "music" | "video";
 
@@ -15,6 +15,10 @@ interface HeaderMenuProps {
   onOpenPlaylists?: () => void;
   onZoomChange?: (newZoom: number) => void;
   onOpenChat?: () => void;
+  onLogin?: () => void;
+  onLogout?: () => void;
+  user?: any;
+  isLoadingUser?: boolean;
   currentZoom?: number;
 }
 
@@ -40,6 +44,10 @@ const HeaderMenu = ({
   onOpenPlaylists,
   onZoomChange,
   onOpenChat,
+  onLogin,
+  onLogout,
+  user,
+  isLoadingUser,
   currentZoom = 1,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -104,6 +112,48 @@ const HeaderMenu = ({
             <Sparkles size={16} className="animate-pulse" />
             <span>Xerife AI</span>
           </button>
+
+          {/* User Profile / Auth (Mobile) */}
+          <div className="p-3 border-b border-border space-y-2">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Conta</span>
+            {isLoadingUser ? (
+              <div className="flex items-center gap-3 px-3 py-2 animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-secondary" />
+                <div className="h-3 w-20 bg-secondary rounded" />
+              </div>
+            ) : user ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/5">
+                   {user.user_metadata?.avatar_url ? (
+                      <img src={user.user_metadata.avatar_url} className="w-8 h-8 rounded-full border border-primary/20" alt="Avatar" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                        <User size={16} />
+                      </div>
+                    )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-bold text-foreground truncate">{user.user_metadata?.full_name || user.email}</p>
+                    <p className="text-[9px] text-muted-foreground">Premium Hub</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { onLogout?.(); setOpen(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                  <LogOut size={14} />
+                  <span>Sair da conta</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { onLogin?.(); setOpen(false); }}
+                className="w-full flex items-center gap-3 px-3 py-3 text-xs font-bold text-primary-foreground bg-primary rounded-xl"
+              >
+                <LogIn size={16} />
+                <span>Conectar com Google</span>
+              </button>
+            )}
+          </div>
 
           {/* Theme toggle */}
           <button
