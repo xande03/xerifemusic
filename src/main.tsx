@@ -3,12 +3,20 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+const safeStorageGet = (key: string): string | null => {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
 // Restore saved theme before first render
-const savedTheme = localStorage.getItem('demus-theme');
+const savedTheme = safeStorageGet("demus-theme");
 if (savedTheme === 'light') {
   document.documentElement.classList.add('light');
 }
-const savedColor = localStorage.getItem('demus-color') || 'red';
+const savedColor = safeStorageGet("demus-color") || "red";
 document.documentElement.classList.add(`theme-${savedColor}`);
 
 createRoot(document.getElementById("root")!).render(
@@ -21,24 +29,35 @@ createRoot(document.getElementById("root")!).render(
 if ("serviceWorker" in navigator) {
   if (import.meta.env.PROD) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").then(
-        (reg) => {
+      let refreshing = false;
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
           console.log("SW registered:", reg.scope);
-          // Force update if a new SW is found
-          reg.onupdatefound = () => {
+
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          }
+
+          reg.addEventListener("updatefound", () => {
             const installingWorker = reg.installing;
-            if (installingWorker) {
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
-                  console.log("New content available; please refresh.");
-                  window.location.reload();
-                }
-              };
-            }
-          };
-        },
-        (err) => console.log("SW registration failed:", err)
-      );
+            if (!installingWorker) return;
+
+            installingWorker.addEventListener("statechange", () => {
+              if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+                installingWorker.postMessage({ type: "SKIP_WAITING" });
+              }
+            });
+          });
+        })
+        .catch((err) => console.log("SW registration failed:", err));
     });
   } else {
     navigator.serviceWorker.getRegistrations().then((regs) => {
