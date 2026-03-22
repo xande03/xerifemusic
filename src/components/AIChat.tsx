@@ -16,7 +16,7 @@ interface AIChatProps {
   onPlaySong?: (song: Song) => void;
 }
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY as string;
+const GROQ_API_KEY = "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";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const MOCK_SONGS: Song[] = [
@@ -55,7 +55,7 @@ const AIChat = ({ isOpen, onClose, onPlaySong }: AIChatProps) => {
     {
       id: "welcome",
       role: "assistant",
-      content: "Olá! Sou o Xerife, seu assistente musical! 🎵\n\nPosso te ajudar a encontrar músicas, mas também posso conversar sobre qualquer assunto que você quiser.\n\nO que você gostaria de ouvir ou聊聊 sobre hoje?"
+      content: "Olá! Sou o Xerife, seu assistente musical! 🎵\n\nPosso te ajudar a encontrar músicas, mas também posso conversar sobre qualquer assunto que você quiser.\n\nO que você gostaria de ouvir ou conversar sobre hoje?"
     }
   ]);
   const [input, setInput] = useState("");
