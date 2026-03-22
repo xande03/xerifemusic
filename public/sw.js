@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xerife-v3';
+const CACHE_NAME = 'xerife-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

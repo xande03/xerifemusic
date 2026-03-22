@@ -22,7 +22,21 @@ if ("serviceWorker" in navigator) {
   if (import.meta.env.PROD) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/sw.js").then(
-        (reg) => console.log("SW registered:", reg.scope),
+        (reg) => {
+          console.log("SW registered:", reg.scope);
+          // Force update if a new SW is found
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+                  console.log("New content available; please refresh.");
+                  window.location.reload();
+                }
+              };
+            }
+          };
+        },
         (err) => console.log("SW registration failed:", err)
       );
     });
