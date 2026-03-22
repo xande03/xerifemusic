@@ -30,6 +30,7 @@ import HeaderMenu from "@/components/HeaderMenu";
 import { DownloadModal } from "@/components/DownloadModal";
 import { ShareModal } from "@/components/ShareModal";
 import { PlaylistModal } from "@/components/PlaylistModal";
+import AIChat from "@/components/AIChat";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -83,6 +84,7 @@ const Index = () => {
   const [playlistModalMode, setPlaylistModalMode] = useState<"manage" | "add">("manage");
   const [appZoom, setAppZoom] = useState(() => parseFloat(localStorage.getItem('xerife-zoom') || '1'));
   const [miniPlayerVisible, setMiniPlayerVisible] = useState(true);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
@@ -1365,6 +1367,34 @@ const Index = () => {
            }}
          />
         </div>{/* end main column */}
+
+        {/* AI Chat Floating Button (Desktop) */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsAIChatOpen(true)}
+          className="fixed bottom-10 right-10 z-[45] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl items-center justify-center transition-shadow hover:shadow-primary/40 hidden md:flex"
+        >
+          <Sparkles size={24} className="animate-pulse" />
+        </motion.button>
+
+        {/* Mobile AI Chat Button (Positioned above MiniPlayer and BottomNav) */}
+        {!expanded && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            onClick={() => setIsAIChatOpen(true)}
+            className="fixed bottom-[145px] right-4 z-[45] w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center md:hidden"
+          >
+            <Sparkles size={20} />
+          </motion.button>
+        )}
+
+        <AIChat 
+          isOpen={isAIChatOpen} 
+          onClose={() => setIsAIChatOpen(false)} 
+          onPlaySong={handleSelect} 
+        />
       </div>
     </>
   );

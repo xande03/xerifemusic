@@ -311,23 +311,32 @@ const NowPlayingView = ({
                          icon: Music2,
                          label: 'Buscar Cifra',
                          onClick: () => {
-                           // Gera slug no formato do Cifra Club: /artista/musica/
-                           const toSlug = (s: string) =>
-                             s.toLowerCase()
+                           // Melhoria na geração de slug para o Cifra Club
+                           const toSlug = (s: string) => {
+                             if (!s) return "";
+                             return s.toLowerCase()
+                               .replace(/\(.*\)/g, '') // remove conteúdos entre parênteses como "(Official Video)", "(Ao Vivo)"
                                .normalize('NFD')
                                .replace(/[\u0300-\u036f]/g, '') // remove acentos
                                .replace(/[^a-z0-9\s-]/g, '')   // remove chars especiais
                                .trim()
                                .replace(/\s+/g, '-');           // espaços → hífens
+                           };
 
-                           // Pega apenas o primeiro artista (antes de vírgula ou feat.)
-                           const mainArtist = song.artist.split(/[,&]/)[0].trim();
+                           // Pega apenas o primeiro artista (antes de vírgula, feat., &, etc)
+                           // Fernandinho & ... => Fernandinho
+                           const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
                            const artistSlug = toSlug(mainArtist);
                            const titleSlug = toSlug(song.title);
 
-                           // Tenta a URL direta primeiro; se não existir, cai na busca
-                           const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
-                           window.open(directUrl, '_blank', 'noopener');
+                           if (artistSlug && titleSlug) {
+                             const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
+                             window.open(directUrl, '_blank', 'noopener');
+                           } else {
+                             // Fallback para busca genérica se o slug falhar
+                             const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
+                             window.open(searchUrl, '_blank', 'noopener');
+                           }
                          }
                        },
                     ].map((btn, i) => btn.onClick && (
