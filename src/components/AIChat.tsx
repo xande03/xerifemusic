@@ -55,7 +55,7 @@ const AIChat = ({ isOpen, onClose, onPlaySong }: AIChatProps) => {
     {
       id: "welcome",
       role: "assistant",
-      content: "Olá! Sou o Xerife, seu assistente musical! 🎵\n\nPosso te ajudar a encontrar músicas, mas também posso conversar sobre qualquer assunto que você quiser.\n\nO que você gostaria de ouvir ou聊聊 sobre hoje?"
+      content: "Olá! Sou o Xerife, seu assistente musical! 🎵\n\nPosso te ajudar a encontrar músicas, mas também posso conversar sobre qualquer assunto que você quiser.\n\nO que você gostaria de ouvir ou conversar sobre hoje?"
     }
   ]);
   const [input, setInput] = useState("");
