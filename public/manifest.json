@@ -5,7 +5,7 @@
     { "src": "/icons/icon-192x192.png", "type": "image/png", "sizes": "192x192" },
     { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable any" }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "id": "/",
   "background_color": "#121212",
   "display": "standalone",
