@@ -16,7 +16,7 @@ interface AIChatProps {
   onPlaySong?: (song: Song) => void;
 }
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY as string;
+const GROQ_API_KEY = "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";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const MOCK_SONGS: Song[] = [
