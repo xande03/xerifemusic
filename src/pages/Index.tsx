@@ -603,6 +603,7 @@ const Index = () => {
           onOpenHistory={() => setActiveTab("history")}
           onOpenPlaylists={() => setActiveTab("playlists")}
           onOpenChat={() => setIsAIChatOpen(true)}
+          onZoomChange={setAppZoom}
           onLogin={handleLogin}
           onLogout={handleLogout}
           user={user}
@@ -707,6 +708,7 @@ const Index = () => {
                 onOpenHistory={() => setActiveTab("history")}
                 onOpenPlaylists={() => setActiveTab("playlists")}
                 onOpenChat={() => setIsAIChatOpen(true)}
+                onZoomChange={setAppZoom}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
                 user={user}
