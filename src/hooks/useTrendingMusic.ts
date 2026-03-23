@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Song } from "@/data/mockSongs";
+import { createFunctionHeaders, createFunctionUrl, getBackendConfig } from "@/lib/backendConfig";
 
 const TRENDING_CACHE_KEY = "demus_trending_cache";
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -31,24 +32,19 @@ function setCachedTrending(songs: Song[]): void {
 
 async function fetchTrendingViaEdgeFunction(): Promise<Song[]> {
   try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    
-    console.log("[Trending] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey });
-    if (!projectUrl || !anonKey) return [];
+    const { usingFallback } = getBackendConfig();
+
+    console.log("[Trending] Edge fn attempt:", { usingFallback });
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const url = `${projectUrl}/functions/v1/youtube-trending?region=BR`;
+    const url = createFunctionUrl("youtube-trending", { region: "BR" });
     console.log("[Trending] Calling:", url);
 
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${anonKey}`,
-        apikey: anonKey,
-      },
+      headers: createFunctionHeaders(),
     });
     clearTimeout(timeout);
 
