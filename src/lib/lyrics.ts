@@ -16,11 +16,15 @@ const lyricsCache = new Map<string, LyricsResult | null>();
 function parseLRC(lrc: string): LyricLine[] {
   const lines: LyricLine[] = [];
   for (const raw of lrc.split('\n')) {
-    const match = raw.match(/^\[(\d{2}):(\d{2})\.(\d{2,3})\]\s?(.*)/);
+    const match = raw.match(/^\[(\d{2,}):(\d{2})(?:\.(\d+))?\]\s?(.*)/);
     if (match) {
       const mins = parseInt(match[1], 10);
       const secs = parseInt(match[2], 10);
-      const ms = parseInt(match[3].padEnd(3, '0'), 10);
+      let msStr = match[3] || '0';
+      // Normalize ms to 3 digits (e.g. "5" -> "500", "05" -> "050")
+      msStr = msStr.padEnd(3, '0').slice(0, 3);
+      const ms = parseInt(msStr, 10);
+      
       const text = match[4].trim();
       if (text) {
         lines.push({ time: mins * 60 + secs + ms / 1000, text });

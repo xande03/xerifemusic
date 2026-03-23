@@ -136,7 +136,7 @@ const NowPlayingView = ({
       const targetTop = activeLine.offsetTop - (container.clientHeight / 2) + (activeLine.clientHeight / 2);
       
       container.scrollTo({
-        top: targetTop,
+        top: Math.max(0, targetTop),
         behavior: 'smooth'
       });
     }
@@ -283,19 +283,19 @@ const NowPlayingView = ({
           </div>
 
           {/* Right Column: Title, Progress, Controls, Tabs */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center min-w-0 px-5 sm:px-8 mt-4 lg:mt-0 relative">
-            <div className="w-full min-w-0 max-w-xl lg:max-w-full mx-auto flex flex-col gap-6 lg:gap-8 overflow-hidden touch-pan-y">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center lg:items-center min-w-0 px-5 sm:px-8 mt-4 lg:mt-0 relative">
+            <div className="w-full min-w-0 max-w-xl lg:max-w-2xl mx-auto flex flex-col gap-6 lg:gap-8 lg:items-center touch-pan-y">
               
               {/* Info Header */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 w-full lg:items-center text-left lg:text-center mt-2 lg:mt-0">
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight line-clamp-2 leading-tight mb-1">{song.title}</h1>
-                <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="group text-left">
+                <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="group text-left lg:text-center">
                   <p className="text-lg sm:text-2xl text-muted-foreground group-hover:text-primary transition-colors font-medium">{song.artist}</p>
                 </button>
               </div>
 
-              {/* Integrated Action Bar (Heart + Tools) - Enhanced Mobile Scroll */}
-              <div className="w-full min-w-0 flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
+              {/* Integrated Action Bar (Heart + Tools) - Enhanced Mobile Scroll / Desktop Wrap */}
+              <div className="w-full min-w-0 flex items-center lg:flex-wrap lg:justify-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-1.5 sm:p-3 shadow-2xl overflow-x-auto lg:overflow-visible scrollbar-hide touch-pan-x">
                 <button 
                   onClick={onLike}
                   title={isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"}
@@ -306,53 +306,51 @@ const NowPlayingView = ({
                   <Heart size={24} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2.5} />
                 </button>
 
-                <div className="h-8 sm:h-10 w-px bg-white/10 mx-0.5 sm:mx-1 flex-shrink-0" />
+                <div className="h-8 sm:h-10 w-px bg-white/10 mx-0.5 sm:mx-1 flex-shrink-0 lg:hidden" />
 
-                <div className="flex items-center gap-1.5 sm:gap-2.5">
-                  {[
-                     { icon: Cast, label: 'Transmitir', onClick: onCast },
-                     { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
-                     { icon: Maximize2, label: 'Tela Cheia', onClick: onFullscreen },
-                     { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
-                     { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
-                     { icon: Download, label: 'Download', onClick: onDownload },
-                     {
-                       icon: Music2,
-                       label: 'Buscar Cifra',
-                       onClick: () => {
-                         const toSlug = (s: string) => {
-                           if (!s) return "";
-                           return s.toLowerCase()
-                             .replace(/\(.*\)/g, '')
-                             .normalize('NFD')
-                             .replace(/[\u0300-\u036f]/g, '')
-                             .replace(/[^a-z0-9\s-]/g, '')
-                             .trim()
-                             .replace(/\s+/g, '-');
-                         };
-                         const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
-                         const artistSlug = toSlug(mainArtist);
-                         const titleSlug = toSlug(song.title);
-                         if (artistSlug && titleSlug) {
-                           const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
-                           window.open(directUrl, '_blank', 'noopener');
-                         } else {
-                           const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
-                           window.open(searchUrl, '_blank', 'noopener');
-                         }
+                {[
+                   { icon: Cast, label: 'Transmitir', onClick: onCast },
+                   { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
+                   { icon: Maximize2, label: 'Tela Cheia', onClick: onFullscreen },
+                   { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
+                   { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
+                   { icon: Download, label: 'Download', onClick: onDownload },
+                   {
+                     icon: Music2,
+                     label: 'Buscar Cifra',
+                     onClick: () => {
+                       const toSlug = (s: string) => {
+                         if (!s) return "";
+                         return s.toLowerCase()
+                           .replace(/\(.*\)/g, '')
+                           .normalize('NFD')
+                           .replace(/[\u0300-\u036f]/g, '')
+                           .replace(/[^a-z0-9\s-]/g, '')
+                           .trim()
+                           .replace(/\s+/g, '-');
+                       };
+                       const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
+                       const artistSlug = toSlug(mainArtist);
+                       const titleSlug = toSlug(song.title);
+                       if (artistSlug && titleSlug) {
+                         const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
+                         window.open(directUrl, '_blank', 'noopener');
+                       } else {
+                         const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
+                         window.open(searchUrl, '_blank', 'noopener');
                        }
-                     },
-                  ].map((btn, i) => btn.onClick && (
-                    <button
-                      key={i}
-                      onClick={btn.onClick}
-                      title={btn.label}
-                      className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center rounded-[1.2rem] sm:rounded-2xl bg-secondary/30 hover:bg-primary/20 hover:text-primary transition-all active:scale-90 text-muted-foreground"
-                    >
-                      <btn.icon size={20} className="sm:size-[22px]" />
-                    </button>
-                  ))}
-                </div>
+                     }
+                   },
+                ].map((btn, i) => btn.onClick && (
+                  <button
+                    key={i}
+                    onClick={btn.onClick}
+                    title={btn.label}
+                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center rounded-[1.2rem] sm:rounded-2xl bg-secondary/30 hover:bg-primary/20 hover:text-primary transition-all active:scale-90 text-muted-foreground"
+                  >
+                    <btn.icon size={20} className="sm:size-[22px]" />
+                  </button>
+                ))}
               </div>
 
               {/* Main Player logic (Slider & Transport) */}
