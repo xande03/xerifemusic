@@ -33,38 +33,47 @@ export async function searchYouTubeGeneral(query: string): Promise<VideoResult[]
   const key = query.toLowerCase().trim();
   const cache = getCache();
   if (cache[key] && Date.now() - cache[key].ts < CACHE_TTL) {
+    console.log("[GeneralSearch] Cache hit for:", key);
     return cache[key].results;
   }
 
   try {
     const projectUrl = import.meta.env.VITE_SUPABASE_URL;
     const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!projectUrl || !anonKey) throw new Error("Missing config");
+    
+    console.log("[GeneralSearch] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey, query });
+    if (!projectUrl || !anonKey) {
+      console.warn("[GeneralSearch] Missing env vars");
+      throw new Error("Missing config");
+    }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(
-      `${projectUrl}/functions/v1/youtube-general-search?q=${encodeURIComponent(query)}`,
-      {
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${anonKey}`,
-          apikey: anonKey,
-        },
-      }
-    );
+    const url = `${projectUrl}/functions/v1/youtube-general-search?q=${encodeURIComponent(query)}`;
+    console.log("[GeneralSearch] Calling:", url);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${anonKey}`,
+        apikey: anonKey,
+      },
+    });
     clearTimeout(timeout);
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      console.error("[GeneralSearch] HTTP error:", response.status);
+      throw new Error(`HTTP ${response.status}`);
+    }
 
     const data = await response.json();
     const results: VideoResult[] = data.results || [];
+    console.log("[GeneralSearch] Got", results.length, "results");
 
     if (results.length > 0) {
       const updated = getCache();
       updated[key] = { results, ts: Date.now() };
-      // Keep max 30 entries
       const entries = Object.entries(updated).sort(([, a], [, b]) => b.ts - a.ts);
       const trimmed = Object.fromEntries(entries.slice(0, 30));
       setCache(trimmed);
@@ -72,7 +81,7 @@ export async function searchYouTubeGeneral(query: string): Promise<VideoResult[]
 
     return results;
   } catch (err) {
-    console.warn("General YouTube search failed:", err);
+    console.error("[GeneralSearch] Failed:", err);
     return cache[key]?.results || [];
   }
 }

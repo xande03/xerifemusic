@@ -1,49 +1,81 @@
 import { useState, useEffect } from "react";
 import type { Song } from "@/data/mockSongs";
-import { mockSongs } from "@/data/mockSongs";
 
-const INVIDIOUS_INSTANCES = [
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://invidious.jing.rocks",
-  "https://vid.puffyan.us",
-  "https://inv.tux.digital",
-];
+const TRENDING_CACHE_KEY = "demus_trending_cache";
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
-async function fetchTrendingDirect(): Promise<Song[]> {
-  const shuffled = [...INVIDIOUS_INSTANCES].sort(() => 0.5 - Math.random());
-  
-  for (const base of shuffled.slice(0, 3)) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+interface CachedTrending {
+  songs: Song[];
+  ts: number;
+}
 
-      const res = await fetch(`${base}/api/v1/trending?region=BR&type=Music`, { signal: controller.signal });
-      clearTimeout(timeout);
-      
-      if (!res.ok) throw new Error("Instance error");
-      const data = await res.json();
-      const items = Array.isArray(data) ? data : [];
-
-      if (items.length > 0) {
-        return items.slice(0, 20).map((v: any): Song => ({
-          id: `trending-${v.videoId}`,
-          youtubeId: v.videoId,
-          title: v.title || "",
-          artist: v.author || "Desconhecido",
-          album: v.title || "",
-          cover: v.videoThumbnails?.[0]?.url || "/placeholder.svg",
-          duration: v.lengthSeconds || 0,
-          votes: 0,
-          isDownloaded: false,
-          type: "music",
-        }));
-      }
-    } catch (err) {
-      console.warn("Trending fetch failed for", base, err);
+function getCachedTrending(): CachedTrending | null {
+  try {
+    const raw = localStorage.getItem(TRENDING_CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedTrending = JSON.parse(raw);
+    if (Date.now() - cached.ts < CACHE_TTL_MS && cached.songs.length > 0) {
+      return cached;
     }
+    return null;
+  } catch {
+    return null;
   }
-  return [];
+}
+
+function setCachedTrending(songs: Song[]): void {
+  try {
+    localStorage.setItem(TRENDING_CACHE_KEY, JSON.stringify({ songs, ts: Date.now() }));
+  } catch {}
+}
+
+async function fetchTrendingViaEdgeFunction(): Promise<Song[]> {
+  try {
+    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    console.log("[Trending] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey });
+    if (!projectUrl || !anonKey) return [];
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const url = `${projectUrl}/functions/v1/youtube-trending?region=BR`;
+    console.log("[Trending] Calling:", url);
+
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${anonKey}`,
+        apikey: anonKey,
+      },
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.error("[Trending] HTTP error:", res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const items = data.results || [];
+    console.log("[Trending] Got", items.length, "results");
+
+    return items.map((v: any): Song => ({
+      id: v.id || `trending-${v.youtubeId}`,
+      youtubeId: v.youtubeId,
+      title: v.title || "",
+      artist: v.artist || "Desconhecido",
+      album: v.album || v.title || "",
+      cover: v.cover || "/placeholder.svg",
+      duration: v.duration || 0,
+      votes: v.votes || 0,
+      isDownloaded: false,
+    }));
+  } catch (err) {
+    console.error("[Trending] Edge function failed:", err);
+    return [];
+  }
 }
 
 export function useTrendingMusic() {
@@ -51,20 +83,34 @@ export function useTrendingMusic() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-    
-    fetchTrendingDirect().then((songs) => {
-      if (!mounted) return;
-      if (songs.length > 0) {
-        setTrendingSongs(songs);
-      } else {
-        // Ultimate fallback to mock songs if no instances respond
-        setTrendingSongs(mockSongs.slice(0, 10));
-      }
-      setIsLoading(false);
-    });
+    let cancelled = false;
 
-    return () => { mounted = false; };
+    const load = async () => {
+      const cached = getCachedTrending();
+      if (cached) {
+        setTrendingSongs(cached.songs);
+        setIsLoading(false);
+        // Refresh in background
+        fetchTrendingViaEdgeFunction().then((fresh) => {
+          if (!cancelled && fresh.length > 0) {
+            setTrendingSongs(fresh);
+            setCachedTrending(fresh);
+          }
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const songs = await fetchTrendingViaEdgeFunction();
+      if (!cancelled) {
+        setTrendingSongs(songs);
+        if (songs.length > 0) setCachedTrending(songs);
+        setIsLoading(false);
+      }
+    };
+
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   return { trendingSongs, isLoading };
