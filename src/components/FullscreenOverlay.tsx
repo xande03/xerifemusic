@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronDown, Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
+import SeekBar from "@/components/SeekBar";
 
 interface FullscreenOverlayProps {
   song: Song;
@@ -84,18 +85,16 @@ const FullscreenOverlay = ({
         className={`px-5 pb-6 pt-12 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Progress bar */}
-        <div
-          className="h-1.5 w-full rounded-full bg-white/30 overflow-hidden cursor-pointer mb-2 relative"
-          onClick={(e) => {
-            e.stopPropagation();
-            const rect = e.currentTarget.getBoundingClientRect();
-            onSeek(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
-          }}
-        >
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress * 100}%` }} />
-        </div>
+        {/* Progress bar — SeekBar com suporte a drag touch/mouse */}
+        <SeekBar
+          progress={progress}
+          onSeek={onSeek}
+          trackHeight="thin"
+          showThumb={true}
+          className="w-full mb-2"
+        />
         <div className="flex justify-between text-[10px] text-white/60 font-mono mb-4">
           <span>{formatDuration(currentTime)}</span>
           <span>{formatDuration(duration)}</span>

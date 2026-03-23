@@ -1,5 +1,5 @@
 import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download, Plus } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
 import AudioVisualizer from "./AudioVisualizer";
@@ -11,6 +11,7 @@ import { fetchLyrics, type LyricsResult } from "@/lib/lyrics";
 import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
+import SeekBar from "@/components/SeekBar";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
@@ -72,8 +73,6 @@ const NowPlayingView = ({
   const [videoInfoLoading, setVideoInfoLoading] = useState(false);
   const [bottomTab, setBottomTab] = useState<"related" | "comments">("related");
   const [showFsControls, setShowFsControls] = useState(true);
-  const [isSeeking, setIsSeeking] = useState(false);
-  const [seekValue, setSeekValue] = useState(0);
   const fsControlsTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLParagraphElement>(null);
@@ -357,21 +356,18 @@ const NowPlayingView = ({
                 ))}
               </div>
 
-              {/* Main Player logic (Slider & Transport) */}
-              <div className="w-full space-y-6">
+              {/* Main Player logic (SeekBar & Transport) */}
+              <div className="w-full space-y-4">
                 <div className="w-full space-y-2">
-                  <Slider
-                    value={[isSeeking ? seekValue : progress * 100]}
-                    max={100}
-                    step={0.1}
-                    onValueChange={([v]) => { setIsSeeking(true); setSeekValue(v); }}
-                    onValueCommit={([v]) => { onSeek(v / 100); setIsSeeking(false); }}
-                    className="w-full py-2"
-                    trackClassName="h-[6px] bg-muted/60"
-                    thumbClassName="w-5 h-5 shadow-2xl border-white"
+                  {/* SeekBar — drag funciona no mobile e desktop */}
+                  <SeekBar
+                    progress={progress}
+                    onSeek={onSeek}
+                    trackHeight="normal"
+                    className="w-full"
                   />
                   <div className="flex justify-between text-xs sm:text-sm font-black italic tracking-widest text-muted-foreground opacity-60">
-                    <span>{formatDuration(isSeeking ? (seekValue / 100) * duration : currentTime)}</span>
+                    <span>{formatDuration(currentTime)}</span>
                     <span>{formatDuration(duration)}</span>
                   </div>
                 </div>
@@ -403,7 +399,13 @@ const NowPlayingView = ({
                     <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="flex-shrink-0 text-muted-foreground hover:text-primary transition-colors">
                        {volume === 0 ? <VolumeX size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Volume2 size={16} className="sm:w-[18px] sm:h-[18px]" />}
                     </button>
-                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1 min-w-0" trackClassName="h-1 bg-muted/40" thumbClassName="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <SeekBar
+                      progress={volume / 100}
+                      onSeek={(f) => onVolumeChange(Math.round(f * 100))}
+                      trackHeight="thin"
+                      showThumb={false}
+                      className="flex-1 min-w-0"
+                    />
                  </div>
                  {onShowQueue && (
                    <button onClick={onShowQueue} className="flex-shrink-0 w-12 h-12 sm:w-auto sm:px-6 sm:py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center justify-center sm:gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95 relative">

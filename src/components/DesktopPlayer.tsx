@@ -1,6 +1,7 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Shuffle, Repeat, Maximize2 } from "lucide-react";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
+import SeekBar from "@/components/SeekBar";
 
 interface DesktopPlayerProps {
   song: Song;
@@ -24,11 +25,6 @@ const DesktopPlayer = ({
   isShuffled, onShuffle,
 }: DesktopPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    onSeek(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)));
-  };
 
   return (
     <div className="hidden lg:flex items-center h-[72px] bg-card border-t border-border px-4 gap-4 flex-shrink-0 animate-fade-in">
@@ -69,20 +65,16 @@ const DesktopPlayer = ({
           </button>
         </div>
 
-        {/* Progress bar */}
+        {/* Progress bar — SeekBar com drag completo */}
         <div className="w-full flex items-center gap-2">
           <span className="text-[10px] text-muted-foreground font-mono w-10 text-right">{formatDuration(currentTime)}</span>
-          <div
-            className="flex-1 h-1 rounded-full bg-muted overflow-hidden cursor-pointer group relative"
-            onClick={handleProgressClick}
-          >
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-150 relative"
-              style={{ width: `${progress * 100}%` }}
-            >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
-            </div>
-          </div>
+          <SeekBar
+            progress={progress}
+            onSeek={onSeek}
+            trackHeight="thin"
+            showThumb={true}
+            className="flex-1"
+          />
           <span className="text-[10px] text-muted-foreground font-mono w-10">{formatDuration(duration)}</span>
         </div>
       </div>
@@ -95,13 +87,12 @@ const DesktopPlayer = ({
         >
           {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </button>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={volume}
-          onChange={(e) => onVolumeChange(Number(e.target.value))}
-          className="w-20 h-1 appearance-none rounded-full bg-muted accent-primary"
+        <SeekBar
+          progress={volume / 100}
+          onSeek={(f) => onVolumeChange(Math.round(f * 100))}
+          trackHeight="thin"
+          showThumb={false}
+          className="w-20"
         />
         <button onClick={onExpand} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="Expandir">
           <Maximize2 size={16} />
