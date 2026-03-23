@@ -1,5 +1,9 @@
 import type { Song } from "@/data/mockSongs";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  createFunctionHeaders,
+  createFunctionUrl,
+  getBackendConfig,
+} from "@/lib/backendConfig";
 
 // --- Search cache (localStorage) ---
 const SEARCH_CACHE_KEY = "demus_search_cache";
@@ -101,27 +105,19 @@ function videoToSong(v: InvidiousVideo): Song {
 // --- Edge function search (primary, reliable in production) ---
 async function searchViaEdgeFunction(query: string, filter: string): Promise<Song[]> {
   try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const { usingFallback } = getBackendConfig();
 
-    console.log("[Search] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey });
-    if (!projectUrl || !anonKey) {
-      console.warn("[Search] Missing VITE_SUPABASE_URL or KEY");
-      return [];
-    }
+    console.log("[Search] Edge fn attempt:", { usingFallback });
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const url = `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`;
+    const url = createFunctionUrl("youtube-search", { q: query, filter });
     console.log("[Search] Calling edge fn:", url);
 
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        "Authorization": `Bearer ${anonKey}`,
-        "apikey": anonKey,
-      },
+      headers: createFunctionHeaders(),
     });
     clearTimeout(timeout);
 

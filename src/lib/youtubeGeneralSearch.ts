@@ -1,3 +1,5 @@
+import { createFunctionHeaders, createFunctionUrl, getBackendConfig } from "@/lib/backendConfig";
+
 export interface VideoResult {
   videoId: string;
   title: string;
@@ -38,27 +40,19 @@ export async function searchYouTubeGeneral(query: string): Promise<VideoResult[]
   }
 
   try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    
-    console.log("[GeneralSearch] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey, query });
-    if (!projectUrl || !anonKey) {
-      console.warn("[GeneralSearch] Missing env vars");
-      throw new Error("Missing config");
-    }
+    const { usingFallback } = getBackendConfig();
+
+    console.log("[GeneralSearch] Edge fn attempt:", { usingFallback, query });
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const url = `${projectUrl}/functions/v1/youtube-general-search?q=${encodeURIComponent(query)}`;
+    const url = createFunctionUrl("youtube-general-search", { q: query });
     console.log("[GeneralSearch] Calling:", url);
 
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${anonKey}`,
-        apikey: anonKey,
-      },
+      headers: createFunctionHeaders(),
     });
     clearTimeout(timeout);
 

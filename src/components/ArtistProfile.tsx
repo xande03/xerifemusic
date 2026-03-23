@@ -5,6 +5,7 @@ import BlurImage from "@/components/BlurImage";
 import { hdThumbnail } from "@/lib/utils";
 import { formatDuration } from "@/data/mockSongs";
 import type { Song } from "@/data/mockSongs";
+import { createFunctionHeaders, createFunctionUrl } from "@/lib/backendConfig";
 
 interface ArtistProfileProps {
   artistName: string;
@@ -70,11 +71,8 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
 
   useEffect(() => {
     setLoading(true);
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-    fetch(`${projectUrl}/functions/v1/youtube-artist-info?name=${encodeURIComponent(artistName)}`, {
-      headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+    fetch(createFunctionUrl("youtube-artist-info", { name: artistName }), {
+      headers: createFunctionHeaders(),
     })
       .then((r) => r.json())
       .then((data) => {
@@ -95,11 +93,8 @@ const ArtistProfile = ({ artistName, artistImage, onBack, onPlaySong, currentPla
     setAlbumLoading(true);
     setAlbumTracks([]);
 
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-    fetch(`${projectUrl}/functions/v1/youtube-album-tracks?browseId=${encodeURIComponent(album.browseId)}`, {
-      headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
+    fetch(createFunctionUrl("youtube-album-tracks", { browseId: album.browseId }), {
+      headers: createFunctionHeaders(),
     })
       .then((r) => r.json())
       .then((data) => {

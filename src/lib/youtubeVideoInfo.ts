@@ -1,4 +1,5 @@
 import type { VideoResult } from "./youtubeGeneralSearch";
+import { createFunctionHeaders, createFunctionUrl } from "@/lib/backendConfig";
 
 export interface Comment {
   author: string;
@@ -37,21 +38,14 @@ export async function fetchVideoInfo(videoId: string): Promise<VideoInfo> {
   }
 
   try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!projectUrl || !anonKey) throw new Error("Missing config");
-
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(
-      `${projectUrl}/functions/v1/youtube-video-info?videoId=${encodeURIComponent(videoId)}`,
+      createFunctionUrl("youtube-video-info", { videoId }),
       {
         signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${anonKey}`,
-          apikey: anonKey,
-        },
+        headers: createFunctionHeaders(),
       }
     );
     clearTimeout(timeout);
