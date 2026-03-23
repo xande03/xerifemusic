@@ -1,10 +1,9 @@
 import type { Song } from "@/data/mockSongs";
-import { supabase } from "@/integrations/supabase/client";
 
 // --- Search cache (localStorage) ---
 const SEARCH_CACHE_KEY = "demus_search_cache";
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const MAX_CACHE_ENTRIES = 50;
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const MAX_CACHE_ENTRIES = 100;
 
 interface CacheEntry {
   results: Song[];
@@ -17,40 +16,28 @@ function getCache(): SearchCache {
 }
 function setCache(cache: SearchCache): void {
   try { localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(cache)); } catch {
-    pruneCache(cache, MAX_CACHE_ENTRIES / 2);
+    const entries = Object.entries(cache).sort(([, a], [, b]) => b.ts - a.ts);
+    entries.slice(50).forEach(([key]) => delete cache[key]);
     try { localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(cache)); } catch {}
   }
-}
-function pruneCache(cache: SearchCache, keepCount: number): void {
-  const entries = Object.entries(cache).sort(([, a], [, b]) => b.ts - a.ts);
-  entries.slice(keepCount).forEach(([key]) => delete cache[key]);
 }
 function cacheKeyFor(query: string, filter: string): string {
   return `${filter}:${query.toLowerCase().trim()}`;
 }
 
-// --- Invidious instances (fallback, CORS-friendly) ---
+// --- Invidious instances (CORS-friendly, direct search) ---
 const INVIDIOUS_INSTANCES = [
   "https://inv.nadeko.net",
   "https://invidious.nerdvpn.de",
   "https://invidious.jing.rocks",
   "https://vid.puffyan.us",
-  "https://invidious.privacyredirect.com",
-  "https://inv.us.projectsegfau.lt",
   "https://invidious.no-logs.com",
+  "https://inv.us.projectsegfau.lt",
   "https://invidious.io.lol",
   "https://inv.tux.digital",
+  "https://invidious.perennialte.ch",
+  "https://iv.melmac.space"
 ];
-
-let currentInstanceIdx = 0;
-
-function getInvidiousUrl(): string {
-  return INVIDIOUS_INSTANCES[currentInstanceIdx % INVIDIOUS_INSTANCES.length];
-}
-
-function rotateInstance(): void {
-  currentInstanceIdx = (currentInstanceIdx + 1) % INVIDIOUS_INSTANCES.length;
-}
 
 interface InvidiousVideo {
   videoId: string;
@@ -74,7 +61,6 @@ function cleanTitle(title: string): string {
 
 function getBestThumbnail(thumbnails?: { url: string; quality: string }[]): string {
   if (!thumbnails || thumbnails.length === 0) return "/placeholder.svg";
-  // Prefer highest quality: maxres > high > medium > default
   const priorities = ["maxres", "maxresdefault", "high", "sddefault", "medium"];
   for (const q of priorities) {
     const match = thumbnails.find(t => t.quality === q);
@@ -98,82 +84,40 @@ function videoToSong(v: InvidiousVideo): Song {
   };
 }
 
-// --- Edge function search (primary, reliable in production) ---
-async function searchViaEdgeFunction(query: string, filter: string): Promise<Song[]> {
-  try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+/**
+ * Perform a parallel search across multiple Invidious instances.
+ * This is the ultimate "send-to-send" approach using the user's IP.
+ */
+async function searchParallel(query: string, filter: string): Promise<Song[]> {
+  const typeParam = filter === "songs" ? "music" : filter === "artists" ? "channel" : filter === "albums" ? "playlist" : "all";
+  
+  // Pick 4 random instances to avoid overloading any single one and improve speed
+  const shuffled = [...INVIDIOUS_INSTANCES].sort(() => 0.5 - Math.random());
+  const targets = shuffled.slice(0, 4);
 
-    if (!projectUrl || !anonKey) return [];
-
+  const fetchFromInstance = async (base: string): Promise<Song[]> => {
+    const url = `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=${typeParam === "all" ? "video" : typeParam}&sort_by=relevance&region=BR`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
-    const response = await fetch(
-      `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`,
-      {
-        signal: controller.signal,
-        headers: {
-          "Authorization": `Bearer ${anonKey}`,
-          "apikey": anonKey,
-        },
-      }
-    );
-    clearTimeout(timeout);
-
-    if (!response.ok) throw new Error(`Edge fn HTTP ${response.status}`);
-
-    const result = await response.json();
-    const items = result.results || [];
-
-    return items.map((item: any) => ({
-      id: item.id || `yt-${item.youtubeId}`,
-      youtubeId: item.youtubeId,
-      title: item.title,
-      artist: item.artist || "Desconhecido",
-      album: item.album || item.title,
-      cover: item.cover || "/placeholder.svg",
-      duration: item.duration || 0,
-      votes: 0,
-      isDownloaded: false,
-      type: (item.type === "music" ? "music" : "video") as "music" | "video",
-    }));
-  } catch (err) {
-    console.warn("Edge function search failed:", err);
-    return [];
-  }
-}
-
-// --- Invidious fallback ---
-async function fetchWithInvidious(query: string, filter: string): Promise<Song[]> {
-  const typeParam = filter === "songs" ? "music" : filter === "artists" ? "channel" : filter === "albums" ? "playlist" : "all";
-  
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const base = getInvidiousUrl();
-    const url = `${base}/api/v1/search?q=${encodeURIComponent(query)}&type=${typeParam === "all" ? "video" : typeParam}&sort_by=relevance&region=BR`;
-
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+      if (!response.ok) throw new Error("Instance error");
       const data: InvidiousVideo[] = await response.json();
-      
-      return data
-        .filter((item: any) => item.videoId)
-        .slice(0, 20)
-        .map(videoToSong);
+      return data.filter(item => item.videoId).slice(0, 25).map(videoToSong);
     } catch (err) {
-      console.warn(`Invidious instance ${base} failed, rotating...`, err);
-      rotateInstance();
+      throw err;
     }
-  }
+  };
 
-  return [];
+  try {
+    // Return the results from the FIRST instance that succeeds
+    return await Promise.any(targets.map(fetchFromInstance));
+  } catch (err) {
+    console.warn("All parallel search instances failed or timed out.");
+    return [];
+  }
 }
 
 export async function searchYouTubeMusic(
@@ -183,8 +127,6 @@ export async function searchYouTubeMusic(
   if (!query || query.length < 2) return [];
 
   const key = cacheKeyFor(query, filter);
-
-  // Check cache first
   const cache = getCache();
   const cached = cache[key];
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
@@ -192,29 +134,18 @@ export async function searchYouTubeMusic(
   }
 
   try {
-    // Try edge function first (works reliably in production)
-    let songs = await searchViaEdgeFunction(query, filter);
+    const songs = await searchParallel(query, filter);
 
-    // Fallback to Invidious if edge function returned nothing
-    if (songs.length === 0) {
-      songs = await fetchWithInvidious(query, filter);
-    }
-
-    // Save to cache
     if (songs.length > 0) {
       const updated = getCache();
       updated[key] = { results: songs, ts: Date.now() };
-      if (Object.keys(updated).length > MAX_CACHE_ENTRIES) {
-        pruneCache(updated, MAX_CACHE_ENTRIES);
-      }
       setCache(updated);
     }
 
     return songs;
   } catch (err) {
     console.error("YouTube search error:", err);
-    if (cached) return cached.results;
-    return [];
+    return cached?.results || [];
   }
 }
 
@@ -223,11 +154,10 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
   if (!query || query.length < 2) return [];
 
   try {
-    const url = `https://clients1.google.com/complete/search?client=youtube&ds=yt&q=${encodeURIComponent(query)}`;
+    const url = `https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${encodeURIComponent(query)}`;
 
     return new Promise((resolve) => {
       const callbackName = `ytSuggest_${Date.now()}`;
-
       (window as any)[callbackName] = (data: any) => {
         try {
           const suggestions = data[1]?.map((item: any) => item[0]) || [];
