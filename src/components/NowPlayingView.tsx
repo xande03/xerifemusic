@@ -283,8 +283,8 @@ const NowPlayingView = ({
           </div>
 
           {/* Right Column: Title, Progress, Controls, Tabs */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 mt-6 lg:mt-0 relative">
-            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-8">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center px-5 sm:px-8 mt-4 lg:mt-0 relative">
+            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-6 lg:gap-8">
               
               {/* Info Header */}
               <div className="flex flex-col gap-2">
@@ -294,21 +294,21 @@ const NowPlayingView = ({
                 </button>
               </div>
 
-              {/* Integrated Action Bar (Heart + Tools) */}
-              <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-3xl p-2.5 shadow-2xl overflow-x-auto scrollbar-hide">
+              {/* Integrated Action Bar (Heart + Tools) - Enhanced Mobile Scroll */}
+              <div className="flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
                 <button 
                   onClick={onLike}
                   title={isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                  className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-95 ${
+                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-[1.2rem] sm:rounded-2xl flex items-center justify-center transition-all active:scale-95 ${
                     isLiked ? 'bg-primary text-primary-foreground shadow-glow animate-pulse-slow' : 'bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
-                  <Heart size={28} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2.5} />
+                  <Heart size={24} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2.5} />
                 </button>
 
-                <div className="h-10 w-px bg-white/10 mx-1 flex-shrink-0" />
+                <div className="h-8 sm:h-10 w-px bg-white/10 mx-0.5 sm:mx-1 flex-shrink-0" />
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-1.5 sm:gap-2.5">
                   {[
                      { icon: Cast, label: 'Transmitir', onClick: onCast },
                      { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
@@ -347,9 +347,9 @@ const NowPlayingView = ({
                       key={i}
                       onClick={btn.onClick}
                       title={btn.label}
-                      className="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-secondary/30 hover:bg-primary/20 hover:text-primary transition-all active:scale-90 text-muted-foreground"
+                      className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center rounded-[1.2rem] sm:rounded-2xl bg-secondary/30 hover:bg-primary/20 hover:text-primary transition-all active:scale-90 text-muted-foreground"
                     >
-                      <btn.icon size={22} />
+                      <btn.icon size={20} className="sm:size-[22px]" />
                     </button>
                   ))}
                 </div>
@@ -374,19 +374,19 @@ const NowPlayingView = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between lg:justify-center lg:gap-10">
+                <div className="flex items-center justify-between lg:justify-center lg:gap-11">
                    <button onClick={onShuffle} className={`p-4 rounded-2xl transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
                       <Shuffle size={24} />
                    </button>
-                   <div className="flex items-center gap-4 sm:gap-8">
-                     <button onClick={onPrev} className="p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90">
-                       <SkipBack size={32} fill="currentColor" />
+                   <div className="flex items-center gap-5 sm:gap-10">
+                     <button onClick={onPrev} className="p-3.5 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg">
+                       <SkipBack size={28} className="sm:size-8" fill="currentColor" />
                      </button>
-                     <button onClick={onTogglePlay} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform">
-                       {isPlaying ? <Pause size={36} fill="currentColor" /> : <Play size={36} fill="currentColor" className="ml-1.5" />}
+                     <button onClick={onTogglePlay} className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform">
+                       {isPlaying ? <Pause size={32} className="sm:size-10" fill="currentColor" /> : <Play size={32} fill="currentColor" className="sm:size-10 ml-1.5" />}
                      </button>
-                     <button onClick={onNext} className="p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90">
-                       <SkipForward size={32} fill="currentColor" />
+                     <button onClick={onNext} className="p-3.5 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg">
+                       <SkipForward size={28} className="sm:size-8" fill="currentColor" />
                      </button>
                    </div>
                    <button className="p-4 rounded-2xl text-muted-foreground hover:text-foreground transition-all">
@@ -396,18 +396,18 @@ const NowPlayingView = ({
               </div>
 
               {/* Volume + Queue Tab Trigger */}
-              <div className="flex items-center gap-6">
-                 <div className="flex items-center gap-3 flex-1 bg-secondary/30 rounded-2xl px-4 py-3">
-                    <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-primary">
-                       {volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              <div className="flex items-center gap-4 sm:gap-6 mt-2">
+                 <div className="flex items-center gap-3 flex-1 bg-secondary/30 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3">
+                    <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-primary transition-colors">
+                       {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
                     </button>
-                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1" trackClassName="h-1 bg-muted/40" thumbClassName="w-3.5 h-3.5" />
+                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1" trackClassName="h-1 bg-muted/40" thumbClassName="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                  </div>
                  {onShowQueue && (
-                   <button onClick={onShowQueue} className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                   <button onClick={onShowQueue} className="w-14 h-14 sm:w-auto sm:px-6 sm:py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center justify-center sm:gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
                       <ListMusic size={20} />
                       <span className="hidden sm:inline">Fila</span>
-                      {queueCount > 0 && <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">{queueCount}</span>}
+                      {queueCount > 0 && <span className="absolute -top-1 -right-1 sm:static sm:bg-white/20 px-2 py-0.5 rounded-lg text-[10px] sm:text-xs bg-primary border-2 border-background">{queueCount}</span>}
                    </button>
                  )}
               </div>
