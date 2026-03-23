@@ -36,6 +36,10 @@ const INVIDIOUS_INSTANCES = [
   "https://invidious.jing.rocks",
   "https://vid.puffyan.us",
   "https://invidious.privacyredirect.com",
+  "https://inv.us.projectsegfau.lt",
+  "https://invidious.no-logs.com",
+  "https://invidious.io.lol",
+  "https://inv.tux.digital",
 ];
 
 let currentInstanceIdx = 0;
