@@ -190,47 +190,6 @@ const DesktopSidebar = ({
               </div>
             )}
 
-            {/* User Profile / Auth */}
-            <div className="p-3 border-b border-border space-y-2">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Conta</span>
-              {isLoadingUser ? (
-                <div className="flex items-center gap-3 px-3 py-2 animate-pulse">
-                  <div className="w-8 h-8 rounded-full bg-secondary" />
-                  <div className="h-3 w-20 bg-secondary rounded" />
-                </div>
-              ) : user ? (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10 mb-2">
-                    {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} className="w-8 h-8 rounded-full border border-primary/20" alt="Avatar" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                        <User size={16} />
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-foreground truncate">{user.user_metadata?.full_name || user.email}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">Premium Hub</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                  >
-                    <LogOut size={14} />
-                    <span>Sair da conta</span>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={onLogin}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 group"
-                >
-                  <LogIn size={16} className="group-hover:translate-x-0.5 transition-transform" />
-                  <span>Conectar com Google</span>
-                </button>
-              )}
-            </div>
 
             {/* Theme toggle */}
             {onToggleTheme && (

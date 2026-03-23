@@ -86,9 +86,9 @@ const Index = () => {
   const [appZoom, setAppZoom] = useState(() => parseFloat(localStorage.getItem('xerife-zoom') || '1'));
   const [miniPlayerVisible, setMiniPlayerVisible] = useState(true);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [user] = useState<any>(null); // Kept as null for interface compatibility
+  const [isLoadingUser] = useState(false);
+  const [isSyncing] = useState(false);
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const deviceId = useRef(getDeviceId());
 
@@ -142,39 +142,12 @@ const Index = () => {
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
 
-  // Auth logic
-  useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setIsLoadingUser(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsLoadingUser(false);
-      
-      if (_event === 'SIGNED_IN') {
-        setIsSyncing(true);
-        setTimeout(() => setIsSyncing(false), 2000); // Simulate data sync loading
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
+    // Auth disabled as requested
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // Auth disabled as requested
   };
 
   useEffect(() => { setPlayerVolume(volume); saveVolume(volume); }, [volume, setPlayerVolume]);
@@ -539,26 +512,6 @@ const Index = () => {
     <>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       
-      {/* Syncing Overlay */}
-      <AnimatePresence>
-        {isSyncing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center text-center px-6"
-          >
-            <div className="relative mb-6">
-              <div className="w-20 h-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="text-primary animate-pulse" size={32} />
-              </div>
-            </div>
-            <h2 className="text-2xl font-display font-bold text-foreground mb-2">Sincronizando Xerife Hub</h2>
-            <p className="text-sm text-muted-foreground max-w-xs">Puxando seus históricos, playlists e preferências para a melhor experiência personalizada.</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="flex h-[100dvh] bg-background overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Desktop Sidebar */}

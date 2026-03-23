@@ -96,55 +96,8 @@ function videoToSong(v: InvidiousVideo): Song {
 
 // --- Edge function search (primary, reliable in production) ---
 async function searchViaEdgeFunction(query: string, filter: string): Promise<Song[]> {
-  try {
-    const { data, error } = await supabase.functions.invoke("youtube-search", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: undefined,
-    });
-
-    // Edge functions invoked via GET need query params - use fetch directly
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-    if (!projectUrl || !anonKey) throw new Error("Missing config");
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-
-    const response = await fetch(
-      `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`,
-      {
-        signal: controller.signal,
-        headers: {
-          "Authorization": `Bearer ${anonKey}`,
-          "apikey": anonKey,
-        },
-      }
-    );
-    clearTimeout(timeout);
-
-    if (!response.ok) throw new Error(`Edge fn HTTP ${response.status}`);
-
-    const result = await response.json();
-    const items = result.results || [];
-
-    return items.map((item: any) => ({
-      id: item.id || `yt-${item.youtubeId}`,
-      youtubeId: item.youtubeId,
-      title: item.title,
-      artist: item.artist || "Desconhecido",
-      album: item.album || item.title,
-      cover: item.cover || "/placeholder.svg",
-      duration: item.duration || 0,
-      votes: 0,
-      isDownloaded: false,
-      type: (item.type === "music" ? "music" : "video") as "music" | "video",
-    }));
-  } catch (err) {
-    console.warn("Edge function search failed:", err);
-    return [];
-  }
+  // Supabase connection disabled as requested.
+  return [];
 }
 
 // --- Invidious fallback ---

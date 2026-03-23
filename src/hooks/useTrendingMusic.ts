@@ -30,46 +30,9 @@ function setCachedTrending(songs: Song[]): void {
 }
 
 async function fetchTrendingViaEdgeFunction(): Promise<Song[]> {
-  try {
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!projectUrl || !anonKey) throw new Error("Missing config");
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const res = await fetch(
-      `${projectUrl}/functions/v1/youtube-trending?region=BR`,
-      {
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${anonKey}`,
-          apikey: anonKey,
-        },
-      }
-    );
-    clearTimeout(timeout);
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-    const items = data.results || [];
-
-    return items.map((v: any): Song => ({
-      id: v.id || `trending-${v.youtubeId}`,
-      youtubeId: v.youtubeId,
-      title: v.title || "",
-      artist: v.artist || "Desconhecido",
-      album: v.album || v.title || "",
-      cover: v.cover || "/placeholder.svg",
-      duration: v.duration || 0,
-      votes: v.votes || 0,
-      isDownloaded: false,
-    }));
-  } catch (err) {
-    console.warn("Trending edge function failed:", err);
-    return [];
-  }
+  // Supabase connection disabled as requested. 
+  // Returning empty list to trigger local fallback in components.
+  return [];
 }
 
 export function useTrendingMusic() {
