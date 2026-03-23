@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'xerife-static-v7';
-const MEDIA_CACHE = 'xerife-media-v7';
+const STATIC_CACHE = 'xerife-static-v8';
+const MEDIA_CACHE = 'xerife-media-v8';
 const CACHES = [STATIC_CACHE, MEDIA_CACHE];
 
 const ASSETS_TO_CACHE = [
