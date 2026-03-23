@@ -283,8 +283,8 @@ const NowPlayingView = ({
           </div>
 
           {/* Right Column: Title, Progress, Controls, Tabs */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center px-5 sm:px-8 mt-4 lg:mt-0 relative">
-            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-6 lg:gap-8">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center min-w-0 px-5 sm:px-8 mt-4 lg:mt-0 relative">
+            <div className="w-full min-w-0 max-w-xl lg:max-w-full mx-auto flex flex-col gap-6 lg:gap-8 overflow-hidden touch-pan-y">
               
               {/* Info Header */}
               <div className="flex flex-col gap-2">
@@ -295,7 +295,7 @@ const NowPlayingView = ({
               </div>
 
               {/* Integrated Action Bar (Heart + Tools) - Enhanced Mobile Scroll */}
-              <div className="w-full flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
+              <div className="w-full min-w-0 flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
                 <button 
                   onClick={onLike}
                   title={isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"}
