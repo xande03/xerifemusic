@@ -33,27 +33,33 @@ async function fetchTrendingViaEdgeFunction(): Promise<Song[]> {
   try {
     const projectUrl = import.meta.env.VITE_SUPABASE_URL;
     const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    console.log("[Trending] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey });
     if (!projectUrl || !anonKey) return [];
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(
-      `${projectUrl}/functions/v1/youtube-trending?region=BR`,
-      {
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${anonKey}`,
-          apikey: anonKey,
-        },
-      }
-    );
+    const url = `${projectUrl}/functions/v1/youtube-trending?region=BR`;
+    console.log("[Trending] Calling:", url);
+
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${anonKey}`,
+        apikey: anonKey,
+      },
+    });
     clearTimeout(timeout);
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      console.error("[Trending] HTTP error:", res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
 
     const data = await res.json();
     const items = data.results || [];
+    console.log("[Trending] Got", items.length, "results");
 
     return items.map((v: any): Song => ({
       id: v.id || `trending-${v.youtubeId}`,
@@ -67,7 +73,7 @@ async function fetchTrendingViaEdgeFunction(): Promise<Song[]> {
       isDownloaded: false,
     }));
   } catch (err) {
-    console.warn("Trending edge function failed:", err);
+    console.error("[Trending] Edge function failed:", err);
     return [];
   }
 }

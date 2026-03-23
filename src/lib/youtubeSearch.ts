@@ -104,27 +104,35 @@ async function searchViaEdgeFunction(query: string, filter: string): Promise<Son
     const projectUrl = import.meta.env.VITE_SUPABASE_URL;
     const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-    if (!projectUrl || !anonKey) return [];
+    console.log("[Search] Edge fn attempt:", { hasUrl: !!projectUrl, hasKey: !!anonKey });
+    if (!projectUrl || !anonKey) {
+      console.warn("[Search] Missing VITE_SUPABASE_URL or KEY");
+      return [];
+    }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(
-      `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`,
-      {
-        signal: controller.signal,
-        headers: {
-          "Authorization": `Bearer ${anonKey}`,
-          "apikey": anonKey,
-        },
-      }
-    );
+    const url = `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`;
+    console.log("[Search] Calling edge fn:", url);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "Authorization": `Bearer ${anonKey}`,
+        "apikey": anonKey,
+      },
+    });
     clearTimeout(timeout);
 
-    if (!response.ok) throw new Error(`Edge fn HTTP ${response.status}`);
+    if (!response.ok) {
+      console.error("[Search] Edge fn HTTP error:", response.status);
+      throw new Error(`Edge fn HTTP ${response.status}`);
+    }
 
     const result = await response.json();
     const items = result.results || [];
+    console.log("[Search] Edge fn returned", items.length, "results");
 
     return items.map((item: any) => ({
       id: item.id || `yt-${item.youtubeId}`,
@@ -139,7 +147,7 @@ async function searchViaEdgeFunction(query: string, filter: string): Promise<Son
       type: (item.type === "music" ? "music" : "video") as "music" | "video",
     }));
   } catch (err) {
-    console.warn("Edge function search failed:", err);
+    console.error("[Search] Edge function search failed:", err);
     return [];
   }
 }
