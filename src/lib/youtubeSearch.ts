@@ -96,8 +96,48 @@ function videoToSong(v: InvidiousVideo): Song {
 
 // --- Edge function search (primary, reliable in production) ---
 async function searchViaEdgeFunction(query: string, filter: string): Promise<Song[]> {
-  // Supabase connection disabled as requested.
-  return [];
+  try {
+    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!projectUrl || !anonKey) return [];
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(
+      `${projectUrl}/functions/v1/youtube-search?q=${encodeURIComponent(query)}&filter=${filter}`,
+      {
+        signal: controller.signal,
+        headers: {
+          "Authorization": `Bearer ${anonKey}`,
+          "apikey": anonKey,
+        },
+      }
+    );
+    clearTimeout(timeout);
+
+    if (!response.ok) throw new Error(`Edge fn HTTP ${response.status}`);
+
+    const result = await response.json();
+    const items = result.results || [];
+
+    return items.map((item: any) => ({
+      id: item.id || `yt-${item.youtubeId}`,
+      youtubeId: item.youtubeId,
+      title: item.title,
+      artist: item.artist || "Desconhecido",
+      album: item.album || item.title,
+      cover: item.cover || "/placeholder.svg",
+      duration: item.duration || 0,
+      votes: 0,
+      isDownloaded: false,
+      type: (item.type === "music" ? "music" : "video") as "music" | "video",
+    }));
+  } catch (err) {
+    console.warn("Edge function search failed:", err);
+    return [];
+  }
 }
 
 // --- Invidious fallback ---
