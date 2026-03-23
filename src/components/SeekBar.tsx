@@ -31,7 +31,9 @@ export function SeekBar({
   const trackRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState(0);
+  const [seekLock, setSeekLock] = useState<number | null>(null);
   const isDraggingRef = useRef(false);
+  const seekTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const heightClass = {
     thin: "h-1",
@@ -47,6 +49,19 @@ export function SeekBar({
     return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   }, []);
 
+  const commitSeek = useCallback((fraction: number) => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    setDragValue(fraction);
+    setSeekLock(fraction);
+    if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+    // Ignora o 'progress' externo por 800ms para dar tempo do player do YouTube (ou outro) atualizar
+    seekTimeoutRef.current = setTimeout(() => {
+      setSeekLock(null);
+    }, 800);
+    onSeek(fraction);
+  }, [onSeek]);
+
   // ─── Mouse handlers ───────────────────────────────────────────────────────
 
   const handleMouseDown = useCallback(
@@ -54,6 +69,8 @@ export function SeekBar({
       e.preventDefault();
       isDraggingRef.current = true;
       setIsDragging(true);
+      if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+      setSeekLock(null);
       setDragValue(getFraction(e.clientX));
     },
     [getFraction]
@@ -67,11 +84,7 @@ export function SeekBar({
 
     const handleMouseUp = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
-      const fraction = getFraction(e.clientX);
-      isDraggingRef.current = false;
-      setIsDragging(false);
-      setDragValue(fraction);
-      onSeek(fraction);
+      commitSeek(getFraction(e.clientX));
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -80,16 +93,17 @@ export function SeekBar({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [getFraction, onSeek]);
+  }, [getFraction, commitSeek]);
 
   // ─── Touch handlers ───────────────────────────────────────────────────────
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      // Não chama preventDefault() aqui para não bloquear scroll de outras áreas,
-      // mas vamos setar o flag de dragging.
+      // Não chama preventDefault() aqui para evitar bloquear scroll
       isDraggingRef.current = true;
       setIsDragging(true);
+      if (seekTimeoutRef.current) clearTimeout(seekTimeoutRef.current);
+      setSeekLock(null);
       setDragValue(getFraction(e.touches[0].clientX));
     },
     [getFraction]
@@ -98,22 +112,15 @@ export function SeekBar({
   useEffect(() => {
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDraggingRef.current) return;
-      // Previne scroll vertical enquanto arrasta a seek bar
       e.preventDefault();
       setDragValue(getFraction(e.touches[0].clientX));
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (!isDraggingRef.current) return;
-      const touch = e.changedTouches[0];
-      const fraction = getFraction(touch.clientX);
-      isDraggingRef.current = false;
-      setIsDragging(false);
-      setDragValue(fraction);
-      onSeek(fraction);
+      commitSeek(getFraction(e.changedTouches[0].clientX));
     };
 
-    // passive: false é necessário para poder chamar preventDefault() no touchmove
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd);
     window.addEventListener("touchcancel", handleTouchEnd);
@@ -122,22 +129,22 @@ export function SeekBar({
       window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("touchcancel", handleTouchEnd);
     };
-  }, [getFraction, onSeek]);
+  }, [getFraction, commitSeek]);
 
   // Clique simples (sem drag)
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      // Só dispara se não foi um drag
       if (!isDraggingRef.current) {
-        const fraction = getFraction(e.clientX);
-        onSeek(fraction);
+        commitSeek(getFraction(e.clientX));
       }
     },
-    [getFraction, onSeek]
+    [getFraction, commitSeek]
   );
 
-  // Valor visual atual: durante drag usa dragValue, caso contrário usa progress
-  const displayValue = isDragging ? dragValue : progress;
+  // Valor visual atual: prioriza dragValue durante o drag,
+  // dps usa o seekLock para manter parado enquanto o player carrega,
+  // ou finalmente volta ao progress normal do player
+  const displayValue = isDragging ? dragValue : (seekLock !== null ? seekLock : progress);
 
   return (
     <div
