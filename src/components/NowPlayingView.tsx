@@ -295,7 +295,7 @@ const NowPlayingView = ({
               </div>
 
               {/* Integrated Action Bar (Heart + Tools) - Enhanced Mobile Scroll */}
-              <div className="flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
+              <div className="w-full flex items-center gap-2 sm:gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2.5 shadow-2xl overflow-x-auto scrollbar-hide touch-pan-x">
                 <button 
                   onClick={onLike}
                   title={isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"}
@@ -356,8 +356,8 @@ const NowPlayingView = ({
               </div>
 
               {/* Main Player logic (Slider & Transport) */}
-              <div className="space-y-6">
-                <div className="space-y-2">
+              <div className="w-full space-y-6">
+                <div className="w-full space-y-2">
                   <Slider
                     value={[isSeeking ? seekValue : progress * 100]}
                     max={100}
@@ -374,37 +374,37 @@ const NowPlayingView = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between lg:justify-center lg:gap-11">
-                   <button onClick={onShuffle} className={`p-4 rounded-2xl transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-                      <Shuffle size={24} />
+                <div className="w-full flex items-center justify-between lg:justify-center lg:gap-11">
+                   <button onClick={onShuffle} className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl transition-all ${isShuffled ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+                      <Shuffle size={20} className="sm:w-6 sm:h-6" />
                    </button>
-                   <div className="flex items-center gap-5 sm:gap-10">
-                     <button onClick={onPrev} className="p-3.5 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg">
-                       <SkipBack size={28} className="sm:size-8" fill="currentColor" />
+                   <div className="flex items-center gap-3 sm:gap-10">
+                     <button onClick={onPrev} className="p-2 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg flex-shrink-0">
+                       <SkipBack size={24} className="sm:w-8 sm:h-8" fill="currentColor" />
                      </button>
-                     <button onClick={onTogglePlay} className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform">
-                       {isPlaying ? <Pause size={32} className="sm:size-10" fill="currentColor" /> : <Play size={32} fill="currentColor" className="sm:size-10 ml-1.5" />}
+                     <button onClick={onTogglePlay} className="w-16 h-16 sm:w-28 sm:h-28 flex-shrink-0 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform">
+                       {isPlaying ? <Pause size={28} className="sm:w-10 sm:h-10" fill="currentColor" /> : <Play size={28} fill="currentColor" className="sm:w-10 sm:h-10 ml-1.5" />}
                      </button>
-                     <button onClick={onNext} className="p-3.5 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg">
-                       <SkipForward size={28} className="sm:size-8" fill="currentColor" />
+                     <button onClick={onNext} className="p-2 sm:p-4 rounded-full bg-secondary hover:bg-accent text-foreground transition-all active:scale-90 shadow-lg flex-shrink-0">
+                       <SkipForward size={24} className="sm:w-8 sm:h-8" fill="currentColor" />
                      </button>
                    </div>
-                   <button className="p-4 rounded-2xl text-muted-foreground hover:text-foreground transition-all">
-                      <Repeat size={24} />
+                   <button className="p-2 sm:p-4 rounded-xl sm:rounded-2xl text-muted-foreground hover:text-foreground transition-all">
+                      <Repeat size={20} className="sm:w-6 sm:h-6" />
                    </button>
                 </div>
               </div>
 
               {/* Volume + Queue Tab Trigger */}
-              <div className="flex items-center gap-4 sm:gap-6 mt-2">
-                 <div className="flex items-center gap-3 flex-1 bg-secondary/30 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3">
-                    <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="text-muted-foreground hover:text-primary transition-colors">
-                       {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              <div className="w-full flex items-center gap-2 sm:gap-6 mt-2">
+                 <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 bg-secondary/30 backdrop-blur-sm rounded-2xl px-3 sm:px-4 py-2 sm:py-3">
+                    <button onClick={() => onVolumeChange(volume > 0 ? 0 : 70)} className="flex-shrink-0 text-muted-foreground hover:text-primary transition-colors">
+                       {volume === 0 ? <VolumeX size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Volume2 size={16} className="sm:w-[18px] sm:h-[18px]" />}
                     </button>
-                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1" trackClassName="h-1 bg-muted/40" thumbClassName="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <Slider value={[volume]} max={100} onValueChange={([v]) => onVolumeChange(v)} className="flex-1 min-w-0" trackClassName="h-1 bg-muted/40" thumbClassName="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                  </div>
                  {onShowQueue && (
-                   <button onClick={onShowQueue} className="w-14 h-14 sm:w-auto sm:px-6 sm:py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center justify-center sm:gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                   <button onClick={onShowQueue} className="flex-shrink-0 w-12 h-12 sm:w-auto sm:px-6 sm:py-3 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center justify-center sm:gap-3 shadow-lg hover:shadow-primary/20 transition-all active:scale-95 relative">
                       <ListMusic size={20} />
                       <span className="hidden sm:inline">Fila</span>
                       {queueCount > 0 && <span className="absolute -top-1 -right-1 sm:static sm:bg-white/20 px-2 py-0.5 rounded-lg text-[10px] sm:text-xs bg-primary border-2 border-background">{queueCount}</span>}
