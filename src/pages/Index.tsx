@@ -54,7 +54,7 @@ const Index = () => {
   const [artistView, setArtistView] = useState<{ name: string; image?: string } | null>(null);
   const [currentSong, setCurrentSong] = useState<Song>(mockSongs[0]);
   const [expanded, setExpanded] = useState(false);
-  const [playerMode, setPlayerMode] = useState<PlayerMode>("video");
+  const [playerMode, setPlayerMode] = useState<PlayerMode>("audio");
   const [showFloatingPiP, setShowFloatingPiP] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
@@ -205,6 +205,11 @@ const Index = () => {
     });
     setRecentHistory(getHistory());
     setMiniPlayerVisible(true); // Reexibe o mini player ao trocar de música
+    
+    // Se for música (não vídeo), define o modo como audio ao selecionar
+    if (song.type !== 'video' && !song.id.startsWith('yt-')) {
+      setPlayerMode('audio');
+    }
     
     // Offline playback check
     const offlineVideo = document.getElementById("offline-player") as HTMLVideoElement | null;
@@ -443,9 +448,11 @@ const Index = () => {
       setSavedSongs((prev) => [...prev, { ...song, isDownloaded: true, votes: 0 }]);
     }
     
-    // Redireciona para o yout.com para download externo do arquivo
-    const youtUrl = `https://yout.com/playlist/?list=RD${song.youtubeId}&v=${song.youtubeId}`;
-    window.open(youtUrl, '_blank');
+    // Redireciona para ytmp3.sc com o link do YouTube já pronto
+    // O usuário clica e pode baixar como MP3 ou MP4
+    const ytUrl = `https://www.youtube.com/watch?v=${song.youtubeId}`;
+    const downloadUrl = `https://ytmp3.sc/?url=${encodeURIComponent(ytUrl)}`;
+    window.open(downloadUrl, '_blank', 'noopener');
   }, [savedSongIds]);
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -1329,6 +1336,7 @@ const Index = () => {
             onShuffle={handleShuffle}
             context={homeMode}
             onShowQueue={() => setShowQueue(true)}
+            initialMode={playerMode}
             onArtistClick={(artist) => setArtistView(artist)}
             queueCount={smartQueueList.length + (albumQueue ? albumQueue.length : 0)}
             onDownload={() => handleDownload(currentSong)}

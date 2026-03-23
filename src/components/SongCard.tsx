@@ -1,4 +1,4 @@
-import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical, Plus } from "lucide-react";
+import { Download, DownloadCloud, Play, ThumbsUp, Check, MoreVertical, Plus, Music2 } from "lucide-react";
 import BlurImage from "@/components/BlurImage";
 import { Song, formatDuration } from "@/data/mockSongs";
 import { motion } from "framer-motion";
@@ -13,6 +13,29 @@ interface SongCardProps {
   onAddToPlaylist?: (song: Song) => void;
   showVotes?: boolean;
   hasVoted?: boolean;
+}
+
+/** Slug a string to cifraclub.com.br URL format */
+function toCifraSlug(s: string): string {
+  if (!s) return "";
+  return s.toLowerCase()
+    .replace(/\(.*?\)/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+function openCifraClub(song: Song) {
+  const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
+  const artistSlug = toCifraSlug(mainArtist);
+  const titleSlug = toCifraSlug(song.title);
+  if (artistSlug && titleSlug) {
+    window.open(`https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`, '_blank', 'noopener');
+  } else {
+    window.open(`https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`, '_blank', 'noopener');
+  }
 }
 
 const SongCard = ({ song, isActive, onSelect, onVote, onDownload, onAddToPlaylist, showVotes = false, hasVoted = false }: SongCardProps) => (
@@ -58,9 +81,18 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, onAddToPlaylis
           <span>{song.votes}</span>
         </button>
       )}
+      {/* Buscar Cifra button — next to download */}
+      <button
+        onClick={() => openCifraClub(song)}
+        title="Buscar Cifra"
+        className="p-1.5 rounded-full text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+      >
+        <Music2 size={16} />
+      </button>
       {onDownload && (
         <button
           onClick={() => onDownload(song)}
+          title="Download"
           className={`p-1.5 rounded-full transition-colors ${
             song.isDownloaded ? "text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
@@ -71,6 +103,7 @@ const SongCard = ({ song, isActive, onSelect, onVote, onDownload, onAddToPlaylis
       {onAddToPlaylist && (
         <button
           onClick={() => onAddToPlaylist(song)}
+          title="Adicionar à playlist"
           className="p-1.5 rounded-full text-muted-foreground hover:text-primary transition-colors"
         >
           <Plus size={16} />

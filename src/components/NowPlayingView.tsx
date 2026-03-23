@@ -46,6 +46,7 @@ interface NowPlayingViewProps {
   onLike?: () => void;
   onArtistClick?: (artist: { name: string; image: string }) => void;
   onAddToPlaylist?: (song: Song) => void;
+  initialMode?: PlayerMode;
 }
 
 const NowPlayingView = ({
@@ -58,9 +59,12 @@ const NowPlayingView = ({
   onShare, onDownload,
   isLiked, onLike,
   onArtistClick,
-  onAddToPlaylist
+  onAddToPlaylist,
+  initialMode,
 }: NowPlayingViewProps) => {
-  const [mode, setMode] = useState<PlayerMode>(context === "video" ? "video" : "audio");
+  const [mode, setMode] = useState<PlayerMode>(
+    initialMode ?? (context === "video" ? "video" : "audio")
+  );
   const [autoplay, setAutoplay] = useState(() => localStorage.getItem('demus-autoplay') !== 'false');
   const [lyricsResult, setLyricsResult] = useState<LyricsResult | null>(null);
   const [lyricsLoading, setLyricsLoading] = useState(false);
