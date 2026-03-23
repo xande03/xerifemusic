@@ -127,12 +127,17 @@ const NowPlayingView = ({
     return idx;
   }, [lyricsResult, currentTime]);
 
-  // Auto-scroll to active line
+  // Auto-scroll to active line with better performance
   useEffect(() => {
     if (activeLineRef.current && lyricsContainerRef.current) {
-      activeLineRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      const container = lyricsContainerRef.current;
+      const activeLine = activeLineRef.current;
+      
+      const targetTop = activeLine.offsetTop - (container.clientHeight / 2) + (activeLine.clientHeight / 2);
+      
+      container.scrollTo({
+        top: targetTop,
+        behavior: 'smooth'
       });
     }
   }, [activeLineIndex]);
@@ -279,77 +284,75 @@ const NowPlayingView = ({
 
           {/* Right Column: Title, Progress, Controls, Tabs */}
           <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 mt-6 lg:mt-0 relative">
-            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-6 sm:gap-8">
+            <div className="max-w-xl lg:w-full mx-auto flex flex-col gap-8">
               
-              {/* Info + Like */}
-              <div className="flex items-center justify-between gap-6">
-                <div className="min-w-0">
-                  <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight line-clamp-2 leading-none mb-2">{song.title}</h1>
-                  <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="group">
-                    <p className="text-lg sm:text-2xl text-muted-foreground group-hover:text-primary transition-colors font-medium">{song.artist}</p>
-                  </button>
-                </div>
-                <button 
-                  onClick={onLike}
-                  className={`p-4 rounded-3xl transition-all active:scale-90 ${isLiked ? 'bg-primary/10 text-primary shadow-glow-red' : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground'}`}
-                >
-                  <Heart size={32} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2} />
+              {/* Info Header */}
+              <div className="flex flex-col gap-2">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight line-clamp-2 leading-tight mb-1">{song.title}</h1>
+                <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="group text-left">
+                  <p className="text-lg sm:text-2xl text-muted-foreground group-hover:text-primary transition-colors font-medium">{song.artist}</p>
                 </button>
               </div>
 
-              {/* Toolbar */}
-              <div className="flex items-center justify-between bg-card/40 border border-white/10 rounded-2xl p-2 sm:p-3 overflow-x-auto scrollbar-hide gap-4">
-                 <div className="flex items-center gap-2">
-                    {[
-                       { icon: Cast, label: 'Cast', onClick: onCast },
-                       { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
-                       { icon: Maximize2, label: 'Fullscreen', onClick: onFullscreen },
-                       { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
-                       { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
-                       { icon: Download, label: 'Download', onClick: onDownload },
-                       {
-                         icon: Music2,
-                         label: 'Buscar Cifra',
-                         onClick: () => {
-                           // Melhoria na geração de slug para o Cifra Club
-                           const toSlug = (s: string) => {
-                             if (!s) return "";
-                             return s.toLowerCase()
-                               .replace(/\(.*\)/g, '') // remove conteúdos entre parênteses como "(Official Video)", "(Ao Vivo)"
-                               .normalize('NFD')
-                               .replace(/[\u0300-\u036f]/g, '') // remove acentos
-                               .replace(/[^a-z0-9\s-]/g, '')   // remove chars especiais
-                               .trim()
-                               .replace(/\s+/g, '-');           // espaços → hífens
-                           };
+              {/* Integrated Action Bar (Heart + Tools) */}
+              <div className="flex items-center gap-3 bg-card/40 backdrop-blur-xl border border-white/10 rounded-3xl p-2.5 shadow-2xl overflow-x-auto scrollbar-hide">
+                <button 
+                  onClick={onLike}
+                  title={isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-95 ${
+                    isLiked ? 'bg-primary text-primary-foreground shadow-glow animate-pulse-slow' : 'bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  }`}
+                >
+                  <Heart size={28} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 2.5} />
+                </button>
 
-                           // Pega apenas o primeiro artista (antes de vírgula, feat., &, etc)
-                           // Fernandinho & ... => Fernandinho
-                           const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
-                           const artistSlug = toSlug(mainArtist);
-                           const titleSlug = toSlug(song.title);
+                <div className="h-10 w-px bg-white/10 mx-1 flex-shrink-0" />
 
-                           if (artistSlug && titleSlug) {
-                             const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
-                             window.open(directUrl, '_blank', 'noopener');
-                           } else {
-                             // Fallback para busca genérica se o slug falhar
-                             const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
-                             window.open(searchUrl, '_blank', 'noopener');
-                           }
+                <div className="flex items-center gap-2.5">
+                  {[
+                     { icon: Cast, label: 'Transmitir', onClick: onCast },
+                     { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
+                     { icon: Maximize2, label: 'Tela Cheia', onClick: onFullscreen },
+                     { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
+                     { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
+                     { icon: Download, label: 'Download', onClick: onDownload },
+                     {
+                       icon: Music2,
+                       label: 'Buscar Cifra',
+                       onClick: () => {
+                         const toSlug = (s: string) => {
+                           if (!s) return "";
+                           return s.toLowerCase()
+                             .replace(/\(.*\)/g, '')
+                             .normalize('NFD')
+                             .replace(/[\u0300-\u036f]/g, '')
+                             .replace(/[^a-z0-9\s-]/g, '')
+                             .trim()
+                             .replace(/\s+/g, '-');
+                         };
+                         const mainArtist = song.artist.split(/[,&\/]|feat\.|ft\./i)[0].trim();
+                         const artistSlug = toSlug(mainArtist);
+                         const titleSlug = toSlug(song.title);
+                         if (artistSlug && titleSlug) {
+                           const directUrl = `https://www.cifraclub.com.br/${artistSlug}/${titleSlug}/`;
+                           window.open(directUrl, '_blank', 'noopener');
+                         } else {
+                           const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(song.artist + ' ' + song.title)}`;
+                           window.open(searchUrl, '_blank', 'noopener');
                          }
-                       },
-                    ].map((btn, i) => btn.onClick && (
-                      <button
-                        key={i}
-                        onClick={btn.onClick}
-                        title={btn.label}
-                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-secondary/50 hover:bg-primary hover:text-primary-foreground transition-all active:scale-90 text-muted-foreground shadow-sm"
-                      >
-                        <btn.icon size={22} />
-                      </button>
-                    ))}
-                 </div>
+                       }
+                     },
+                  ].map((btn, i) => btn.onClick && (
+                    <button
+                      key={i}
+                      onClick={btn.onClick}
+                      title={btn.label}
+                      className="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-secondary/30 hover:bg-primary/20 hover:text-primary transition-all active:scale-90 text-muted-foreground"
+                    >
+                      <btn.icon size={22} />
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Main Player logic (Slider & Transport) */}

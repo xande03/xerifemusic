@@ -162,7 +162,7 @@ export function useYouTubePlayer(containerId: string) {
         const ct = playerRef.current?.getCurrentTime?.() || 0;
         const dur = playerRef.current?.getDuration?.() || 0;
         setState((s) => ({ ...s, currentTime: ct, duration: dur }));
-      }, 500); // 500ms is enough and saves battery on mobile
+      }, 200); // Increased frequency for better sync performance
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
