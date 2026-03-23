@@ -444,7 +444,7 @@ const Index = () => {
     }
     
     // Redireciona para o yout.com para download externo do arquivo
-    const youtUrl = `https://yout.com/video/${song.youtubeId}`;
+    const youtUrl = `https://yout.com/playlist/?list=RD${song.youtubeId}&v=${song.youtubeId}`;
     window.open(youtUrl, '_blank');
   }, [savedSongIds]);
 
@@ -543,14 +543,13 @@ const Index = () => {
           }}
           onHomeModeChange={setHomeMode}
           onCast={() => {
-            const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
-            if (iframe && 'remote' in iframe) {
-              (iframe as any).remote.prompt().catch(() => {});
-            } else {
-              const video = document.querySelector('video');
-              if (video && 'remote' in video) {
-                (video as any).remote.prompt().catch(() => {});
-              }
+            // Priority 1: Use hook logic (handles AirPlay/Cast picker)
+            requestAirPlay(homeMode === "video" ? "video" : "audio");
+            
+            // Priority 2: Force prompt on any available video element (backup)
+            const video = document.querySelector('video');
+            if (video && 'remote' in video) {
+              (video as any).remote.prompt().catch(() => {});
             }
           }}
           onOpenHistory={() => setActiveTab("history")}
@@ -1309,17 +1308,7 @@ const Index = () => {
               setExpanded(false);
               setShowFloatingPiP(true);
             }
-          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onCast={() => {
-            const iframe = document.querySelector('#yt-player iframe') as HTMLIFrameElement | null;
-            if (iframe && 'remote' in iframe) {
-              (iframe as any).remote.prompt().catch(() => {});
-            } else {
-              const video = document.querySelector('video');
-              if (video && 'remote' in video) {
-                (video as any).remote.prompt().catch(() => {});
-              }
-            }
-          }} onPlayRelated={(video) => {
+          }} onModeChange={setPlayerMode} onAirPlay={requestAirPlay} onCast={() => requestAirPlay(playerMode === "lyrics" ? "audio" : playerMode)} onPlayRelated={(video) => {
             const song: Song = {
               id: `yt-${video.videoId}`,
               youtubeId: video.videoId,

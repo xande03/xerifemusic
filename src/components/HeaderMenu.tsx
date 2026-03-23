@@ -208,9 +208,18 @@ const HeaderMenu = ({
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
             >
               <Cast size={16} />
-              <span>Transmitir (Cast)</span>
+              <span>Transmitir (Cast / AirPlay)</span>
             </button>
           )}
+
+          {/* Version Info */}
+          <div className="px-3 py-2 bg-muted/30 border-t border-border">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">Versão do App</span>
+              <span className="text-[10px] text-muted-foreground/80 font-medium">v1.2.9 • Mar 2026</span>
+              <span className="text-[8px] text-muted-foreground/50 tracking-tighter">Última atualização: 22/03/2026</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
