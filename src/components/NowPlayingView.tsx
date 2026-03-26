@@ -286,7 +286,7 @@ const NowPlayingView = ({
           </div>
 
           {/* Right Column: Title, Progress, Controls, Tabs */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center lg:items-center min-w-0 px-5 sm:px-8 mt-4 lg:mt-0 relative">
+          <div className={`w-full ${mode === "video" ? "" : "lg:w-1/2"} flex flex-col justify-center lg:items-center min-w-0 px-5 sm:px-8 mt-4 lg:mt-0 relative`}>
             <div className="w-full min-w-0 max-w-xl lg:max-w-2xl mx-auto flex flex-col gap-6 lg:gap-8 lg:items-center touch-pan-y">
               
               {/* Info Header */}
