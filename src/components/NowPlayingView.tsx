@@ -194,11 +194,11 @@ const NowPlayingView = ({
 
       {/* Main Layout Container */}
       <div className="flex-1 overflow-hidden">
-        <div className="flex flex-col lg:flex-row h-full w-full max-w-[1600px] mx-auto lg:px-12 lg:pb-12 lg:gap-16">
+        <div className={`flex flex-col ${mode === "video" ? "" : "lg:flex-row"} h-full w-full max-w-[1600px] mx-auto lg:px-12 lg:pb-12 ${mode === "video" ? "lg:gap-6" : "lg:gap-16"}`}>
           
           {/* Left Column: Artwork / Lyrics / Video */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center items-center relative gap-6">
-            <div className="relative w-full aspect-square max-w-[500px] group">
+          <div className={`w-full ${mode === "video" ? "" : "lg:w-1/2"} flex flex-col justify-center items-center relative gap-6`}>
+            <div className={`relative w-full group ${mode === "video" ? "aspect-video max-w-full" : "aspect-square max-w-[500px]"}`}>
               {/* Phone Artwork Container (Maintains existing logic) */}
               <div className="w-full h-full relative z-0">
                 {mode === "video" ? (
