@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus, Sparkles, User, LogOut, LogIn } from "lucide-react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus, Sparkles, User, LogOut, LogIn, SlidersHorizontal } from "lucide-react";
+import Equalizer from "@/components/Equalizer";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
