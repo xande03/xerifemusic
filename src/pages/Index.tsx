@@ -48,7 +48,7 @@ const albumCovers = [album1, album2, album3, album4];
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("home");
-  const [homeMode, setHomeModeState] = useState<HomeMode>(() => (localStorage.getItem('demus-home-mode') as HomeMode) || "music");
+  const [homeMode, setHomeModeState] = useState<HomeMode>("music");
   const setHomeMode = (mode: HomeMode) => { setHomeModeState(mode); localStorage.setItem('demus-home-mode', mode); };
   const [channelView, setChannelView] = useState<{ name: string; thumbnail?: string } | null>(null);
   const [artistView, setArtistView] = useState<{ name: string; image?: string } | null>(null);
@@ -792,7 +792,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="flex flex-col items-center justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 text-center overflow-hidden"
+                    className="flex flex-col items-center justify-center pt-0 sm:pt-2 pb-1 sm:pb-2 px-4 text-center overflow-hidden gap-0"
                   >
                     <div className="relative group [perspective:1000px]">
                       <motion.div 
@@ -805,16 +805,16 @@ const Index = () => {
                         <img 
                           src={xerifeHubLogo} 
                           alt="Xerife Hub" 
-                          className="w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] rounded-3xl"
+                          className="w-36 h-36 sm:w-52 sm:h-52 lg:w-64 lg:h-64 drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] rounded-3xl"
                         />
                       </motion.div>
                       <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
                     </div>
-                    <div className="relative z-10">
-                      <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tighter text-foreground italic">
+                    <div className="relative z-10 -mt-2">
+                      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-black tracking-tighter text-foreground italic">
                         XERIFE <span className="text-primary drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]">HUB</span>
                       </h1>
-                      <p className="text-sm sm:text-lg text-muted-foreground font-medium tracking-[0.4em] uppercase opacity-60">Premium Experience</p>
+                      <p className="text-xs sm:text-base text-muted-foreground font-medium tracking-[0.4em] uppercase opacity-60">Premium Experience</p>
                     </div>
                   </motion.div>
 
