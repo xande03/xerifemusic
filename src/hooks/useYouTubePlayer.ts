@@ -138,6 +138,8 @@ export function useYouTubePlayer(containerId: string) {
       // Start silent audio on first user interaction (iOS audio session)
       const audio = ensureSilentAudio();
       audio.play().catch(() => {});
+      // Resume AudioContext (required on iOS/Chrome after user gesture)
+      resumeAudioContext();
 
       document.removeEventListener("touchstart", captureGesture);
       document.removeEventListener("click", captureGesture);
