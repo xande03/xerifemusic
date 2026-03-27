@@ -68,7 +68,7 @@ const groupPlaylists = (videos: VideoResult[]) => {
   return playlists.slice(0, 5);
 };
 
-const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddToPlaylist, activeVideo, isPlaying, onTogglePlay, onMinimize, onLike, isLiked, onShare }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddToPlaylist }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
@@ -79,11 +79,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionTab>("videos");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => (localStorage.getItem('demus-view-mode') as 'grid' | 'list') || 'grid');
-  
-  // Inline video info (related videos, comments)
-  const [inlineVideoInfo, setInlineVideoInfo] = useState<VideoInfo | null>(null);
-  const [inlineVideoLoading, setInlineVideoLoading] = useState(false);
-  const [inlineTab, setInlineTab] = useState<"related" | "comments">("related");
 
   const toggleViewMode = () => {
     const next = viewMode === 'grid' ? 'list' : 'grid';

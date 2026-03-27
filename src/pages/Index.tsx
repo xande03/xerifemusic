@@ -1064,19 +1064,6 @@ const Index = () => {
                   setPlaylistModalMode("add");
                   setShowPlaylistModal(true);
                 }}
-                activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
-                isPlaying={isPlaying}
-                onTogglePlay={handleTogglePlay}
-                onMinimize={() => {
-                  setShowFloatingPiP(true);
-                }}
-                onLike={() => handleVote(currentSong)}
-                isLiked={votedSongs.has(currentSong.id)}
-                onShare={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
-                  }
-                }}
               />
             ) : (
               <SearchScreen
