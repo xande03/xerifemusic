@@ -246,98 +246,111 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="bg-background"
           >
-          {/* Video Player Area — full-width 16:9 */}
+          {/* Video Player Area — edge-to-edge 16:9 */}
           <div className="relative w-full aspect-video bg-black">
-            {/* The actual YT iframe is rendered elsewhere — this is the visual container */}
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-muted-foreground text-xs font-mono">YouTube Stream</div>
             </div>
-
-            {/* Minimize button (top-left) */}
             <button
               onClick={onMinimize}
-              className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
+              className="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
             >
-              <ChevronDown size={22} />
+              <ChevronDown size={20} />
             </button>
           </div>
 
-          {/* Video Info */}
-          <div className="px-4 pt-3 pb-2 space-y-2">
-            <h2 className="text-sm font-bold text-foreground leading-tight line-clamp-2">
+          {/* Title + views + ...mais */}
+          <div className="px-4 pt-3 pb-1">
+            <h2 className="text-[15px] font-extrabold text-foreground leading-snug line-clamp-2">
               {activeVideo.title}
             </h2>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               {activeVideo.artist}
+              <span className="mx-1.5 opacity-40">•</span>
+              <span className="text-muted-foreground/70">...mais</span>
             </p>
           </div>
 
-          {/* Action Buttons Row */}
-          <div className="flex items-center justify-around px-4 py-2 border-b border-border/30">
-            <button onClick={onLike} className={`flex flex-col items-center gap-1 ${isLiked ? 'text-primary' : 'text-muted-foreground'}`}>
-              <ThumbsUp size={20} fill={isLiked ? "currentColor" : "none"} />
-              <span className="text-[10px] font-medium">{isLiked ? 'Curtido' : 'Curtir'}</span>
+          {/* Channel row */}
+          <div className="flex items-center gap-3 px-4 py-2">
+            <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-muted-foreground overflow-hidden flex-shrink-0">
+              {activeVideo.cover ? (
+                <img src={activeVideo.cover} alt="" className="w-full h-full object-cover" />
+              ) : (
+                activeVideo.artist?.charAt(0) || '?'
+              )}
+            </div>
+            <span className="text-[13px] font-semibold text-foreground truncate flex-1">{activeVideo.artist}</span>
+          </div>
+
+          {/* Action Buttons — horizontal scroll */}
+          <div className="flex items-center gap-1 px-3 py-2 overflow-x-auto no-scrollbar">
+            <button onClick={onLike} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all flex-shrink-0 ${isLiked ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+              <ThumbsUp size={16} fill={isLiked ? "currentColor" : "none"} />
+              {isLiked ? 'Curtido' : 'Curtir'}
             </button>
-            <button onClick={onShare} className="flex flex-col items-center gap-1 text-muted-foreground">
-              <Share2 size={20} />
-              <span className="text-[10px] font-medium">Partilhar</span>
+            <button onClick={onShare} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <Share2 size={16} />
+              Partilhar
             </button>
-            <button onClick={() => onAddToPlaylist?.({ id: activeVideo.id, videoId: activeVideo.youtubeId, title: activeVideo.title, channel: activeVideo.artist, thumbnail: activeVideo.cover })} className="flex flex-col items-center gap-1 text-muted-foreground">
-              <Plus size={20} />
-              <span className="text-[10px] font-medium">Playlist</span>
+            <button onClick={() => onAddToPlaylist?.({ id: activeVideo.id, videoId: activeVideo.youtubeId, title: activeVideo.title, channel: activeVideo.artist, thumbnail: activeVideo.cover })} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <Plus size={16} />
+              Playlist
             </button>
-            <button onClick={onMinimize} className="flex flex-col items-center gap-1 text-muted-foreground">
-              <Minimize2 size={20} />
-              <span className="text-[10px] font-medium">Minimizar</span>
+            <button onClick={onMinimize} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <Minimize2 size={16} />
+              Minimizar
             </button>
           </div>
 
-          {/* Comments preview (expandable) */}
+          {/* Comments preview card */}
           {inlineVideoInfo && inlineVideoInfo.comments.length > 0 && (
             <button
-              onClick={() => { setInlineTab("comments"); }}
-              className="mx-4 mt-2 p-3 rounded-xl bg-secondary/50 w-[calc(100%-2rem)] text-left"
+              onClick={() => setInlineTab("comments")}
+              className="mx-4 mt-1 p-3 rounded-2xl bg-secondary/60 w-[calc(100%-2rem)] text-left active:scale-[0.98] transition-transform"
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-foreground">Comentários {inlineVideoInfo.comments.length}</span>
-                <ChevronRight size={14} className="text-muted-foreground" />
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-xs font-bold text-foreground">Comentários</span>
+                <span className="text-[11px] text-muted-foreground font-semibold">{inlineVideoInfo.comments.length}</span>
+                <span className="ml-auto text-muted-foreground"><ChevronRight size={14} /></span>
               </div>
               {inlineVideoInfo.comments[0] && (
-                <p className="text-[11px] text-muted-foreground line-clamp-2">
-                  {inlineVideoInfo.comments[0].content}
-                </p>
+                <div className="flex items-start gap-2">
+                  {inlineVideoInfo.comments[0].authorThumbnail && (
+                    <img src={inlineVideoInfo.comments[0].authorThumbnail} alt="" className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5" />
+                  )}
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                    {inlineVideoInfo.comments[0].content}
+                  </p>
+                </div>
               )}
             </button>
           )}
 
-          {/* Tabs: Related / Comments */}
-          <div className="flex gap-3 px-4 pt-3 pb-1">
-            <button
-              onClick={() => setInlineTab("related")}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${inlineTab === 'related' ? 'bg-foreground text-background' : 'bg-secondary text-muted-foreground'}`}
-            >
-              Recomendados
-            </button>
-            <button
-              onClick={() => setInlineTab("comments")}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${inlineTab === 'comments' ? 'bg-foreground text-background' : 'bg-secondary text-muted-foreground'}`}
-            >
-              Comentários
-            </button>
-          </div>
+          {/* Separator */}
+          <div className="h-px bg-border/30 mx-4 mt-3" />
 
-          {/* Related Videos / Comments */}
-          <div className="px-4 py-3">
-            {inlineTab === "related" ? (
+          {/* Related Videos (YouTube-style list, always visible) */}
+          <div className="px-4 py-3 space-y-3">
+            {inlineTab === "comments" && (
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-foreground">Comentários</span>
+                  <button onClick={() => setInlineTab("related")} className="text-xs text-primary font-semibold">
+                    ← Voltar
+                  </button>
+                </div>
+                <VideoComments
+                  comments={inlineVideoInfo?.comments || []}
+                  loading={inlineVideoLoading}
+                />
+              </div>
+            )}
+            {inlineTab === "related" && (
               <RelatedVideos
                 videos={inlineVideoInfo?.relatedVideos || []}
                 loading={inlineVideoLoading}
                 onPlay={(v) => onPlayVideo(v)}
-              />
-            ) : (
-              <VideoComments
-                comments={inlineVideoInfo?.comments || []}
-                loading={inlineVideoLoading}
               />
             )}
           </div>
