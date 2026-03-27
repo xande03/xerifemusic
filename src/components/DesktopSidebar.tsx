@@ -317,6 +317,7 @@ const DesktopSidebar = ({
           </div>
         )}
       </div>
+      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
     </aside>
   );
 };
