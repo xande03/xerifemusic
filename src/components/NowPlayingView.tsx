@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download, Plus } from "lucide-react";
+import { ChevronDown, Heart, Volume2, VolumeX, Video, Music2, PictureInPicture2, Mic2, SkipBack, Play, Pause, SkipForward, Shuffle, Repeat, Loader2, Airplay, Cast, ListVideo, MessageSquare, SkipForward as AutoPlayIcon, Maximize2, ListMusic, Download, Plus, SlidersHorizontal } from "lucide-react";
 
 import { Song, formatDuration } from "@/data/mockSongs";
 import { hdThumbnail } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 import SeekBar from "@/components/SeekBar";
+import Equalizer from "@/components/Equalizer";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
@@ -72,6 +73,7 @@ const NowPlayingView = ({
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [videoInfoLoading, setVideoInfoLoading] = useState(false);
   const [bottomTab, setBottomTab] = useState<"related" | "comments">("related");
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const [showFsControls, setShowFsControls] = useState(true);
   const fsControlsTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
@@ -344,6 +346,7 @@ const NowPlayingView = ({
                        }
                      }
                    },
+                   { icon: SlidersHorizontal, label: 'Equalizador', onClick: () => setShowEqualizer(true) },
                 ].map((btn, i) => btn.onClick && (
                   <button
                     key={i}
@@ -438,8 +441,10 @@ const NowPlayingView = ({
               )}
             </div>
           </div>
-        </div>
       </div>
+
+      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
+    </div>
       </div>
     </div>
   );
