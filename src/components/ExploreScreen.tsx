@@ -97,19 +97,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const hasFetchedTrending = useRef(false);
 
-  // Fetch video info when activeVideo changes
-  useEffect(() => {
-    if (activeVideo?.youtubeId) {
-      setInlineVideoInfo(null);
-      setInlineVideoLoading(true);
-      fetchVideoInfo(activeVideo.youtubeId).then((info) => {
-        setInlineVideoInfo(info);
-        setInlineVideoLoading(false);
-      }).catch(() => setInlineVideoLoading(false));
-    } else {
-      setInlineVideoInfo(null);
-    }
-  }, [activeVideo?.youtubeId]);
 
   useEffect(() => {
     if (hasFetchedTrending.current) return;
