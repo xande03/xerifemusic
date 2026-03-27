@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, ChevronDown, Play, LayoutGrid, List, ThumbsUp, Share2, Plus, Minimize2 } from "lucide-react";
+import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, Play, LayoutGrid, List } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import { hdThumbnail } from "@/lib/utils";
@@ -9,21 +9,12 @@ import VideoCard from "./VideoCard";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
 import VideoCategorySelector, { VIDEO_CATEGORIES, type VideoCategory } from "./VideoCategorySelector";
-import type { Song } from "@/data/mockSongs";
 
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
   onFullscreenVideo?: (video: VideoResult) => void;
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
   onAddToPlaylist?: (video: any) => void;
-  /** Currently playing video song (for inline player on mobile) */
-  activeVideo?: Song | null;
-  isPlaying?: boolean;
-  onTogglePlay?: () => void;
-  onMinimize?: () => void;
-  onLike?: () => void;
-  isLiked?: boolean;
-  onShare?: () => void;
 }
 
 // Categories are now imported from VideoCategorySelector
