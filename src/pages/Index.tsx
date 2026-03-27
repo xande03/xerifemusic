@@ -805,7 +805,7 @@ const Index = () => {
                         <img 
                           src={xerifeHubLogo} 
                           alt="Xerife Hub" 
-                          className="w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] rounded-3xl"
+                          className="w-36 h-36 sm:w-52 sm:h-52 lg:w-64 lg:h-64 drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] rounded-3xl"
                         />
                       </motion.div>
                       <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
