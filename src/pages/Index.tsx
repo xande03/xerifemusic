@@ -737,16 +737,20 @@ const Index = () => {
                       id: `yt-${video.videoId}`, youtubeId: video.videoId,
                       title: video.title, artist: video.channel, album: video.title,
                       cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                      type: "video" as const,
                     };
                     handleSelect(song);
                     setPlayerMode("video");
-                    setExpanded(true);
+                    if (window.innerWidth >= 768) {
+                      setExpanded(true);
+                    }
                   }}
                   onFullscreenVideo={(video) => {
                     const song: Song = {
                       id: `yt-${video.videoId}`, youtubeId: video.videoId,
                       title: video.title, artist: video.channel, album: video.title,
                       cover: video.thumbnail, duration: video.lengthSeconds, votes: 0, isDownloaded: false,
+                      type: "video" as const,
                     };
                     handleSelect(song);
                     setPlayerMode("video");
@@ -754,6 +758,28 @@ const Index = () => {
                     setTimeout(() => requestFullscreen(), 500);
                   }}
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
+                  activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
+                  isPlaying={isPlaying}
+                  onTogglePlay={handleTogglePlay}
+                  onMinimize={() => setShowFloatingPiP(true)}
+                  onLike={() => handleVote(currentSong)}
+                  isLiked={votedSongs.has(currentSong.id)}
+                  onShare={() => {
+                    if (navigator.share) {
+                      navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
+                    }
+                  }}
+                  onAddToPlaylist={(v) => {
+                    const song: Song = {
+                      id: `yt-${v.videoId}`, youtubeId: v.videoId,
+                      title: v.title, artist: v.channel, album: v.title,
+                      cover: v.thumbnail, duration: v.lengthSeconds || 0, votes: 0, isDownloaded: false,
+                      type: "video" as const,
+                    };
+                    setSongToAddToPlaylist(song);
+                    setPlaylistModalMode("add");
+                    setShowPlaylistModal(true);
+                  }}
                 />
               ) : (
                 <motion.div
