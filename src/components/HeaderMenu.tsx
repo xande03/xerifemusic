@@ -233,6 +233,8 @@ const HeaderMenu = ({
           </div>
         </div>
       )}
+
+      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
     </div>
   );
 };
