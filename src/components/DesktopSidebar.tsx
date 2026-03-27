@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus, Sparkles, User, LogOut, LogIn } from "lucide-react";
+import { Home, Search, Heart, Download, Settings, Compass, MonitorPlay, Clock, ListMusic, Music, Sun, Moon, Palette, Cast, X, ZoomIn, Plus, Minus, Sparkles, User, LogOut, LogIn, SlidersHorizontal } from "lucide-react";
+import Equalizer from "@/components/Equalizer";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 
 type Tab = "home" | "search" | "library" | "offline" | "profile" | "history" | "playlists";
@@ -77,6 +78,7 @@ const DesktopSidebar = ({
 }: DesktopSidebarProps) => {
   const mainTabs = homeMode === "video" ? videoTabs : musicTabs;
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -284,6 +286,15 @@ const DesktopSidebar = ({
               </div>
             )}
 
+            {/* Equalizer */}
+            <button
+              onClick={() => { setShowEqualizer(true); setToolsOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+            >
+              <SlidersHorizontal size={16} className="text-muted-foreground" />
+              <span>Equalizador</span>
+            </button>
+
             {/* Chromecast */}
             {onCast && (
               <button
@@ -306,6 +317,7 @@ const DesktopSidebar = ({
           </div>
         )}
       </div>
+      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
     </aside>
   );
 };
