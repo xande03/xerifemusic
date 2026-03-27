@@ -792,7 +792,7 @@ const Index = () => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="flex flex-col items-center justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-4 text-center overflow-hidden"
+                    className="flex flex-col items-center justify-center pt-0 sm:pt-2 pb-1 sm:pb-2 px-4 text-center overflow-hidden gap-0"
                   >
                     <div className="relative group [perspective:1000px]">
                       <motion.div 
