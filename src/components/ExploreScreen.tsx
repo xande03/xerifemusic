@@ -341,8 +341,9 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
               />
             )}
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ═══ BROWSE SECTION (hidden when inline player is showing) ═══ */}
       {!showInlinePlayer && (
