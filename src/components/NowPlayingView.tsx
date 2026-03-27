@@ -346,7 +346,7 @@ const NowPlayingView = ({
                        }
                      }
                    },
-                   { icon: SlidersHorizontal, label: 'Equalizador', onClick: () => setShowEqualizer(true) },
+                   
                 ].map((btn, i) => btn.onClick && (
                   <button
                     key={i}
