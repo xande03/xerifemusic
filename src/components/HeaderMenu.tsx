@@ -52,6 +52,7 @@ const HeaderMenu = ({
   currentZoom = 1,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
