@@ -203,6 +203,15 @@ const HeaderMenu = ({
             </div>
           </div>
 
+          {/* Equalizer */}
+          <button
+            onClick={() => { setShowEqualizer(true); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+          >
+            <SlidersHorizontal size={16} className="text-muted-foreground" />
+            <span>Equalizador</span>
+          </button>
+
           {/* Chromecast */}
           {onCast && (
             <button
