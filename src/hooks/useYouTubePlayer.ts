@@ -187,6 +187,7 @@ export function useYouTubePlayer(containerId: string) {
             // Keep silent audio in sync — iOS needs an active audio element
             if (playing) {
               ensureSilentAudio().play().catch(() => {});
+              resumeAudioContext();
             }
 
             setState((s) => ({
