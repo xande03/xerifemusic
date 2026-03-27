@@ -810,11 +810,11 @@ const Index = () => {
                       </motion.div>
                       <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-150 opacity-20 animate-pulse pointer-events-none" />
                     </div>
-                    <div className="relative z-10">
-                      <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tighter text-foreground italic">
+                    <div className="relative z-10 -mt-2">
+                      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-black tracking-tighter text-foreground italic">
                         XERIFE <span className="text-primary drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]">HUB</span>
                       </h1>
-                      <p className="text-sm sm:text-lg text-muted-foreground font-medium tracking-[0.4em] uppercase opacity-60">Premium Experience</p>
+                      <p className="text-xs sm:text-base text-muted-foreground font-medium tracking-[0.4em] uppercase opacity-60">Premium Experience</p>
                     </div>
                   </motion.div>
 
