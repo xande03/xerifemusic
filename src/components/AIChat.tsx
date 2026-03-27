@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Send, Bot, User, Music, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Song } from "@/data/mockSongs";
 
 interface Message {
@@ -16,9 +18,6 @@ interface AIChatProps {
   onPlaySong?: (song: Song) => void;
 }
 
-const GROQ_API_KEY = "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";
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-
 const MOCK_SONGS: Song[] = [
   { id: "1", youtubeId: "dQw4w9WgXcQ", title: "Never Gonna Give You Up", artist: "Rick Astley", album: "Whenever You Need Somebody", cover: "", duration: 213, votes: 12, isDownloaded: false },
   { id: "2", youtubeId: "fJ9rUzIMcZQ", title: "Bohemian Rhapsody", artist: "Queen", album: "A Night at the Opera", cover: "", duration: 354, votes: 8, isDownloaded: false },
@@ -29,26 +28,6 @@ const MOCK_SONGS: Song[] = [
   { id: "7", youtubeId: "JGwWNGJdvx8", title: "Shape of You", artist: "Ed Sheeran", album: "÷", cover: "", duration: 234, votes: 9, isDownloaded: false },
   { id: "8", youtubeId: "CevxZvSJLk8", title: "Roar", artist: "Katy Perry", album: "Prism", cover: "", duration: 224, votes: 7, isDownloaded: false },
 ];
-
-const SYSTEM_PROMPT = `Você é Xerife, um assistente amigável e conversacional do Xerife Hub, um app de música.
-
-Sobre você:
-- Você é acolhedor, humorado e adora conversar sobre música
-- Você pode falar sobre qualquer assunto, não apenas música
-- Use emojis com moderação para deixar a conversa mais divertida
-- Seja natural e conversacional, como um amigo
-- Se o usuário perguntar sobre música, seja útil e sugira músicas do catálogo
-
-Catálogo de músicas disponíveis:
-${MOCK_SONGS.map(s => `• "${s.title}" - ${s.artist} (${s.album})`).join('\n')}
-
-Quando o usuário mencionar uma música ou artista, você pode sugerir que ele toque a música. Você pode buscar músicas por:
-- Nome da música ou artista
-- Descrição ou sentimento
-- Trecho de letra
-- Gênero ou década
-
-Responda de forma natural e concisa. Se não souber algo, seja honesto mas ofereça ajuda do que puder.`;
 
 const AIChat = ({ isOpen, onClose, onPlaySong }: AIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -97,34 +76,21 @@ const AIChat = ({ isOpen, onClose, onPlaySong }: AIChatProps) => {
     const newHistory = [...conversationHistory, { role: "user", content: input.trim() }];
 
     try {
-      const response = await fetch(GROQ_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...newHistory.slice(-10),
-            { role: "user", content: input.trim() }
-          ],
-          temperature: 0.8,
-          max_tokens: 1024,
-          top_p: 0.9,
-          stream: false,
-        }),
+      const { data, error } = await supabase.functions.invoke("ai-chat", {
+        body: { messages: newHistory.slice(-10) },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Groq API error:", errorData);
-        throw new Error(`API request failed: ${response.status}`);
+      if (error) {
+        console.error("AI Chat edge function error:", error);
+        throw new Error(error.message || "Edge function error");
       }
 
-      const data = await response.json();
-      const assistantContent = data.choices?.[0]?.message?.content || 
+      if (data?.error) {
+        toast.error(data.error);
+        throw new Error(data.error);
+      }
+
+      const assistantContent = data?.choices?.[0]?.message?.content || 
         "Desculpe, tive um problema ao processar sua mensagem. Pode tentar novamente?";
 
       setConversationHistory([...newHistory, { role: "assistant", content: assistantContent }]);
@@ -205,7 +171,7 @@ const AIChat = ({ isOpen, onClose, onPlaySong }: AIChatProps) => {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-foreground">Xerife AI</h2>
-                  <p className="text-[10px] text-muted-foreground">Powered by Groq</p>
+                  <p className="text-[10px] text-muted-foreground">Powered by Lovable AI</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
