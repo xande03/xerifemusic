@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles, User, LogIn, LogOut } from "lucide-react";
+import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles, User, LogIn, LogOut, SlidersHorizontal } from "lucide-react";
+import Equalizer from "@/components/Equalizer";
 
 type HomeMode = "music" | "video";
 
