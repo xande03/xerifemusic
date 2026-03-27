@@ -40,24 +40,79 @@ function loadYouTubeAPI(): Promise<void> {
   });
 }
 
-// Silent audio element to keep iOS audio session alive in background
+// Silent audio element to keep iOS/Android audio session alive in background/lock screen
 let silentAudio: HTMLAudioElement | null = null;
+let audioContext: AudioContext | null = null;
 
+/**
+ * Creates a longer silent audio loop (1 second) that keeps the browser audio
+ * session alive when the page loses visibility (lock screen, app switch).
+ * Uses both an <audio> element AND a Web Audio API oscillator for maximum
+ * compatibility across iOS Safari, Chrome Android, and desktop browsers.
+ */
 function ensureSilentAudio() {
   if (silentAudio) return silentAudio;
-  
-  // Create a tiny silent WAV as a data URI
-  // This keeps the Web Audio session active on iOS even in background/lock screen
-  const silentWav = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
-  silentAudio = new Audio(silentWav);
+
+  // Generate a 1-second silent WAV (44100 Hz, 16-bit mono)
+  // Longer duration = more reliable background keep-alive on iOS
+  const sampleRate = 44100;
+  const numSamples = sampleRate; // 1 second
+  const dataSize = numSamples * 2; // 16-bit = 2 bytes per sample
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  // RIFF header
+  const writeString = (offset: number, str: string) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); };
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // chunk size
+  view.setUint16(20, 1, true);  // PCM
+  view.setUint16(22, 1, true);  // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); // byte rate
+  view.setUint16(32, 2, true);  // block align
+  view.setUint16(34, 16, true); // bits per sample
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+  // All samples = 0 (silence)
+
+  const blob = new Blob([buffer], { type: 'audio/wav' });
+  const url = URL.createObjectURL(blob);
+
+  silentAudio = new Audio(url);
   silentAudio.loop = true;
   silentAudio.volume = 0.001; // Nearly silent
   silentAudio.setAttribute("playsinline", "true");
   silentAudio.setAttribute("webkit-playsinline", "true");
-  // Enable AirPlay on the audio element (Safari)
   silentAudio.setAttribute("x-webkit-airplay", "allow");
-  
+
+  // Also start a Web Audio API context — some Android browsers only
+  // keep the audio session alive if an AudioContext is running
+  try {
+    if (!audioContext) {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (AC) {
+        audioContext = new AC();
+        // Create silent oscillator
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        gain.gain.value = 0.001; // inaudible
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+      }
+    }
+  } catch { /* AudioContext not available */ }
+
   return silentAudio;
+}
+
+/** Resume AudioContext if suspended (required after user gesture on iOS/Chrome) */
+function resumeAudioContext() {
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
 }
 
 export function useYouTubePlayer(containerId: string) {
@@ -83,6 +138,8 @@ export function useYouTubePlayer(containerId: string) {
       // Start silent audio on first user interaction (iOS audio session)
       const audio = ensureSilentAudio();
       audio.play().catch(() => {});
+      // Resume AudioContext (required on iOS/Chrome after user gesture)
+      resumeAudioContext();
 
       document.removeEventListener("touchstart", captureGesture);
       document.removeEventListener("click", captureGesture);
@@ -130,6 +187,7 @@ export function useYouTubePlayer(containerId: string) {
             // Keep silent audio in sync — iOS needs an active audio element
             if (playing) {
               ensureSilentAudio().play().catch(() => {});
+              resumeAudioContext();
             }
 
             setState((s) => ({
@@ -154,6 +212,24 @@ export function useYouTubePlayer(containerId: string) {
     };
   }, [containerId]);
 
+  // Keep audio session alive when page goes to background (lock screen / app switch)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden' && state.isPlaying) {
+        // Re-assert silent audio to prevent iOS from killing the audio session
+        const audio = ensureSilentAudio();
+        audio.play().catch(() => {});
+        resumeAudioContext();
+      } else if (document.visibilityState === 'visible' && state.isPlaying) {
+        // Coming back — resume everything
+        resumeAudioContext();
+        ensureSilentAudio().play().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [state.isPlaying]);
+
   // Track progress — use requestAnimationFrame-friendly interval
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -162,7 +238,7 @@ export function useYouTubePlayer(containerId: string) {
         const ct = playerRef.current?.getCurrentTime?.() || 0;
         const dur = playerRef.current?.getDuration?.() || 0;
         setState((s) => ({ ...s, currentTime: ct, duration: dur }));
-      }, 200); // Increased frequency for better sync performance
+      }, 200);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
