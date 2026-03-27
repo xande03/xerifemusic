@@ -73,6 +73,7 @@ const NowPlayingView = ({
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [videoInfoLoading, setVideoInfoLoading] = useState(false);
   const [bottomTab, setBottomTab] = useState<"related" | "comments">("related");
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const [showFsControls, setShowFsControls] = useState(true);
   const fsControlsTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lyricsContainerRef = useRef<HTMLDivElement>(null);
