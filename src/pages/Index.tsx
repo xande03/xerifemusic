@@ -741,9 +741,7 @@ const Index = () => {
                     };
                     handleSelect(song);
                     setPlayerMode("video");
-                    if (window.innerWidth >= 768) {
-                      setExpanded(true);
-                    }
+                    setExpanded(true);
                   }}
                   onFullscreenVideo={(video) => {
                     const song: Song = {
