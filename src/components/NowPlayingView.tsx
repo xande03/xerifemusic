@@ -422,7 +422,7 @@ const NowPlayingView = ({
                     <div className="h-8 sm:h-10 w-px bg-white/10 mx-0.5 sm:mx-1 flex-shrink-0 lg:hidden" />
                     {[
                       { icon: Cast, label: 'Transmitir', onClick: onCast },
-                      { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode === "video" ? "video" : "audio") },
+                      { icon: Airplay, label: 'Airplay', onClick: () => onAirPlay?.(mode as any === "video" ? "video" : "audio") },
                       { icon: Maximize2, label: 'Tela Cheia', onClick: onFullscreen },
                       { icon: PictureInPicture2, label: 'PiP', onClick: onTogglePiP },
                       { icon: Plus, label: 'Playlist', onClick: onAddToPlaylist ? () => onAddToPlaylist(song) : undefined },
