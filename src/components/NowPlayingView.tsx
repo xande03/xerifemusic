@@ -443,7 +443,7 @@ const NowPlayingView = ({
           </div>
       </div>
 
-      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
+      
     </div>
       </div>
     </div>
