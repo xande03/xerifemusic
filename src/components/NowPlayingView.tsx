@@ -12,6 +12,7 @@ import { fetchVideoInfo, type VideoInfo } from "@/lib/youtubeVideoInfo";
 import type { VideoResult } from "@/lib/youtubeGeneralSearch";
 import xerifeHubLogo from "@/assets/xerife-hub-logo.png";
 import SeekBar from "@/components/SeekBar";
+import Equalizer from "@/components/Equalizer";
 
 export type PlayerMode = "video" | "audio" | "lyrics";
 
