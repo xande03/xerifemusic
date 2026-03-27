@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles, User, LogIn, LogOut } from "lucide-react";
+import { Settings, Music, MonitorPlay, Sun, Moon, Palette, Cast, X, Clock, ListMusic, ZoomIn, Plus, Minus, Sparkles, User, LogIn, LogOut, SlidersHorizontal } from "lucide-react";
+import Equalizer from "@/components/Equalizer";
 
 type HomeMode = "music" | "video";
 
@@ -51,6 +52,7 @@ const HeaderMenu = ({
   currentZoom = 1,
 }: HeaderMenuProps) => {
   const [open, setOpen] = useState(false);
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -201,6 +203,15 @@ const HeaderMenu = ({
             </div>
           </div>
 
+          {/* Equalizer */}
+          <button
+            onClick={() => { setShowEqualizer(true); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-accent transition-colors border-t border-border"
+          >
+            <SlidersHorizontal size={16} className="text-muted-foreground" />
+            <span>Equalizador</span>
+          </button>
+
           {/* Chromecast */}
           {onCast && (
             <button
@@ -222,6 +233,8 @@ const HeaderMenu = ({
           </div>
         </div>
       )}
+
+      <Equalizer open={showEqualizer} onClose={() => setShowEqualizer(false)} />
     </div>
   );
 };
