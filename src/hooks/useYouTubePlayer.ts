@@ -212,6 +212,24 @@ export function useYouTubePlayer(containerId: string) {
     };
   }, [containerId]);
 
+  // Keep audio session alive when page goes to background (lock screen / app switch)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden' && state.isPlaying) {
+        // Re-assert silent audio to prevent iOS from killing the audio session
+        const audio = ensureSilentAudio();
+        audio.play().catch(() => {});
+        resumeAudioContext();
+      } else if (document.visibilityState === 'visible' && state.isPlaying) {
+        // Coming back — resume everything
+        resumeAudioContext();
+        ensureSilentAudio().play().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [state.isPlaying]);
+
   // Track progress — use requestAnimationFrame-friendly interval
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -220,7 +238,7 @@ export function useYouTubePlayer(containerId: string) {
         const ct = playerRef.current?.getCurrentTime?.() || 0;
         const dur = playerRef.current?.getDuration?.() || 0;
         setState((s) => ({ ...s, currentTime: ct, duration: dur }));
-      }, 200); // Increased frequency for better sync performance
+      }, 200);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
