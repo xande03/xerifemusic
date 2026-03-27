@@ -290,7 +290,7 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
               </div>
               {inlineVideoInfo.comments[0] && (
                 <p className="text-[11px] text-muted-foreground line-clamp-2">
-                  {inlineVideoInfo.comments[0].text}
+                  {inlineVideoInfo.comments[0].content}
                 </p>
               )}
             </button>
