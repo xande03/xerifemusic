@@ -675,8 +675,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
               <p className="text-sm text-muted-foreground">Nenhum vídeo encontrado</p>
             </div>
           )}
-        </>
-      )}
     </div>
   );
 };
