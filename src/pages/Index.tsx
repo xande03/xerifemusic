@@ -1046,10 +1046,7 @@ const Index = () => {
                   };
                   handleSelect(song);
                   setPlayerMode("video");
-                  // Don't expand on mobile — show inline player instead
-                  if (window.innerWidth >= 768) {
-                    setExpanded(true);
-                  }
+                  setExpanded(true);
                 }}
                 onFullscreenVideo={(video) => {
                   const song: Song = {
