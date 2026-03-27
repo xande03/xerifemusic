@@ -225,13 +225,27 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
     { id: "comments", icon: MessageSquare, label: "Comentários" },
   ];
 
-  const showInlinePlayer = !!activeVideo && activeVideo.type === 'video';
+  const showInlinePlayer = !!activeVideo && (activeVideo.type === 'video' || activeVideo.id.startsWith('yt-'));
 
   return (
     <div className="space-y-3">
       {/* ═══ INLINE VIDEO PLAYER (YouTube-like mobile layout) ═══ */}
-      {showInlinePlayer && (
-        <div className="bg-background">
+      <AnimatePresence>
+        {showInlinePlayer && (
+          <motion.div
+            key="inline-player"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ 
+              opacity: 0, 
+              scale: 0.3,
+              x: 200,
+              y: 400,
+              transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+            }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="bg-background"
+          >
           {/* Video Player Area — full-width 16:9 */}
           <div className="relative w-full aspect-video bg-black">
             {/* The actual YT iframe is rendered elsewhere — this is the visual container */}
