@@ -756,17 +756,6 @@ const Index = () => {
                     setTimeout(() => requestFullscreen(), 500);
                   }}
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
-                  activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
-                  isPlaying={isPlaying}
-                  onTogglePlay={handleTogglePlay}
-                  onMinimize={() => setShowFloatingPiP(true)}
-                  onLike={() => handleVote(currentSong)}
-                  isLiked={votedSongs.has(currentSong.id)}
-                  onShare={() => {
-                    if (navigator.share) {
-                      navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
-                    }
-                  }}
                   onAddToPlaylist={(v) => {
                     const song: Song = {
                       id: `yt-${v.videoId}`, youtubeId: v.videoId,
