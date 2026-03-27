@@ -78,6 +78,7 @@ const DesktopSidebar = ({
 }: DesktopSidebarProps) => {
   const mainTabs = homeMode === "video" ? videoTabs : musicTabs;
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [showEqualizer, setShowEqualizer] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
