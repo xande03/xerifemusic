@@ -338,8 +338,8 @@ const NowPlayingView = ({
                     <button onClick={() => onArtistClick?.({ name: song.artist, image: song.cover })} className="text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium truncate">
                       {song.artist}
                     </button>
-                    {videoInfo?.viewCount && (
-                      <span className="text-[11px] text-muted-foreground/60">• {videoInfo.viewCount} visualizações</span>
+                    {(videoInfo as any)?.viewCount && (
+                      <span className="text-[11px] text-muted-foreground/60">• {(videoInfo as any).viewCount} visualizações</span>
                     )}
                   </div>
 
