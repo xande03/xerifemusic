@@ -1022,7 +1022,10 @@ const Index = () => {
                   };
                   handleSelect(song);
                   setPlayerMode("video");
-                  setExpanded(true);
+                  // Don't expand on mobile — show inline player instead
+                  if (window.innerWidth >= 768) {
+                    setExpanded(true);
+                  }
                 }}
                 onFullscreenVideo={(video) => {
                   const song: Song = {
@@ -1050,6 +1053,19 @@ const Index = () => {
                   setSongToAddToPlaylist(song);
                   setPlaylistModalMode("add");
                   setShowPlaylistModal(true);
+                }}
+                activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
+                isPlaying={isPlaying}
+                onTogglePlay={handleTogglePlay}
+                onMinimize={() => {
+                  setShowFloatingPiP(true);
+                }}
+                onLike={() => handleVote(currentSong)}
+                isLiked={votedSongs.has(currentSong.id)}
+                onShare={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
+                  }
                 }}
               />
             ) : (
