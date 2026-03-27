@@ -254,6 +254,16 @@ const Equalizer = ({ open, onClose }: EqualizerProps) => {
               </div>
             </div>
 
+            {/* Info note */}
+            <div className="px-5 pb-3">
+              <div className="flex items-start gap-2.5 rounded-xl bg-primary/5 border border-primary/15 px-3.5 py-2.5">
+                <span className="text-base mt-0.5">🎧</span>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  A equalização real é aplicada ao usar <span className="text-foreground font-medium">fones de ouvido com suporte a EQ nativo</span> ou em dispositivos com o app nativo instalado (Android/iOS).
+                </p>
+              </div>
+            </div>
+
             {/* Sliders */}
             <div className="flex-1 px-5 pb-6 pt-2">
               <div className="w-full max-w-md mx-auto flex">
