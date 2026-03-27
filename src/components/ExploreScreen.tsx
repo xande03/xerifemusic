@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, ChevronDown, Play, LayoutGrid, List, ThumbsUp, Share2, Plus, Minimize2 } from "lucide-react";
+import { Search, TrendingUp, Loader2, X, PlayCircle, Users, ListVideo, MessageSquare, ChevronRight, Play, LayoutGrid, List } from "lucide-react";
 import { searchYouTubeGeneral, type VideoResult } from "@/lib/youtubeGeneralSearch";
 import { getSearchSuggestions } from "@/lib/youtubeSearch";
 import { hdThumbnail } from "@/lib/utils";
@@ -9,21 +9,12 @@ import VideoCard from "./VideoCard";
 import RelatedVideos from "./RelatedVideos";
 import VideoComments from "./VideoComments";
 import VideoCategorySelector, { VIDEO_CATEGORIES, type VideoCategory } from "./VideoCategorySelector";
-import type { Song } from "@/data/mockSongs";
 
 interface ExploreScreenProps {
   onPlayVideo: (video: VideoResult) => void;
   onFullscreenVideo?: (video: VideoResult) => void;
   onChannelClick?: (channelName: string, channelThumbnail?: string) => void;
   onAddToPlaylist?: (video: any) => void;
-  /** Currently playing video song (for inline player on mobile) */
-  activeVideo?: Song | null;
-  isPlaying?: boolean;
-  onTogglePlay?: () => void;
-  onMinimize?: () => void;
-  onLike?: () => void;
-  isLiked?: boolean;
-  onShare?: () => void;
 }
 
 // Categories are now imported from VideoCategorySelector
@@ -77,7 +68,7 @@ const groupPlaylists = (videos: VideoResult[]) => {
   return playlists.slice(0, 5);
 };
 
-const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddToPlaylist, activeVideo, isPlaying, onTogglePlay, onMinimize, onLike, isLiked, onShare }: ExploreScreenProps) => {
+const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddToPlaylist }: ExploreScreenProps) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [results, setResults] = useState<VideoResult[]>([]);
@@ -88,11 +79,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionTab>("videos");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => (localStorage.getItem('demus-view-mode') as 'grid' | 'list') || 'grid');
-  
-  // Inline video info (related videos, comments)
-  const [inlineVideoInfo, setInlineVideoInfo] = useState<VideoInfo | null>(null);
-  const [inlineVideoLoading, setInlineVideoLoading] = useState(false);
-  const [inlineTab, setInlineTab] = useState<"related" | "comments">("related");
 
   const toggleViewMode = () => {
     const next = viewMode === 'grid' ? 'list' : 'grid';
@@ -111,19 +97,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
   const suggestTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const hasFetchedTrending = useRef(false);
 
-  // Fetch video info when activeVideo changes
-  useEffect(() => {
-    if (activeVideo?.youtubeId) {
-      setInlineVideoInfo(null);
-      setInlineVideoLoading(true);
-      fetchVideoInfo(activeVideo.youtubeId).then((info) => {
-        setInlineVideoInfo(info);
-        setInlineVideoLoading(false);
-      }).catch(() => setInlineVideoLoading(false));
-    } else {
-      setInlineVideoInfo(null);
-    }
-  }, [activeVideo?.youtubeId]);
 
   useEffect(() => {
     if (hasFetchedTrending.current) return;
@@ -225,142 +198,9 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
     { id: "comments", icon: MessageSquare, label: "Comentários" },
   ];
 
-  const showInlinePlayer = !!activeVideo && (activeVideo.type === 'video' || activeVideo.id.startsWith('yt-'));
-
   return (
     <div className="space-y-3">
-      {/* ═══ INLINE VIDEO PLAYER (YouTube-like mobile layout) ═══ */}
-      <AnimatePresence>
-        {showInlinePlayer && (
-          <motion.div
-            key="inline-player"
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ 
-              opacity: 0, 
-              scale: 0.3,
-              x: 200,
-              y: 400,
-              transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
-            }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-background"
-          >
-          {/* Video Player Area — edge-to-edge 16:9 */}
-          <div className="relative w-full aspect-video bg-black">
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-muted-foreground text-xs font-mono">YouTube Stream</div>
-            </div>
-            <button
-              onClick={onMinimize}
-              className="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
-            >
-              <ChevronDown size={20} />
-            </button>
-          </div>
-
-          {/* Title + views + ...mais */}
-          <div className="px-4 pt-3 pb-1">
-            <h2 className="text-[15px] font-extrabold text-foreground leading-snug line-clamp-2">
-              {activeVideo.title}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              {activeVideo.artist}
-              <span className="mx-1.5 opacity-40">•</span>
-              <span className="text-muted-foreground/70">...mais</span>
-            </p>
-          </div>
-
-          {/* Channel row */}
-          <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-muted-foreground overflow-hidden flex-shrink-0">
-              {activeVideo.cover ? (
-                <img src={activeVideo.cover} alt="" className="w-full h-full object-cover" />
-              ) : (
-                activeVideo.artist?.charAt(0) || '?'
-              )}
-            </div>
-            <span className="text-[13px] font-semibold text-foreground truncate flex-1">{activeVideo.artist}</span>
-          </div>
-
-          {/* Action Buttons — horizontal scroll */}
-          <div className="flex items-center gap-1 px-3 py-2 overflow-x-auto no-scrollbar">
-            <button onClick={onLike} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all flex-shrink-0 ${isLiked ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-              <ThumbsUp size={16} fill={isLiked ? "currentColor" : "none"} />
-              {isLiked ? 'Curtido' : 'Curtir'}
-            </button>
-            <button onClick={onShare} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
-              <Share2 size={16} />
-              Partilhar
-            </button>
-            <button onClick={() => onAddToPlaylist?.({ id: activeVideo.id, videoId: activeVideo.youtubeId, title: activeVideo.title, channel: activeVideo.artist, thumbnail: activeVideo.cover })} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
-              <Plus size={16} />
-              Playlist
-            </button>
-            <button onClick={onMinimize} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-secondary text-xs font-semibold text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
-              <Minimize2 size={16} />
-              Minimizar
-            </button>
-          </div>
-
-          {/* Comments preview card */}
-          {inlineVideoInfo && inlineVideoInfo.comments.length > 0 && (
-            <button
-              onClick={() => setInlineTab("comments")}
-              className="mx-4 mt-1 p-3 rounded-2xl bg-secondary/60 w-[calc(100%-2rem)] text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs font-bold text-foreground">Comentários</span>
-                <span className="text-[11px] text-muted-foreground font-semibold">{inlineVideoInfo.comments.length}</span>
-                <span className="ml-auto text-muted-foreground"><ChevronRight size={14} /></span>
-              </div>
-              {inlineVideoInfo.comments[0] && (
-                <div className="flex items-start gap-2">
-                  {inlineVideoInfo.comments[0].authorThumbnail && (
-                    <img src={inlineVideoInfo.comments[0].authorThumbnail} alt="" className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5" />
-                  )}
-                  <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                    {inlineVideoInfo.comments[0].content}
-                  </p>
-                </div>
-              )}
-            </button>
-          )}
-
-          {/* Separator */}
-          <div className="h-px bg-border/30 mx-4 mt-3" />
-
-          {/* Related Videos (YouTube-style list, always visible) */}
-          <div className="px-4 py-3 space-y-3">
-            {inlineTab === "comments" && (
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-foreground">Comentários</span>
-                  <button onClick={() => setInlineTab("related")} className="text-xs text-primary font-semibold">
-                    ← Voltar
-                  </button>
-                </div>
-                <VideoComments
-                  comments={inlineVideoInfo?.comments || []}
-                  loading={inlineVideoLoading}
-                />
-              </div>
-            )}
-            {inlineTab === "related" && (
-              <RelatedVideos
-                videos={inlineVideoInfo?.relatedVideos || []}
-                loading={inlineVideoLoading}
-                onPlay={(v) => onPlayVideo(v)}
-              />
-            )}
-          </div>
-        </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ═══ BROWSE SECTION (hidden when inline player is showing) ═══ */}
-      {!showInlinePlayer && (
-        <>
+      {/* ═══ BROWSE SECTION ═══ */}
           {/* Search bar + View Toggle */}
           <div className="flex items-center gap-2 px-4 pt-1">
             <form onSubmit={handleSubmit} className="flex-1">
@@ -808,8 +648,6 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
               <p className="text-sm text-muted-foreground">Nenhum vídeo encontrado</p>
             </div>
           )}
-        </>
-      )}
     </div>
   );
 };

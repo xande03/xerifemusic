@@ -741,9 +741,7 @@ const Index = () => {
                     };
                     handleSelect(song);
                     setPlayerMode("video");
-                    if (window.innerWidth >= 768) {
-                      setExpanded(true);
-                    }
+                    setExpanded(true);
                   }}
                   onFullscreenVideo={(video) => {
                     const song: Song = {
@@ -758,17 +756,6 @@ const Index = () => {
                     setTimeout(() => requestFullscreen(), 500);
                   }}
                   onChannelClick={(name, thumb) => setChannelView({ name, thumbnail: thumb })}
-                  activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
-                  isPlaying={isPlaying}
-                  onTogglePlay={handleTogglePlay}
-                  onMinimize={() => setShowFloatingPiP(true)}
-                  onLike={() => handleVote(currentSong)}
-                  isLiked={votedSongs.has(currentSong.id)}
-                  onShare={() => {
-                    if (navigator.share) {
-                      navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
-                    }
-                  }}
                   onAddToPlaylist={(v) => {
                     const song: Song = {
                       id: `yt-${v.videoId}`, youtubeId: v.videoId,
@@ -1048,10 +1035,7 @@ const Index = () => {
                   };
                   handleSelect(song);
                   setPlayerMode("video");
-                  // Don't expand on mobile — show inline player instead
-                  if (window.innerWidth >= 768) {
-                    setExpanded(true);
-                  }
+                  setExpanded(true);
                 }}
                 onFullscreenVideo={(video) => {
                   const song: Song = {
@@ -1079,19 +1063,6 @@ const Index = () => {
                   setSongToAddToPlaylist(song);
                   setPlaylistModalMode("add");
                   setShowPlaylistModal(true);
-                }}
-                activeVideo={currentSong.type === 'video' || currentSong.id.startsWith('yt-') ? currentSong : null}
-                isPlaying={isPlaying}
-                onTogglePlay={handleTogglePlay}
-                onMinimize={() => {
-                  setShowFloatingPiP(true);
-                }}
-                onLike={() => handleVote(currentSong)}
-                isLiked={votedSongs.has(currentSong.id)}
-                onShare={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: currentSong.title, url: `https://youtube.com/watch?v=${currentSong.youtubeId}` }).catch(() => {});
-                  }
                 }}
               />
             ) : (
