@@ -8,6 +8,7 @@ import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 import { useNativeCapabilities } from "@/hooks/useNativeCapabilities";
 import { useTrendingMusic } from "@/hooks/useTrendingMusic";
 import { useMediaSession } from "@/hooks/useMediaSession";
+import { useGlobalEqualizer } from "@/hooks/useGlobalEqualizer";
 import { fetchRelatedQueue, popNextFromQueue, clearSmartQueue, shuffleSmartQueue, hasSmartQueue } from "@/lib/smartQueue";
 import QueueDrawer from "@/components/QueueDrawer";
 import { getSearchSuggestions, searchYouTubeMusic } from "@/lib/youtubeSearch";
@@ -100,6 +101,7 @@ const Index = () => {
   const { state: playerState, loadVideo, play, pause, seekTo, setVolume: setPlayerVolume, togglePiP, requestAirPlay, requestFullscreen, exitFullscreen } = useYouTubePlayer("yt-player");
   const { trendingSongs, isLoading: trendingLoading } = useTrendingMusic();
   useNativeCapabilities(playerState.isPlaying);
+  useGlobalEqualizer();
 
 
 
@@ -581,6 +583,7 @@ const Index = () => {
           <div id="yt-player" className="w-full h-full rounded-xl overflow-hidden relative z-0" />
           <video 
             id="offline-player" 
+            data-eq-enabled="true"
             className={`absolute inset-0 w-full h-full bg-black z-10 rounded-xl ${isPlayingOffline ? "block" : "hidden"}`}
             playsInline
             controls={false}
