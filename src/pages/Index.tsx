@@ -465,13 +465,14 @@ const Index = () => {
       if (suggestTimeoutRef.current) clearTimeout(suggestTimeoutRef.current);
       suggestTimeoutRef.current = setTimeout(async () => {
         setSuggestions(await getSearchSuggestions(q));
-      }, 300);
+      }, 500);
+
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       searchTimeoutRef.current = setTimeout(async () => {
         setIsSearching(true);
         setSearchResults(await searchYouTubeMusic(q, searchFilter));
         setIsSearching(false);
-      }, 600);
+      }, 1000);
     } else {
       setSuggestions([]);
       setSearchResults([]);

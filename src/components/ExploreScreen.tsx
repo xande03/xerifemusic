@@ -124,9 +124,9 @@ const ExploreScreen = ({ onPlayVideo, onFullscreenVideo, onChannelClick, onAddTo
       if (suggestTimeoutRef.current) clearTimeout(suggestTimeoutRef.current);
       suggestTimeoutRef.current = setTimeout(async () => {
         setSuggestions(await getSearchSuggestions(val));
-      }, 250);
+      }, 500);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      searchTimeoutRef.current = setTimeout(() => doSearch(val), 800);
+      searchTimeoutRef.current = setTimeout(() => doSearch(val), 1200);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
