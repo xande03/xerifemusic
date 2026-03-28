@@ -19,7 +19,8 @@ serve(async (req) => {
     const rl = checkRateLimit(ip, { maxRequests: 5, windowMs: 60_000 });
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
-    const results = await fetchTrendingFromYouTubeMusic();
+    // Server-side cache: trending is the same for ALL users, cache 30 min
+    const results = await cachedFetch("trending_BR", () => fetchTrendingFromYouTubeMusic(), { ttlMs: 30 * 60 * 1000 });
 
     return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

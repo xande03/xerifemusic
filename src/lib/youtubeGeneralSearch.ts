@@ -14,7 +14,7 @@ export interface VideoResult {
 }
 
 const CACHE_KEY = "demus_explore_cache";
-const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
 
 interface CacheEntry {
   results: VideoResult[];

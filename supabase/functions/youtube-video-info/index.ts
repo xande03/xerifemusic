@@ -39,7 +39,8 @@ serve(async (req) => {
       });
     }
 
-    const result = await fetchVideoInfo(videoId);
+    // Server-side cache: same videoId shares results across users for 15 min
+    const result = await cachedFetch(`video:${videoId}`, () => fetchVideoInfo(videoId), { ttlMs: 15 * 60 * 1000 });
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
