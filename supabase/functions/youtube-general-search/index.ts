@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getClientIp, checkRateLimit, rateLimitResponse } from "../_shared/rateLimiter.ts";
+import { cachedFetch } from "../_shared/serverCache.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
