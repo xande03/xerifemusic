@@ -3,7 +3,7 @@ import type { Song } from "@/data/mockSongs";
 import { createFunctionHeaders, createFunctionUrl, getBackendConfig } from "@/lib/backendConfig";
 
 const TRENDING_CACHE_KEY = "demus_trending_cache";
-const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+const CACHE_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours — trending rarely changes
 
 interface CachedTrending {
   songs: Song[];

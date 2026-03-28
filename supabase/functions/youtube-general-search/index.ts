@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getClientIp, checkRateLimit, rateLimitResponse } from "../_shared/rateLimiter.ts";
+import { cachedFetch } from "../_shared/serverCache.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +42,9 @@ serve(async (req) => {
       });
     }
 
-    const results = await searchYouTubeGeneral(query);
+    // Server-side cache: same query shares results across users for 5 min
+    const cacheKey = `general:${query.toLowerCase().trim()}`;
+    const results = await cachedFetch(cacheKey, () => searchYouTubeGeneral(query), { ttlMs: 5 * 60 * 1000 });
 
     return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
