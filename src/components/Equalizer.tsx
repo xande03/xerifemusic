@@ -63,6 +63,7 @@ const DEFAULT_BANDS: Band[] = FREQ_LIST.map(f => ({ ...f, value: 0 }));
 
 const STORAGE_KEY = "xerife-eq-bands-20";
 const PRESET_KEY = "xerife-eq-preset";
+const EQ_EVENT_NAME = "xerife-eq-change";
 
 function loadBands(): Band[] {
   try {
@@ -77,7 +78,11 @@ function loadBands(): Band[] {
   return DEFAULT_BANDS.map(b => ({ ...b }));
 }
 function saveBands(bands: Band[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(bands.map(b => b.value)));
+  const values = bands.map(b => b.value);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent<number[]>(EQ_EVENT_NAME, { detail: values }));
+  }
 }
 function loadPreset(): string {
   return localStorage.getItem(PRESET_KEY) || "Flat";
