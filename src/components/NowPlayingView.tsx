@@ -256,7 +256,7 @@ const NowPlayingView = ({
                 isVideoMode 
                   ? "w-full" /* edge-to-edge, tall video area */
                   : "aspect-square max-w-[500px] mx-auto px-5 sm:px-8"
-              }`} style={isVideoMode ? { height: 'clamp(200px, 35vh, 360px)' } : undefined}>
+              }`} }`} style={isVideoMode ? { height: 'clamp(220px, 42vh, 420px)' } : undefined}>>
                 <div className="w-full h-full relative z-0">
                   {isVideoMode ? (
                     <div className="w-full h-full bg-black overflow-hidden relative">
