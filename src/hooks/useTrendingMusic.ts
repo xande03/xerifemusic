@@ -3,7 +3,7 @@ import type { Song } from "@/data/mockSongs";
 import { createFunctionHeaders, createFunctionUrl, getBackendConfig } from "@/lib/backendConfig";
 
 const TRENDING_CACHE_KEY = "demus_trending_cache";
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 interface CachedTrending {
   songs: Song[];
@@ -86,13 +86,7 @@ export function useTrendingMusic() {
       if (cached) {
         setTrendingSongs(cached.songs);
         setIsLoading(false);
-        // Refresh in background
-        fetchTrendingViaEdgeFunction().then((fresh) => {
-          if (!cancelled && fresh.length > 0) {
-            setTrendingSongs(fresh);
-            setCachedTrending(fresh);
-          }
-        });
+        // Skip background refresh — cache is valid for 4h
         return;
       }
 

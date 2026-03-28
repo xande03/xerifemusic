@@ -16,7 +16,7 @@ export interface VideoInfo {
 }
 
 const CACHE_KEY = "demus_video_info_cache";
-const CACHE_TTL = 10 * 60 * 1000; // 10 min
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 function getCache(): Record<string, { data: VideoInfo; ts: number }> {
   try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); } catch { return {}; }
@@ -24,7 +24,7 @@ function getCache(): Record<string, { data: VideoInfo; ts: number }> {
 
 function setCache(cache: Record<string, { data: VideoInfo; ts: number }>): void {
   try {
-    const entries = Object.entries(cache).sort(([, a], [, b]) => b.ts - a.ts).slice(0, 20);
+    const entries = Object.entries(cache).sort(([, a], [, b]) => b.ts - a.ts).slice(0, 50);
     localStorage.setItem(CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
   } catch {}
 }
