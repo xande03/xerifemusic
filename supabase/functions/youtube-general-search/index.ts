@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getClientIp, checkRateLimit, rateLimitResponse } from "../_shared/rateLimiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +27,12 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
+
+    // Rate limit: 20 requests per minute per IP
+    const ip = getClientIp(req);
+    const rl = checkRateLimit(ip, { maxRequests: 20, windowMs: 60_000 });
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
+
     const query = url.searchParams.get("q");
 
     if (!query || query.length < 2) {
